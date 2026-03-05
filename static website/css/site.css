@@ -38,3 +38,23 @@ a:hover {
 .wrap {
   width: min(var(--max), calc(100% - 2rem));
   margin: 0 auto;
+  padding: 1.5rem 0 3rem;
+}
+
+.top {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.top-inner {
+  width: min(var(--max), calc(100% - 2rem));
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand {
