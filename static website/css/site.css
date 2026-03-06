@@ -58,3 +58,23 @@ a:hover {
 }
 
 .brand {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 1.25rem;
+  color: var(--text);
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.95rem;
+}
+
+.hero {
+  padding: 2.5rem 1.5rem;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(109, 77, 255, 0.25), rgba(61, 217, 176, 0.12));
+  border: 1px solid var(--line);
+  margin-bottom: 2rem;
