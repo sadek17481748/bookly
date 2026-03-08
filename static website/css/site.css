@@ -118,3 +118,23 @@ button.btn {
   cursor: not-allowed;
 }
 
+.btn.outline {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.tile {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem;
+  font-family: system-ui, sans-serif;
+}
+
