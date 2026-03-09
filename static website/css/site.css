@@ -138,3 +138,23 @@ button.btn {
   font-family: system-ui, sans-serif;
 }
 
+.tile .cover-block {
+  height: 120px;
+  border-radius: 8px;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.06) 8px,
+    rgba(255, 255, 255, 0.02) 8px,
+    rgba(255, 255, 255, 0.02) 16px
+  );
+  margin-bottom: 0.75rem;
+}
+
+.tile h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.tile .meta {
+  margin: 0;
