@@ -158,3 +158,23 @@ button.btn {
 
 .tile .meta {
   margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  max-width: 32rem;
+  font-family: system-ui, sans-serif;
+}
+
+.panel h2 {
+  margin-top: 0;
+}
+
+label {
+  display: block;
+  margin: 0.75rem 0 0.2rem;
