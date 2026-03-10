@@ -178,3 +178,23 @@ button.btn {
 label {
   display: block;
   margin: 0.75rem 0 0.2rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: #0e1420;
+  color: var(--text);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+}
