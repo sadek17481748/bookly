@@ -198,3 +198,16 @@ table {
   font-family: system-ui, sans-serif;
   font-size: 0.9rem;
 }
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.muted {
+  color: var(--muted);
+  font-family: system-ui, sans-serif;
+  font-size: 0.9rem;
+}
