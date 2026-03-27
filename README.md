@@ -1255,6 +1255,12 @@ My process was:
 - When I got stuck, AI helped by suggesting likely causes, pointing me to relevant documentation, and recommending specific videos/tutorial topics that matched the problem. I then applied the fix manually and verified it worked in my project.
 - The final code and write-up were still checked, edited, and tested manually to match how the project actually works.
 
+**Which tools were used (ChatGPT, Claude, Cursor)**
+
+- **ChatGPT** — early **planning** (breaking work into steps, clarifying scope, and sanity-checking ideas before implementation).
+- **Claude** — **suggestions** and **spell-check** on documentation (especially long README sections), plus occasional wording improvements I then verified against the real project.
+- **Cursor** — **Git pushes and connection issues** that had become too awkward to debug only inside VS Code. GitHub stopped connecting to VS Code the way it normally had; after working through the usual troubleshooting paths, I used Cursor part-way through the project to find out why **commits were not going through**. Cursor surfaced that the remote was still **pointing at an old repository that no longer existed**; correcting the remote and push setup resolved it.
+
 | Area / section | What AI assistance was used for | Notes / checks I still did |
 |----------------|----------------------------------|----------------------------|
 | README + docs (`README.md`, `docs/*.md`) | Spell-checking, rephrasing for clarity, tightening wording, and structuring sections (TOC, headings). | I verified all steps and claims against the actual repository contents and deployment flow. |
@@ -1262,6 +1268,7 @@ My process was:
 | Python (Flask / SQLAlchemy) (`app.py`, blueprints, `cli.py`) | Spot-checking patterns (blueprints, decorators, error handlers) and suggesting safer validation/guard logic. | I implemented the logic, tested flows in-browser, and confirmed DB writes/reads in Postgres. |
 | HTML/Jinja templates (`templates/`) | Suggesting layout tweaks and accessibility improvements (labels, alt text, ARIA). | I checked pages visually, verified navigation flows, and ensured server-side checks remained in Python. |
 | CSS/JS (`static/css/styles.css`, `static/js/main.js`) | Minor suggestions for responsiveness and small JS helpers (nav toggle, confirm). | I validated behaviour on multiple screen sizes and confirmed no critical console errors. |
+| Git / GitHub / pushes | **Cursor:** diagnosing failed pushes and remote misconfiguration when VS Code’s GitHub integration would not connect as usual. | I confirmed the correct repository URL, updated `origin`, and verified pushes reached GitHub. |
 
 ### Lighthouse testing
 
@@ -1559,7 +1566,7 @@ The catalogue uses cover images to make the UI feel closer to a real storefront.
 
 ## Additional Notes
 
-- **Use of AI:** Generative AI was used as an assistant during development (mainly spell-checking and improving the clarity of documentation). It also helped with drafting and iterating on automated tests and discussing approaches for parts of the Python/Flask code (validation, structure, and edge cases). The final implementation was still written/edited, verified, and tested by me, and any AI suggestions were only kept when they matched the project’s real behaviour. A concise log of AI-assisted areas is included in [Use of AI (assistance log)](#use-of-ai-assistance-log).
+- **Use of AI:** **ChatGPT** for early planning; **Claude** for suggestions and spell-check on documentation; **Cursor** for GitHub/VS Code connection problems and for tracking down why pushes failed (an `origin` remote still targeting an old repo that no longer existed). Generative AI also helped with drafting tests and discussing Flask/SQLAlchemy patterns. The final implementation was still written/edited, verified, and tested by me, and any AI suggestions were only kept when they matched the project’s real behaviour. A concise log is in [Use of AI (assistance log)](#use-of-ai-assistance-log).
 - **`docs/legacy-code.md` (development snapshots):** Earlier in development, my GitHub/Heroku setup ended up in a broken state (the repo would not accept new commits reliably and the Heroku connection stopped working). I restarted the project setup and moved the work into a fresh repository on a new GitHub account, linked to a new Heroku app/account. To make the development progression easy to review, I kept small “before → after” code snapshots in `docs/legacy-code.md`.
 - **`docs/devlog.md` — removed** (notes merged into `README.md`).
 - **`docs/testing.md` — removed** (moved into `README.md`).
