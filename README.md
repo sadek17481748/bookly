@@ -6,7 +6,6 @@
   - [Project goals](#project-goals)
   - [Planning notes (written at project start)](#planning-notes-written-at-project-start)
 - [Quick links](#quick-links)
-  - [Marking criteria → README (assessor map)](#marking-criteria--readme-assessor-map)
 - [Key UI screenshots](#key-ui-screenshots)
 - [Features](#features)
 - [User Experience (UX)](#user-experience-ux)
@@ -75,16 +74,6 @@ Assessor-facing links and evidence paths (also useful when marking without searc
 | **Rubric 1.5 — test procedures (four areas)** | [Assessment test matrix](#assessment-test-matrix-functionality-usability-responsiveness-data-management) — functionality, usability, responsiveness, data management |
 
 Key screens are also embedded under [Key UI screenshots](#key-ui-screenshots) below.
-
-### Marking criteria → README (assessor map)
-
-These rows tie **this `README.md` only** (no extra marker document) to the assessment items below. The evidence named here is what you should scroll to in the sections linked.
-
-| Rubric | Criterion (assessment brief wording) | What you should see in this README | Anchor |
-|--------|----------------------------------------|-------------------------------------|--------|
-| **4** | Design a **database structure** that is relevant to the domain, **including relationships between records of different entities**. | Relational entities (users, books, reviews, cart, orders), **cardinality table**, and a **Mermaid ERD** (entity–relationship diagram) with keys and links. The same structure is implemented in `models.py` and `schema.sql`. | [Data model and ERD (entity relationships)](#data-model-and-erd-entity-relationships) |
-| **1.5** | Design and implement **test procedures** (automated or manual) to assess **functionality**, **usability**, **responsiveness**, and **data management** within the **full-stack** web application. | The **four-row assessment matrix** (one row per area above), then the **numbered manual checklist** with Pass/Fail and screenshot paths, plus **automated testing** (`pytest`) and the **testing summary** table. | [Assessment test matrix](#assessment-test-matrix-functionality-usability-responsiveness-data-management); [Manual testing](#manual-testing); [Automated testing](#automated-testing); [Testing summary table](#testing-summary-table) |
-| **2.1** | Design a **data model** that fits the **purpose** of the project. | Same place as rubric **4**: the ERD plus narrative explain how tables support browsing, reviews, cart, checkout, and admin reporting for a bookstore domain. | [Data model and ERD (entity relationships)](#data-model-and-erd-entity-relationships) |
 
 ---
 
