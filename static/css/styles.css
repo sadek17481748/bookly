@@ -36,3 +36,12 @@ body {
 a { color: var(--text); }
 a:hover { color: white; }
 
+/* ================= LAYOUT CONTAINER ================= */
+/* Centered page column (wraps {% block content %} in base.html) */
+.container {
+  width: min(var(--max), calc(100% - 32px));
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+/* ================= SKIP LINK (ACCESSIBILITY) ================= */
