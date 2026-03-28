@@ -64,3 +64,12 @@ a:hover { color: white; }
   top: 0;
   z-index: 20;
   background: rgba(11, 18, 32, 0.70);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  width: min(var(--max), calc(100% - 32px));
+  margin: 0 auto;
+  padding: 12px 0;
+  display: flex;
