@@ -1,0 +1,9 @@
+/* =====================================================================
+   bookly — site-wide styles
+   - Custom CSS (no Bootstrap / no external UI framework)
+   - Dark theme, responsive layout, shared components
+   ===================================================================== */
+
+/* ================= THEME VARIABLES + GLOBAL BASE ================= */
+:root {
+  --bg: #0b1220;
