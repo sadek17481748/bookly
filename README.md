@@ -179,3 +179,39 @@ Screenshots below are stored under `docs/images/manual-testing/` so key screens 
 ![Analytics dashboard](docs/images/manual-testing/21-analytics-admin.png)
 
 ---
+## Features
+
+### Public browsing
+
+- **Home** page with calls-to-action (browse, register).
+- **Book catalog** with optional **search** (`?q=`) over title and author (case-insensitive `ILIKE` in SQLAlchemy → Postgres).
+- **Book detail** with description, optional cover image path, cart form (if logged in), and reviews.
+
+### Authentication
+
+- **Register**, **login**, **logout** (Flask-Login).
+- Passwords stored with **Werkzeug** hashing (`set_password` / `check_password` on `User`).
+
+### Reviews (CRUD)
+
+- **Create** and **read** reviews on a book; **update** and **delete** only for the **owning** user (checked in `books.py`).
+- Reviews are stored with `user_id` and `book_id` foreign keys.
+
+### Cart & checkout
+
+- Add to cart (merge quantity if the same book is already in the cart).
+- Update quantity or remove a line.
+- **Checkout** collects minimal shipping fields, creates an **order** + **order items**, then **clears the cart** (no external payment gateway—orders are persisted for coursework realism).
+
+### Admin analytics
+
+- **Admin-only** route (`is_admin` on `users`).
+- Dashboard metrics from SQL aggregates: revenue, order counts, top sellers, books per category, recent orders.
+
+### Book covers
+
+- Generated **SVG** artwork per seeded title lives under `static/img/covers/`.
+- `book_covers.py` maps each title to a stable URL; seeds set `cover_url` so templates can render `<img src="...">`.
+
+---
+
