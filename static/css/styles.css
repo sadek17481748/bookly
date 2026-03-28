@@ -177,3 +177,12 @@ a:hover { color: white; }
   border-radius: var(--radius);
   padding: 26px;
   box-shadow: var(--shadow);
+}
+.hero h1 { margin: 0 0 8px; font-size: 38px; line-height: 1.1; }
+.hero p { margin: 0 0 16px; color: var(--muted); }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* ================= GRID + CARD COMPONENTS ================= */
+/* Generic responsive grids + panel “cards” */
+.grid {
+  display: grid;
