@@ -120,3 +120,13 @@ a:hover { color: white; }
   font-weight: 900;
   color: var(--text);
 }
+.footer-sub {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.footer-links {
+  display: grid;
+  gap: 10px;
+}
+.footer-links a {
