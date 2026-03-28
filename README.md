@@ -150,3 +150,32 @@ Based on the routes above, my wireframe plan is:
 - **Admin add book (`/admin/books/new`)**: form to add a new book to the catalogue.
 - **Error pages (403/404)**: friendly messages with navigation back to safe pages.
 
+## Key UI screenshots
+
+Screenshots below are stored under `docs/images/manual-testing/` so key screens are visible directly in this README (same files as the manual checklist where applicable).
+
+### Home
+
+![Home page](docs/images/manual-testing/01-home.png)
+
+### Books
+
+![Books list page](docs/images/manual-testing/03-books-list.png)
+
+### Contact
+
+![Contact page](docs/images/manual-testing/02-contact.png)
+
+### Login
+
+![Login page](docs/images/manual-testing/09-login-fail.png)
+
+### Register
+
+![Register page](docs/images/manual-testing/06a-register-form.png)
+
+### Analytics (admin)
+
+![Analytics dashboard](docs/images/manual-testing/21-analytics-admin.png)
+
+---
