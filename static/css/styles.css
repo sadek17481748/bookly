@@ -271,3 +271,12 @@ textarea { resize: vertical; }
 .btn-danger {
   border-color: rgba(255, 92, 124, 0.45);
   background: linear-gradient(180deg, rgba(255, 92, 124, 0.95), rgba(255, 92, 124, 0.62));
+}
+.btn-small { padding: 8px 10px; border-radius: 11px; font-size: 14px; }
+
+.linklike {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
