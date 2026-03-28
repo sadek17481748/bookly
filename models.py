@@ -35,3 +35,11 @@ class User(db.Model, UserMixin):
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
 
+
+# ================= BOOK CATALOG =================
+class Book(db.Model):
+    __tablename__ = "books"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False, index=True)
+    author = db.Column(db.String(255), nullable=False, index=True)
