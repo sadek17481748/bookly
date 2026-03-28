@@ -233,3 +233,13 @@ input, select, textarea {
   color: var(--text);
 }
 textarea { resize: vertical; }
+
+.hint { color: var(--muted); font-size: 14px; margin-top: 8px; }
+.muted { color: var(--muted); }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
