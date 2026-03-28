@@ -158,3 +158,12 @@ a:hover { color: white; }
   height: 20px;
   fill: currentColor;
 }
+
+/* ================= CONTACT PAGE ================= */
+/* Contact page bullet list */
+.contact-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
