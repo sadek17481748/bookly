@@ -48,3 +48,9 @@ class Book(db.Model):
     description = db.Column(db.Text, nullable=False, default="")
     cover_url = db.Column(db.String(1024), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    reviews = db.relationship("Review", back_populates="book", cascade="all, delete-orphan")
+
+    def price_dollars(self) -> str:
+        return f"{self.price_cents / 100:.2f}"
+
