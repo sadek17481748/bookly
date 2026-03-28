@@ -43,3 +43,8 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False, index=True)
     author = db.Column(db.String(255), nullable=False, index=True)
+    category = db.Column(db.String(255), nullable=False, default="Uncategorized", index=True)
+    price_cents = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.Text, nullable=False, default="")
+    cover_url = db.Column(db.String(1024), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
