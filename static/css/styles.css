@@ -205,3 +205,12 @@ a:hover { color: white; }
 .book-card .cover {
   width: 100%;
   aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+}
+.cover.placeholder { display: block; }
+.cover.large { max-width: 240px; width: 100%; }
+
+.book-title { margin: 10px 0 6px; font-size: 18px; }
