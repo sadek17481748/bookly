@@ -83,3 +83,12 @@ a:hover { color: white; }
   letter-spacing: 0.3px;
   text-decoration: none;
   color: white;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.nav-links a { text-decoration: none; color: var(--muted); }
+.nav-links a:hover { color: white; }
