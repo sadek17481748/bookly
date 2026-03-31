@@ -299,3 +299,12 @@ textarea { resize: vertical; }
   gap: 12px;
   flex-wrap: wrap;
 }
+.search { display: flex; gap: 10px; align-items: center; }
+.search input { width: min(360px, 75vw); }
+
+/* ----- Book detail: cover column + info column ----- */
+.book-detail {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 18px;
+  align-items: start;
