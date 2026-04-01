@@ -346,3 +346,12 @@ textarea { resize: vertical; }
 .mini-list li {
   display: flex;
   justify-content: space-between;
+  gap: 12px;
+}
+
+/* ----- Scrollable tables (admin top sellers) ----- */
+.table-wrap { overflow: auto; }
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
