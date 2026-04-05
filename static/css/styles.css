@@ -384,3 +384,12 @@ textarea { resize: vertical; }
     padding-top: 10px;
   }
   .nav-links.open { display: flex; }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+  .footer-social {
+    justify-content: flex-start;
+  }
+}
+
