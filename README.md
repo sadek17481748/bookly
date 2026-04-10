@@ -215,3 +215,89 @@ Screenshots below are stored under `docs/images/manual-testing/` so key screens 
 
 ---
 
+## User Experience (UX)
+
+### Navigation
+
+- **Sticky** top bar with brand link, **Home**, **Books**, **Contact**.
+- When logged in: **Cart**, **Orders**, **Logout**; if `is_admin`: **Analytics**.
+- When logged out: **Login**, **Register**.
+- **Mobile:** hamburger control toggles link visibility; `aria-expanded` updated in JS for accessibility.
+
+### Interaction design
+
+- **Flash messages** after register, login, cart changes, checkout, errors (categories `success` / `error` styled in CSS).
+- **Forms** use labels, placeholders where helpful, and `sr-only` labels for compact controls (e.g. quantity on cart rows).
+- **Skip link** to `#main` for keyboard users.
+- **Confirm** dialog on destructive actions (e.g. delete review) via `data-confirm` in `main.js`.
+
+### Responsive behaviour
+
+**Why responsiveness matters**
+
+People do not all use the same screen size. Many visitors browse shops on a **phone** while commuting, on a **tablet** at home, or on a **laptop** or **desktop** at a desk. If the layout only worked on one width, text could overflow, buttons could sit too close together, or whole regions might require awkward horizontal scrolling—so tasks like searching the catalogue, editing cart quantities, or filling checkout fields would feel broken or slow. Responsive design keeps the same **functionality** available across form factors, improves **readability** and **touch targets** on small screens, and matches what users expect from a modern web app. For bookly specifically, it matters because the **book grid**, **cart**, **checkout**, and **admin analytics** tables all pack a lot of information; breakpoints and a collapsible nav avoid cramming that into a unusable single wide column on a phone.
+
+**What the CSS does**
+
+- **Best viewed on laptop/desktop:** the catalogue grid, checkout summary, order history, and especially the **admin analytics tables** are easier to read and compare on a wider screen (more items visible at once, less scrolling).
+- **Phone/tablet support:** the site was adjusted to be usable on smaller screens (responsive CSS breakpoints stack multi-column layouts into a single column, the book detail page collapses, the footer becomes one column, and the navigation switches to a hamburger menu).
+
+#### How responsiveness was tested
+
+I treated **responsiveness as a manual test pass** (layout and navigation, not something `pytest` asserts on). I exercised the site across **four device classes** so the same core journeys stayed usable at different widths:
+
+| Device class | Typical width / how I simulated it | What I checked |
+|--------------|-----------------------------------|----------------|
+| **Phone** | Narrow viewport (around **375px** wide, portrait), using Chrome **Device Toolbar** presets and manual resize | Hamburger menu opens/closes; **Home**, **Books**, **Book detail**, **Cart**, and **Checkout** stack in one column; text and prices remain readable without horizontal scroll; quantity fields and buttons are usable. |
+| **Tablet** | Medium viewport (around **768px**–**834px**) | Grids move between single- and multi-column behaviour; navigation and footer layouts still balance; book cards and forms do not feel cramped. |
+| **Laptop** | Around **1024px**–**1280px** | Catalogue uses the intended multi-column grid; cart and order pages show summaries clearly; flows match “everyday” student/work laptop use. |
+| **Desktop** | **1440px** and above (and full-width resize from large down) | Content respects the max-width container (`--max` in CSS) so lines do not stretch uncomfortably wide; **admin analytics** tables and stat tiles use the extra space without breaking alignment. |
+
+**How I ran the pass:** **Google Chrome** with **DevTools → Toggle device toolbar** (responsive mode), switching between built-in device frames and custom widths, and dragging the viewport edge across breakpoints. On each class above I repeated representative flows (**browse → search → book detail → login → cart → checkout** where relevant) and visually confirmed that panels, grids, and the sticky nav behaved as intended. **Landscape** was spot-checked on phone/tablet presets where rotation changes usable height.
+
+#### Responsiveness testing evidence
+
+![Responsive testing on mobile, tablet and laptop](docs/images/validation/responsive-test-devices.png)
+
+### User stories
+
+**First-time / guest user**
+
+- As a guest, I want to land on a clear home page so I understand what the site does and what I can do next.
+- As a guest, I want to browse the catalogue so I can explore what books are available before making an account.
+- As a guest, I want to search by title/author so I can find a specific book quickly.
+- As a guest, I want to open a book detail page so I can read the description and existing reviews before deciding whether to register.
+- As a guest, I want to see a clear message when I try to access a protected feature (cart, orders, reviews) so I know I need to log in.
+
+**Registered / returning user**
+
+- As a user, I want to register and log in so I can access features that require an account (reviews, cart, checkout, orders).
+- As a user, I want to add books to my cart and adjust quantities so I can control my order without starting over.
+- As a user, I want the cart total to update correctly when I change quantities so I can trust the checkout amount.
+- As a user, I want to check out so my purchase is saved as an order (with order items) in the database.
+- As a user, I want to view my order history so I can confirm what I bought after checkout.
+- As a user, I want to create reviews with a rating and text so I can share feedback on books I read.
+- As a user, I want to edit/delete **my own** reviews so I can correct mistakes or remove outdated feedback.
+- As a user, I want to be prevented from editing/deleting other people’s reviews so the site feels fair and secure.
+
+**Admin**
+
+- As an admin, I want to view the analytics dashboard so I can monitor revenue, orders, and top-selling books.
+- As an admin, I want to see a category breakdown so I can understand the shape of the catalogue at a glance.
+- As an admin, I want to add a new book to the catalogue (including a category and cover) so I can expand inventory without touching the database directly.
+- As an admin, I want non-admin users to be blocked from admin pages so sensitive business information is protected.
+
+### Target audience & user stories
+
+The site is aimed at **readers** who want a simple way to browse a small catalogue, check book details, read/write reviews, and place an order using a lightweight checkout flow. It is also aimed at a **store admin** who needs quick visibility of what is happening in the store (revenue, order volume, top sellers, and category distribution) without exporting data or running SQL manually.
+
+In practice, I thought about three “audience groups” while building and testing:
+
+- **Guest visitors**: explore the catalogue and understand the value of the site without being forced to create an account immediately.
+- **Registered customers**: complete the core journey (browse → cart → checkout → orders) and manage their own reviews.
+- **Admin user**: manage the catalogue (add books) and review store performance using the analytics dashboard.
+
+The user stories above are the ones I used to guide feature scope and testing. They map directly to the live routes and the database flows (catalogue read, review write, cart write, order + order items write, and analytics aggregates).
+
+---
+
