@@ -23,3 +23,6 @@ def test_book_detail_404(client):
     r = client.get("/books/99999")
     assert r.status_code == 404
 
+
+def test_book_detail_ok(client, sample_book):
+    r = client.get(f"/books/{sample_book}")
