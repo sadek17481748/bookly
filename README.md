@@ -719,3 +719,101 @@ These choices are implemented as CSS variables at the top of `static/css/styles.
 
 ---
 
+## Development
+
+### Prerequisites
+
+- **Python 3.11+** (Heroku pin in `runtime.txt`).
+- **PostgreSQL** installed and running locally (e.g. Homebrew Postgres on macOS).
+
+### Environment setup
+```bash
+cd /path/to/bookly-final
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
+```
+
+In `.env` I set:
+
+- **`SECRET_KEY`** — a long random string for sessions.
+- **`DATABASE_URL`** — SQLAlchemy URL for Postgres, for example:
+
+```text
+postgresql+psycopg2://bookly_user:change_me@localhost:5432/bookly_db
+```
+
+Example SQL to create a matching role and database (names line up with the example URL above):
+
+```sql
+CREATE USER bookly_user WITH PASSWORD 'change_me';
+CREATE DATABASE bookly_db OWNER bookly_user;
+```
+
+### Initialise the database (PostgreSQL)
+
+```bash
+source .venv/bin/activate
+python -m flask --app app.py init-db
+```
+
+This creates tables from `models.py` and seeds books if the catalog is empty.
+
+### Run the app locally
+
+```bash
+source .venv/bin/activate
+python -m flask --app app.py run --debug
+```
+
+The app served at `http://127.0.0.1:5000` during local runs.
+
+### Troubleshooting (local Postgres setup)
+
+- **`password authentication failed for user ...`**
+  - This usually means `DATABASE_URL` in `.env` still has placeholder values or the Postgres user password does not match.
+  - Fix by updating `.env` to a real connection string and (re)setting the user password in Postgres, for example:
+
+```sql
+ALTER USER bookly_user WITH PASSWORD 'bookly_pass';
+```
+
+- **Commands typed inside `psql` by mistake**
+  - If the prompt looks like `postgres=#` or `postgres-#`, you are inside Postgres interactive mode.
+  - Exit with `\q` to return to the normal terminal prompt before running:
+    - `python -m flask --app app.py init-db`
+    - `python -m flask --app app.py run --debug`
+
+### Promote an admin user
+
+After I registered a user in the browser:
+
+```bash
+python -m flask --app app.py make-admin
+```
+
+The command prompts for an email; I used the account I wanted to promote so `is_admin` is set and `/admin/analytics` unlocks.
+
+### Assessor / invigilator login (analytics access)
+
+To make marking simpler, I created a dedicated admin account for the analytics dashboard:
+
+- **Email:** `analytics@testemail.com`
+- **Password:** `test123`
+
+After logging in, the admin analytics dashboard is available at **`/admin/analytics`**.
+
+**Note (live Heroku app):** The Heroku deployment uses its own Postgres database, so the account must be **registered on the live site** and then promoted to admin (set `users.is_admin = true`). This can be done using `heroku pg:psql` or by running the existing CLI command (`make-admin`) against the Heroku app.
+
+### Automated tests (no Postgres required for pytest)
+
+```bash
+source .venv/bin/activate
+pytest -v
+```
+
+Tests use **SQLite in-memory** via `tests/conftest.py` so they run quickly; I still demonstrated PostgreSQL using the steps above. A feature → test mapping is included in the Automated testing section below.
+
+---
+
