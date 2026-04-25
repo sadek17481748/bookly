@@ -1286,3 +1286,296 @@ I validated HTML with the **W3C Markup Validator** and CSS with the **W3C CSS Va
 
 ---
 
+## Sources and references
+
+These are third-party tutorials and playlists that helped while building bookly (Flask, PostgreSQL, and Python). They are **learning resources**, not code copied into this repository.
+
+Quick index: [Feature resources](#feature-resources-inspiration--references) · [Flask](#flask) · [PostgreSQL (5 videos)](#postgresql-5-videos) · [Python (15 videos / playlists)](#python-15-videos--playlists) · [Sources for Python](#sources-for-python) · [Images used in this project](#images-used-in-this-project) · [Image credits](#image-credits)
+
+Also useful: [Flask](https://flask.palletsprojects.com/) · [SQLAlchemy](https://docs.sqlalchemy.org/) · [PostgreSQL docs](https://www.postgresql.org/docs/) · [Heroku Dev Center](https://devcenter.heroku.com/) · [W3C Markup Validator](https://validator.w3.org/) · [W3C CSS Validator](https://jigsaw.w3.org/css-validator/)
+
+### Feature resources (inspiration & references)
+
+This subsection lists external reference points that match key features in bookly. I used these to understand typical patterns and UI expectations, then implemented my own version for this project.
+
+#### 1) Home Page (`/`)
+
+- Bootstrap bookstore-style homepage UI: [Shop Home (Start Bootstrap)](https://startbootstrap.com/template-overviews/shop-home)
+- Flask basics (routes + templates): [Flask Mega-Tutorial Part 1](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world)
+
+Route used in bookly (serves the home template):
+
+```python
+@app.get("/")
+def home():
+    return render_template("home.html")
+```
+
+#### 2) Contact Page (`/contact`)
+
+- Flask-WTF forms tutorial (reference): [Mega-Tutorial — Web Forms](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ii-web-forms)
+
+In this project, the contact page is intentionally a simple informational page (no POST form submission):
+
+```python
+@app.get("/contact")
+def contact():
+    return render_template("contact.html")
+```
+
+Template snippet (`templates/contact.html`):
+
+```html
+<h1>Contact us</h1>
+<section class="card">
+  <h2>Get in touch</h2>
+  <ul class="contact-list">
+    <li><strong>Email:</strong> <a href="mailto:contact@bookly.example">contact@bookly.example</a></li>
+    <li><strong>Phone:</strong> <a href="tel:+10000000000">+1 (000) 000-0000</a></li>
+  </ul>
+</section>
+```
+
+#### 3) Browse Books Catalogue (`/books`)
+
+- [ReadMeBookshop (Flask bookstore reference)](https://github.com/hoangdat07/ReadMeBookshop)
+- [Django Oscar (full e-commerce reference)](https://github.com/django-oscar/django-oscar)
+
+#### 4) Search Books by Title/Author (`/books?q=...`)
+
+- Flask blog tutorial code (search + query patterns reference): [Corey Schafer — Flask Blog snippets](https://github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog)
+
+Search logic used in bookly (`books.py`):
+
+```python
+q = (request.args.get("q") or "").strip()
+query = Book.query
+if q:
+    like = f"%{q}%"
+    query = query.filter((Book.title.ilike(like)) | (Book.author.ilike(like)))
+```
+
+#### 5) Book Detail Pages (`/books/<id>`)
+
+- [Open Library — example book detail page](https://openlibrary.org/)
+
+Route used in bookly (`books.py`):
+
+```python
+@books_bp.get("/<int:book_id>")
+def book_detail(book_id: int):
+    book = Book.query.get_or_404(book_id)
+    reviews = (
+        Review.query.filter_by(book_id=book_id)
+        .order_by(Review.created_at.desc())
+        .all()
+    )
+    return render_template("book_detail.html", book=book, reviews=reviews)
+```
+
+#### 6) Custom Error Pages (403, 404)
+
+- [Flask — Error handling](https://flask.palletsprojects.com/en/stable/errorhandling/)
+
+Error handlers used in bookly (`app.py`):
+
+```python
+@app.errorhandler(403)
+def forbidden(_err):
+    return render_template("403.html"), 403
+
+@app.errorhandler(404)
+def not_found(_err):
+    return render_template("404.html"), 404
+```
+
+#### 7) Accounts (Authentication) (`/register`, `/login`, `/logout`)
+
+- [Flask Mega-Tutorial — User login](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-v-user-log-in)
+
+Login protection is handled with Flask-Login’s `@login_required` decorator on routes like cart, checkout, orders, and admin pages.
+
+#### 8) Reviews (Create/Edit/Delete + ownership protection)
+
+- [Django review app reference](https://github.com/justdjango/django-review-app)
+- [Corey Schafer — Flask Blog snippets](https://github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog)
+
+Ownership check used in bookly (`books.py`):
+
+```python
+if review.user_id != current_user.id:
+    flash("You can only edit your own reviews.", "error")
+    return redirect(url_for("books.book_detail", book_id=book_id))
+```
+
+#### 9) Cart + Checkout (add/view/update/checkout)
+
+- [Django Oscar (cart/checkout concepts)](https://github.com/django-oscar/django-oscar)
+
+Checkout guard used in bookly (`orders.py`):
+
+```python
+items = CartItem.query.filter_by(user_id=current_user.id).all()
+if not items:
+    flash("Your cart is empty.", "error")
+    return redirect(url_for("cart.view_cart"))
+```
+
+#### 10) Order History (`/orders`)
+
+- [Django Oscar (orders list patterns)](https://github.com/django-oscar/django-oscar)
+
+Route used in bookly (`orders.py`):
+
+```python
+@orders_bp.get("")
+@login_required
+def list_orders():
+    orders = (
+        Order.query.filter_by(user_id=current_user.id)
+        .order_by(Order.created_at.desc())
+        .all()
+    )
+    return render_template("orders.html", orders=orders)
+```
+
+#### 11) Admin Features (`/admin/...`)
+
+- [Flask-Admin docs](https://flask-admin.readthedocs.io/en/latest/)
+- [Django admin docs](https://docs.djangoproject.com/en/stable/ref/contrib/admin/)
+
+Admin-only protection used in bookly (`admin.py`):
+
+```python
+if not getattr(current_user, "is_admin", False):
+    abort(403)
+```
+
+#### 12) Add New Book (`/admin/books/new`)
+
+- [Flask-Admin — model views](https://flask-admin.readthedocs.io/en/latest/advanced/#creating-model-views)
+
+This project uses a custom form and server-side validation rather than Flask-Admin (see `admin.py`).
+
+#### 13) CLI Commands & Tests
+
+- [Flask CLI](https://flask.palletsprojects.com/en/stable/cli/)
+- [Flask testing](https://flask.palletsprojects.com/en/stable/testing/)
+
+CLI registration used in bookly (`app.py`):
+
+```python
+register_cli(app)
+```
+
+### Flask
+
+| Resource | Link |
+|----------|------|
+| Corey Schafer — Flask Tutorial Series | [YouTube playlist](https://www.youtube.com/playlist?list=PL-osiE80TeTs4UjLw5MM6OjgkjFeUxwXZ) |
+| Traversy Media — Flask Crash Course | [YouTube video](https://www.youtube.com/watch?v=Z1RJmh_OqeA) |
+| freeCodeCamp.org — Flask Tutorial for Beginners | [YouTube video](https://www.youtube.com/watch?v=Z1RJmh_OqeA) |
+| Tech With Tim — Flask Tutorial for Beginners | [YouTube video](https://www.youtube.com/watch?v=Z1RJmh_OqeA) (same video ID as Traversy / freeCodeCamp rows above) |
+| Pretty Printed — Flask Web Development Tutorial | [YouTube video](https://www.youtube.com/watch?v=3mwSl4cWMQg) |
+
+### PostgreSQL (5 videos)
+
+| Resource | Link |
+|----------|------|
+| The Net Ninja — PostgreSQL Tutorial for Beginners | [YouTube playlist](https://www.youtube.com/playlist?list=PL4cUxeGkcC9iTXLU_KDd2KzJTuPLlZBXd) |
+| freeCodeCamp.org — PostgreSQL Tutorial for Beginners | [YouTube video](https://www.youtube.com/watch?v=qw--VYLpxG4) |
+| Programming with Mosh — SQL Tutorial for Beginners | [YouTube video](https://www.youtube.com/watch?v=7S_tz1z_5bA) |
+| Simplilearn — PostgreSQL Tutorial for Beginners | [YouTube video](https://www.youtube.com/watch?v=qw--VYLpxG4) |
+| The Net Ninja — SQL & PostgreSQL Full Course | [YouTube video](https://www.youtube.com/watch?v=qw--VYLpxG4) |
+
+### Python (15 videos / playlists)
+
+| Resource | Link |
+|----------|------|
+| freeCodeCamp.org — Python Tutorial for Beginners | [YouTube video](https://www.youtube.com/watch?v=rfscVS0vtbw) |
+| Corey Schafer — Python Programming Tutorials | [YouTube playlist](https://www.youtube.com/playlist?list=PL-osiE80TeTskrapNb--U7guZkPGQmw3w) |
+| Programming with Mosh — Python Tutorial for Beginners | [YouTube video](https://www.youtube.com/watch?v=_uQrJ0TkZlc) |
+| freeCodeCamp.org — Advanced Python Tutorials | [YouTube video](https://www.youtube.com/watch?v=HGOBQPFzWKo) |
+| Tech With Tim — Python Tutorials | [YouTube playlist](https://www.youtube.com/playlist?list=PLzMcBWfBadonZKTCXRr7dzqTbuhv9NKfa) |
+| Sentdex — Python Programming Tutorials | [YouTube playlist](https://www.youtube.com/playlist?list=PLQVvvaa0QuDe8MctxNBx-KGtXy3cGIlnV) |
+| Real Python — Python Tutorials | [YouTube playlist](https://www.youtube.com/playlist?list=PLF8wDe_N9g5c8BZxlHLNtKDTdQS2O6n52) |
+| freeCodeCamp.org — Python for Data Science | [YouTube video](https://www.youtube.com/watch?v=LHBE6Q9XlzI) |
+| CS Dojo — Python Programming Tutorials | [YouTube playlist](https://www.youtube.com/playlist?list=PLBZBJbE_rGRWeh5mIBhqk_DZUb1qh0bqQ) |
+| Python Engineer — Complete Python Course | [YouTube video](https://www.youtube.com/watch?v=eWRfhZUzrAc) |
+| Tech With Tim — Python Projects | [YouTube playlist](https://www.youtube.com/playlist?list=PLzMcBWfBadonxkT_8Er6RV9coleUqlRRl) |
+| freeCodeCamp.org — Python OOP Tutorial | [YouTube video](https://www.youtube.com/watch?v=Ej_02ICOIgs) |
+| Corey Schafer — Python Decorators & Generators | [YouTube video](https://www.youtube.com/watch?v=FsAPt_9Bf3U) |
+| Real Python — Python Best Practices | [YouTube video](https://www.youtube.com/watch?v=ZWIvWq1Sl64) |
+| freeCodeCamp.org — Python Data Structures | [YouTube video](https://www.youtube.com/watch?v=R-HLU9Fl5ug) |
+
+### Sources for Python
+
+This document compiles helpful references related to Flask, SQLAlchemy, environment management, security, and Python web development.
+
+- **Application factory:** [Flask app factories](https://flask.palletsprojects.com/en/stable/patterns/appfactories/)
+- **Configuration:** [Flask configuration](https://flask.palletsprojects.com/en/stable/config/)
+- **python-dotenv:** [theskumar/python-dotenv](https://github.com/theskumar/python-dotenv)
+- **Blueprints:** [Flask blueprints](https://flask.palletsprojects.com/en/stable/blueprints/)
+- **Error handling:** [Flask error handling](https://flask.palletsprojects.com/en/stable/errorhandling/)
+- **CLI commands:** [Flask CLI](https://flask.palletsprojects.com/en/stable/cli/)
+- **Deployment (Heroku / Gunicorn):** [Heroku Python category](https://devcenter.heroku.com/categories/python)
+- **Flask-Login:** [Flask-Login documentation](https://flask-login.readthedocs.io/en/latest/)
+- **Password hashing (Werkzeug):** [Werkzeug security utilities](https://werkzeug.palletsprojects.com/en/stable/utils/#module-werkzeug.security)
+- **Session management (OWASP):** [Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)
+- **Input validation (OWASP):** [Input Validation](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html)
+- **SQLAlchemy ORM:** [SQLAlchemy ORM](https://docs.sqlalchemy.org/en/20/orm/)
+- **Flask-SQLAlchemy setup:** [Contexts / application setup](https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/contexts/#application-setup)
+- **12-factor config:** [The Twelve-Factor App — Config](https://12factor.net/config)
+- **Heroku Postgres (connecting in Python):** [Heroku Postgres](https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python)
+- **SQLAlchemy database URLs:** [Engine configuration](https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls)
+- **RealPython — Flask + SQLAlchemy app:** [Building a Flask + SQLAlchemy application](https://realpython.com/flask-sqlalchemy/)
+- **CSRF (reference):** [Flask-WTF CSRF](https://flask-wtf.readthedocs.io/en/stable/csrf/)
+
+### Images used in this project
+
+Wireframes live in-repo as `docs/wireframe-bookly.pdf`. Other coursework artefacts (for example Lighthouse exports) may sit only in the written submission. In the running site, cover art is mostly SVG plus inline icons.
+
+| Image / asset type | Where it lives | Notes |
+|--------------------|----------------|-------|
+| Wireframes | `docs/wireframe-bookly.pdf` | PDF export of bookly screen planning. |
+| Book cover graphics | `static/img/covers/*.svg` (and any raster assets) | Generated SVG “posters” (gradient + title + author + small bookly label). `cover_url` in the DB points at paths like `/static/img/covers/1984.svg`. |
+| Icons in footer | Inline `<svg>` in `templates/base.html` | Simple vector icons for social links. |
+
+### Image credits
+
+The catalogue uses cover images to make the UI feel closer to a real storefront. Where a real-world cover thumbnail was used, the source is credited below. (If a row shows “Wikipedia page”, use the book’s Wikipedia article image file page as the attribution source.)
+
+| Asset | Source / link | Credit / licence note |
+|-------|----------------|------------------------|
+| Book cover images (`static/img/covers/*.{png,jpg,svg}`) | (add per-title links as needed) | Local cover assets served from `static/img/covers/`. |
+| Wireframes PDF (`docs/wireframe-bookly.pdf`) | N/A | Created during the planning phase. |
+| Footer icons (inline `<svg>`) | (add if applicable) | Vector icons embedded directly in templates. |
+
+---
+
+## Attributions
+
+- Book metadata in `cli.py` / `seed_books.sql` is synthetic catalogue text for coursework (not an official publisher catalogue).
+- Cover assets live under `static/img/covers/` (a mix of SVG placeholders and raster cover images where credited in the **Image credits** section).
+- Social icons in the footer use simple SVG paths; outbound links are examples only.
+- Learning sources are listed under **Sources and references**; bookly’s implementation was written for this coursework and follows those tutorials only at a conceptual level unless otherwise cited in code comments.
+
+---
+
+## Additional Notes
+
+- **Use of AI:** Generative AI was used as an assistant during development (mainly spell-checking and improving the clarity of documentation). It also helped with drafting and iterating on automated tests and discussing approaches for parts of the Python/Flask code (validation, structure, and edge cases). The final implementation was still written/edited, verified, and tested by me, and any AI suggestions were only kept when they matched the project’s real behaviour. A concise log of AI-assisted areas is included in [Use of AI (assistance log)](#use-of-ai-assistance-log).
+- **`docs/legacy-code.md` (development snapshots):** Earlier in development, my GitHub/Heroku setup ended up in a broken state (the repo would not accept new commits reliably and the Heroku connection stopped working). I restarted the project setup and moved the work into a fresh repository on a new GitHub account, linked to a new Heroku app/account. To make the development progression easy to review, I kept small “before → after” code snapshots in `docs/legacy-code.md`.
+- **`docs/devlog.md` — removed** (notes merged into `README.md`).
+- **`docs/testing.md` — removed** (moved into `README.md`).
+- During development, when the schema changed, I used `flask reset-db` (destructive) and re-seeded as needed.
+
+---
+
+## Author
+
+**Name:** Mohammed Sadek Hussain  
+**Institution:** New City College  
+**Course / project:** Project 3  
+**Repository / submission:** Code and README submitted through New City College coursework channels (and GitHub if the assessor was given a link separately).
+
