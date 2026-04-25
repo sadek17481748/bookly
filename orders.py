@@ -28,3 +28,11 @@ def list_orders():
     )
     return render_template("orders.html", orders=orders)
 
+
+# ================= CHECKOUT FORM (LOGIN REQUIRED) =================
+# GET shows shipping form + current cart summary.
+@orders_bp.get("/checkout")
+@login_required
+def checkout_form():
+    # -------- Load cart items for the current user --------
+    items = CartItem.query.filter_by(user_id=current_user.id).all()
