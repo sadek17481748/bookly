@@ -21,3 +21,12 @@ def test_add_to_cart_ok(client, app, sample_book):
         data={"email": "buyer@example.com", "password": "pw123456"},
         follow_redirects=True,
     )
+
+    r = client.post(
+        f"/cart/add/{sample_book}",
+        data={"quantity": "2"},
+        follow_redirects=True,
+    )
+    assert r.status_code == 200
+    assert b"Test Book Alpha" in r.data
+
