@@ -897,3 +897,392 @@ Where changes affected both documentation and the app itself, I kept commits sep
 
 ---
 
+## Technical overview
+
+### Why PostgreSQL is the technical centre of this work
+
+PostgreSQL is a core part of the project:
+
+- **Connection:** the app reads `DATABASE_URL` from the environment (`config.py`, `.env.example`). In development this pointed at a **local Postgres** instance; on Heroku it used the **managed Postgres** add-on URL.
+- **Integrity:** foreign keys tie reviews to users and books, cart lines to users and books, order items to orders and books. `schema.sql` lists the same structure for reference and marking.
+- **Meaningful writes:** checkout creates an `orders` row and multiple `order_items` rows, then deletes `cart_items` for that user—i.e. a **multi-table write** I verified in `psql` and other SQL clients during development.
+- **Read patterns:** the admin dashboard uses **aggregations** (`COUNT`, `SUM`, `GROUP BY`, joins) executed against real tables—exactly the kind of SQL competence Project 3 is meant to evidence, surfaced through the UI.
+
+Automated tests in `tests/` use **SQLite in-memory** only so `pytest` runs quickly **without** Postgres on the machine running CI. For marking and demos I still ran the app against **PostgreSQL** as described in [Development](#development).
+
+### Request flow overview
+
+1. The browser requests a URL (e.g. `/books`).
+2. Flask maps the URL to a **view function** in a blueprint (`books.py`, `cart.py`, etc.).
+3. The view uses **SQLAlchemy** to query or change rows in **PostgreSQL** (via `DATABASE_URL`).
+4. Flask renders a **Jinja2** template and injects the results (e.g. `books`, `reviews`).
+5. The server returns **HTML**; the browser requests **static** assets (`styles.css`, `main.js`).
+6. Small behaviours (mobile nav toggle, `data-confirm` on delete) are handled in **JavaScript** without replacing server-side validation.
+
+This is **server-side rendering**, not a single-page React/Vue app: most HTML is produced on the server, which keeps the project understandable while still being “full stack” in the sense of **HTTP + app + database**.
+
+### Role of Flask
+
+Flask provides the **web layer** between the user and PostgreSQL:
+
+- **Routing:** maps paths like `/`, `/books`, `/cart`, `/orders/checkout` to Python functions.
+- **HTTP verbs:** distinguishes **GET** (show form or page) from **POST** (submit form, mutate data).
+- **Sessions / auth:** Flask-Login loads the current user from the session cookie and ties actions to `users.id` in Postgres.
+- **Templates:** connects each response to a file under `templates/`.
+- **Blueprints:** splits features into `auth.py`, `books.py`, `cart.py`, `orders.py`, `admin.py` so the codebase stays readable.
+
+### Database (PostgreSQL)
+
+PostgreSQL stores:
+
+- **Users** (email, password hash, admin flag, timestamps).
+- **Books** (title, author, category, price in cents, description, optional `cover_url`).
+- **Reviews** (rating, body, links to user and book).
+- **Cart items** (per user and book, quantity; unique constraint so one row merges quantities).
+- **Orders** and **order items** (order header + line items with **unit price snapshot** in cents).
+
+SQLAlchemy maps Python classes in `models.py` to these tables. **`flask init-db`** calls `db.create_all()` so the live schema matches the models (`cli.py`). **`schema.sql`** is a human-readable duplicate of the layout for documentation and external review.
+
+For a **visual entity–relationship diagram** (tables, keys, and relationships), see [Data model and ERD (entity relationships)](#data-model-and-erd-entity-relationships) under [Design](#design).
+
+### Project 3 scope vs what this submission demonstrates
+
+For **Project 3**, the emphasis is on **PostgreSQL**—designing tables, relationships, and queries—and demonstrating that data in a working project.
+
+While building bookly, I watched a range of tutorials and walkthroughs (Flask + database projects). As a result, I included a few extra “real app” steps that were not strictly required by the brief, because they helped me complete the overall logic of the site and make the database work easier to demonstrate end-to-end.
+
+| Typical Project 3 focus | What bookly adds (and why) |
+|-------------------------|----------------------------|
+| SQL scripts, ER thinking, maybe a thin UI | **End-to-end paths**: browser → Flask routes → SQLAlchemy → **PostgreSQL** → HTML response. That makes the database work **visible and testable** as part of a real use case (browse → cart → checkout → orders). |
+| Less emphasis on auth, sessions, deployment | **Flask-Login** sessions, **environment-based configuration**, and a **Heroku-style** deployment story so Postgres is not “theory only” but runnable **locally and** on a hosted database. |
+
+**Why this still fits the marking criteria**
+
+1. **PostgreSQL remains the source of truth.** Users, books, reviews, cart rows, orders, and order items all live in Postgres. The ORM generates SQL; constraints (foreign keys, uniqueness on cart lines) match standard relational design taught on the course.
+2. **A thin static page** can show a `SELECT` result, but it does not demonstrate **transactions across steps** (cart updates, checkout clearing the cart while inserting orders) or **authorization** (only the review owner can delete). Those behaviours need **application logic** tied to the database.
+3. **Separation of concerns is still clear:** `schema.sql` documents the DDL; `models.py` mirrors it for SQLAlchemy; `books.py`, `cart.py`, `orders.py` show **which HTTP actions cause which writes** to Postgres.
+
+For assessment, **`schema.sql`** and the **`models.py` ↔ table mapping** document the relational design and local setup. The Flask routes and blueprints show **how** that PostgreSQL design is exercised in practice (browse, cart, checkout, admin reads).
+
+### HTML, CSS, JavaScript
+
+- **HTML / Jinja2** under `templates/` builds pages and loops (e.g. book grid, review list).
+- **CSS** in `static/css/styles.css` defines layout, dark theme, responsive grids, forms, and admin tables.
+- **JavaScript** in `static/js/main.js` adds progressive enhancements (nav toggle, confirm before destructive POSTs). **Security rules stay on the server** (e.g. “only delete your own review” is enforced in Python, not only in JS).
+
+### Why this approach?
+
+Server-rendered Flask keeps the database work clear: every important screen is backed by a query or a write to **PostgreSQL**. This matches Project 3 learning outcomes while still being a complete small app.
+
+---
+
+## Testing and Bugs
+
+### Assessment test matrix (functionality, usability, responsiveness, data management)
+
+The procedures below show how testing covers the **full-stack** application across four areas: whether features work (**functionality**), whether the interface is clear and forgiving (**usability**), whether layouts behave on different screens (**responsiveness**), and whether data is created, constrained, and persisted correctly (**data management**). Methods mix **automated** tests (`pytest` in `tests/`), **manual** browser runs (checklist and screenshots under `docs/images/manual-testing/` and `docs/images/validation/`), and **tooling** (Lighthouse, W3C validators, JSHint—see sections further down).
+
+| Area | What was assessed | Procedures (automated / manual / tools) | Evidence in this README |
+|------|-------------------|----------------------------------------|-------------------------|
+| **Functionality** | End-to-end behaviour: browse, auth, reviews, cart, checkout, orders, admin guards | **Automated:** `pytest` (route status, redirects, cart, admin 403/200, search, reviews). **Manual:** checklist tests **#1–#32** (public pages, auth, reviews, cart, checkout, orders, admin). | [Manual testing](#manual-testing) table; [Automated testing](#automated-testing) and [Testing summary table](#testing-summary-table); terminal log under [Running pytest locally](#running-pytest-locally-terminal-evidence) |
+| **Usability** | Navigation, forms, validation feedback, destructive confirmations, access to help/error states | **Manual:** registration/login validation (**#7–#9**), cart/checkout flows, review CRUD, **404** via sitemap link, flash messages. **Tools:** Lighthouse (performance/accessibility/best-practice signals). | Manual rows **#7–#9**, **#14–#18**, **#21–#22**, **#28–#30**; [404 page note](#404-page-note-and-evidence); [Lighthouse testing](#lighthouse-testing); [User Experience (UX)](#user-experience-ux) |
+| **Responsiveness** | Layout and navigation from **phone → tablet → laptop → desktop**; readable catalogue, forms, and admin views | **Manual:** dedicated pass using Chrome **Device Toolbar** at typical widths for each class (see [How responsiveness was tested](#how-responsiveness-was-tested)); repeated browse/cart/checkout flows per viewport; **Tools:** Lighthouse. **Evidence:** composite screenshot in `docs/images/validation/`. | [Responsive behaviour](#responsive-behaviour) and [How responsiveness was tested](#how-responsiveness-was-tested); [Lighthouse testing](#lighthouse-testing); [File Structure](#file-structure) |
+| **Data management** | Correct persistence, FK relationships, ownership rules, cart merge, checkout multi-table write, price snapshot | **Automated:** cart requires login, add-to-cart, empty-checkout guard, admin routes. **Manual:** duplicate email (**#13**), review ownership (**#18**), cart merge/update (**#19–#20**), checkout creates order and clears cart (**#22**), large order totals (**#26**), admin add book (**#25**, **#31**). **Design ref:** ERD and `schema.sql`. | [Data model and ERD](#data-model-and-erd-entity-relationships); manual rows **#13**, **#18–#22**, **#25–#26**, **#31**; [Database (PostgreSQL)](#database-postgresql); [Why PostgreSQL is the technical centre of this work](#why-postgresql-is-the-technical-centre-of-this-work) |
+
+### Manual testing
+
+I complemented automated tests with manual runs in the browser, recording **what I did**, **what I expected**, and **what happened**. The table below is the checklist I used; I filled **Pass/Fail**, **Notes**, and captured screenshots in `docs/images/manual-testing/`.
+
+| # | Area | Step | Expected | Pass/Fail | Notes | Screenshot evidence |
+|---|------|------|----------|-----------|-------|-------------------|
+| 1 | Public | Open `/` | Home loads; branding and hero visible | Pass |  | [01-home](docs/images/manual-testing/01-home.png) |
+| 2 | Public | Open `/contact` | Contact content loads | Pass |  | [02-contact](docs/images/manual-testing/02-contact.png) |
+| 3 | Public | Open `/books` | Catalog or empty state loads | Pass |  | [03-books-list](docs/images/manual-testing/03-books-list.png) |
+| 4 | Public | Use search `?q=` with a known title | Matching books appear | Pass |  | [04-search](docs/images/manual-testing/04-search.png)<br>[04b-search-no-results](docs/images/manual-testing/04b-search-no-results.png) |
+| 5 | Public | Open a book detail URL | Title, author, price, description | Pass |  | [05-book-detail](docs/images/manual-testing/05-book-detail.png) |
+| 6 | Auth | Register a new user | Redirect to books; flash success | Pass |  | [06a-register-form](docs/images/manual-testing/06a-register-form.png)<br>[06-register-success](docs/images/manual-testing/06-register-success.png) |
+| 7 | Auth | On Register, enter an invalid email format | Browser validation blocks submit; user is prompted to enter a valid email | Pass |  | [24-register-email-required](docs/images/manual-testing/24-register-email-required.png) |
+| 8 | Auth | On Register, enter a password under 6 characters | Browser validation prompts “Use at least 6 characters” | Pass |  | [25-register-password-min-length](docs/images/manual-testing/25-register-password-min-length.png) |
+| 9 | Auth | Register with mismatched passwords | Error message shown; account not created | Pass |  | [26-register-passwords-dont-match](docs/images/manual-testing/26-register-passwords-dont-match.png) |
+| 10 | Auth | Log out | Session cleared; home or login | Pass |  | [07-logout](docs/images/manual-testing/07-logout.png) |
+| 11 | Auth | Log in with correct password | Redirect; flash success | Pass |  | [08-login-success](docs/images/manual-testing/08-login-success.png) |
+| 12 | Auth | Log in with wrong password | Stays on login; flash error | Pass |  | [09-login-fail](docs/images/manual-testing/09-login-fail.png) |
+| 13 | Auth | Register duplicate email | Error; no duplicate user | Pass |  | [10-register-duplicate](docs/images/manual-testing/10-register-duplicate.png) |
+| 14 | Reviews | While logged out, open book detail | No POST review without login | Pass |  | [11-reviews-guest](docs/images/manual-testing/11-reviews-guest.png) |
+| 15 | Reviews | Post a review (logged in) | Review appears on page | Pass |  | [12-review-created](docs/images/manual-testing/12-review-created.png) |
+| 16 | Reviews | Edit **your** review | Updated text/rating shown | Pass |  | [13-review-edit](docs/images/manual-testing/13-review-edit.png) |
+| 17 | Reviews | Delete **your** review | Review removed | Pass |  | [14-review-delete](docs/images/manual-testing/14-review-delete.png) |
+| 18 | Reviews | Attempt to delete another user’s review (second account) | Blocked with message | Pass |  | [15-review-owner-block](docs/images/manual-testing/15-review-owner-block.png) |
+| 19 | Cart | Add book to cart | Line appears with correct title/qty | Pass |  | [16-cart-add](docs/images/manual-testing/16-cart-add.png) |
+| 20 | Cart | Change quantity / remove line | Totals and rows update | Pass |  | [17-cart-update-remove](docs/images/manual-testing/17-cart-update-remove.png)<br>[17b-cart-remove-confirm](docs/images/manual-testing/17b-cart-remove-confirm.png)<br>[17c-cart-updated](docs/images/manual-testing/17c-cart-updated.png) |
+| 21 | Cart | Checkout with empty cart | Error flash; redirect to cart | Pass |  | [18-checkout-empty](docs/images/manual-testing/18-checkout-empty.png) |
+| 22 | Orders | Checkout with items | Order on Orders page; cart empty | Pass |  | [19-checkout-success](docs/images/manual-testing/19-checkout-success.png)<br>[19b-orders-page](docs/images/manual-testing/19b-orders-page.png) |
+| 23 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page | Pass |  |  |
+| 24 | Admin | Same as admin user | Dashboard metrics load | Pass |  | [21-analytics-admin](docs/images/manual-testing/21-analytics-admin.png) |
+| 25 | Admin | Add a new book via Analytics → Add book | Book created and visible in catalogue | Pass |  | [22-admin-add-book](docs/images/manual-testing/22-admin-add-book.png)<br>[23-admin-book-added](docs/images/manual-testing/23-admin-book-added.png) |
+| 26 | Orders | Large order test (multiple items and quantities) | Cart subtotal matches checkout total; order summary lists all items | Pass |  | [27-large-order-cart](docs/images/manual-testing/27-large-order-cart.png)<br>[28-large-order-checkout](docs/images/manual-testing/28-large-order-checkout.png)<br>[29-large-order-checkout-total](docs/images/manual-testing/29-large-order-checkout-total.png) |
+| 27 | Orders | Log out during checkout, then log back in | Redirects to login and returns to checkout (via `next=`); checkout can continue | Pass |  | [30-checkout-logout-login-continue](docs/images/manual-testing/30-checkout-logout-login-continue.png) |
+| 28 | Auth | When logged in, check the navigation bar | Login/Register are hidden; authenticated links are shown instead (Cart/Orders/Logout) | Pass |  | [31-nav-logged-in-hides-login-register](docs/images/manual-testing/31-nav-logged-in-hides-login-register.png) |
+| 29 | Reviews | Attempt to post a review while logged out | Redirects to login; after login the user can return and submit the review | Pass |  |  |
+| 30 | Cart | Attempt “Add to cart” while logged out | Redirects to login; after login the user can add the book to cart | Pass |  |  |
+| 31 | Admin | Add book: enter an invalid price (non-numeric or 0/negative) | Blocked with validation errors (“Price must be a number (e.g. 12.99).” / “Price must be greater than 0.”) | Pass |  |  |
+| 32 | Cart | Update cart quantity using letters | Browser blocks non-numeric input (“Enter a number”) so quantity validation happens before submit | Pass |  | [35-cart-quantity-non-numeric](docs/images/manual-testing/35-cart-quantity-non-numeric.png) |
+
+#### 404 page (note and evidence)
+
+Assessor note: use the steps below to trigger the custom 404 in the browser.
+
+- **Where to find it:** click **Sitemap** in the footer (route: **`/sitemap`**). This route is intentionally not implemented so the custom 404 page is shown.
+
+![Custom 404 page](docs/images/validation/404-page.png)
+
+Where something failed during manual runs, I kept **screenshots** or a short log and noted the fix in the bug table or devlog. Short **fix narratives** aligned with the checklist live in [`docs/fix-log.md`](docs/fix-log.md).
+
+#### Validation and edge-case checks (input correctness)
+
+These checks focus on places where user input can be correct/incorrect and where logic could break if validation was missing. Most validation is **server-side** (Flask routes) and is shown to the user via **flash messages**.
+
+- **Register (`/register`)**
+  - **Valid**: new email + matching passwords → account created and logged in.
+  - **Invalid**:
+    - duplicate email → blocked with a message (see manual test **#13**).
+    - password confirmation mismatch → blocked with an error flash.
+
+- **Login (`/login`)**
+  - **Valid**: correct email/password → logged in and redirected.
+  - **Invalid**: wrong password → stays on login with error flash (manual test **#12**).
+
+- **Reviews (create/edit/delete)**
+  - **Create review**:
+    - blocked when logged out (redirect to login; manual test **#14**).
+    - rating must be **1–5** and body must not be empty (server-side checks).
+  - **Edit/delete**:
+    - only the review owner can edit/delete (server-side ownership guard; manual tests **#13–#15**).
+
+- **Cart**
+  - **Quantity rules**: quantity < 1 is treated as remove (keeps totals consistent).
+  - **Auth guard**: cart routes require login (tested in automated suite).
+
+- **Checkout**
+  - **Empty cart**: checkout is blocked with a flash + redirect back to cart (manual test **#21**).
+  - **Valid**: creates an order + order items and clears the cart (manual test **#22**).
+
+- **Admin-only routes**
+  - Non-admins receive **403** on analytics and admin pages (manual test **#23**, automated tests).
+  - **Admin “Add book”** checks:
+    - empty required fields return server-side validation flashes
+    - invalid or non-positive prices are rejected with a clear message
+    - optional cover filename must exist under `static/img/covers/`
+    - duplicate (title + author) is blocked
+    - successful submits create a row visible in the public catalogue
+
+### Automated testing
+
+For this project, I used **pytest** to write automated tests. The tests live under `tests/` and include:
+
+- **`conftest.py`** — sets `DATABASE_URL=sqlite:///:memory:` before the application module loads (so `create_app()` does not require PostgreSQL during pytest), resets the schema for each test, and provides shared fixtures (including a `sample_book` row inserted for detail/cart tests).
+- **`test_public_pages.py`** — checks the home page, contact page, books list, book detail, 404 for an unknown id, and that static CSS is served.
+- **`test_auth.py`** — exercises registration and login GET pages, the full register → logout → login flow, password mismatch on register, and wrong password on login.
+- **`test_books_reviews.py`** — verifies search (`?q=`), that creating a review requires login, and that a logged-in user can post a review. Edit and delete for reviews are covered in manual testing above only (not automated in the current suite).
+- **`test_cart_orders_admin.py`** — ensures the cart requires authentication, that items can be added to the cart, that checkout with an empty cart is handled, that admin analytics requires login, returns **403** for a normal user, and **200** for an admin, and that admin add-book routes enforce login, forbidden for non-admin, and succeed for admin.
+
+I was able to create these tests by following online tutorials and resources about testing Flask applications with pytest. Some helpful sources I used include:
+
+- [Test a Flask App with pytest – Real Python](https://realpython.com/flask-project/)
+- [pytest documentation](https://docs.pytest.org/)
+- [Testing Flask Applications – Flask documentation](https://flask.palletsprojects.com/en/stable/testing/)
+- [pytest-flask documentation](https://pytest-flask.readthedocs.io/) — I did **not** use this plugin; the suite uses the stock Flask test client from pytest fixtures.
+
+These resources helped me understand how to set up test environments, use an in-memory database for fast automated runs, and write assertions on HTTP status codes and HTML responses for different parts of the Flask app.
+
+Below is a compact **feature → test map** showing what each automated test covers.
+
+#### Feature to test mapping
+
+| Feature | Test file | Test name | What it checks |
+|---------|-----------|-----------|----------------|
+| Home page loads | `test_public_pages.py` | `test_home_ok` | `GET /` returns 200 and expected text |
+| Contact page loads | `test_public_pages.py` | `test_contact_ok` | `GET /contact` returns 200 |
+| Books list loads | `test_public_pages.py` | `test_books_list_empty_ok` | `GET /books` returns 200 |
+| Search works | `test_books_reviews.py` | `test_books_search_param_ok` | `?q=` returns matching book |
+| Book detail loads | `test_public_pages.py` | `test_book_detail_ok` | `GET /books/<id>` shows title/author |
+| Missing book returns 404 | `test_public_pages.py` | `test_book_detail_404` | Unknown id returns 404 |
+| CSS is served | `test_public_pages.py` | `test_static_css_served` | `GET /static/css/styles.css` returns 200 |
+| Register page loads | `test_auth.py` | `test_register_get_ok` | `GET /register` returns 200 |
+| Login page loads | `test_auth.py` | `test_login_get_ok` | `GET /login` returns 200 |
+| Register → logout → login | `test_auth.py` | `test_register_login_flow` | Full auth flow works |
+| Register mismatch blocked | `test_auth.py` | `test_register_password_mismatch` | Mismatch redirects (validation path) |
+| Wrong password blocked | `test_auth.py` | `test_login_bad_password` | Wrong password redirects to login |
+| Review requires login | `test_books_reviews.py` | `test_create_review_requires_login` | Guest POST review redirects to login |
+| Review can be created | `test_books_reviews.py` | `test_create_review_ok` | Logged-in user can post a review |
+| Cart requires login | `test_cart_orders_admin.py` | `test_cart_requires_login` | Guest `GET /cart` redirects |
+| Add to cart works | `test_cart_orders_admin.py` | `test_add_to_cart_ok` | Logged-in user can add a book |
+| Empty cart checkout blocked | `test_cart_orders_admin.py` | `test_checkout_empty_cart_redirects` | Empty checkout handled safely |
+| Admin analytics requires login | `test_cart_orders_admin.py` | `test_admin_analytics_requires_login` | Guest redirects to login |
+| Admin analytics forbidden | `test_cart_orders_admin.py` | `test_admin_analytics_forbidden_for_normal_user` | Non-admin gets 403 |
+| Admin analytics works | `test_cart_orders_admin.py` | `test_admin_analytics_ok_for_admin` | Admin gets 200 |
+| Admin add book requires login | `test_cart_orders_admin.py` | `test_admin_add_book_requires_login` | Guest redirects to login |
+| Admin add book forbidden | `test_cart_orders_admin.py` | `test_admin_add_book_forbidden_for_normal_user` | Non-admin gets 403 |
+| Admin add book works | `test_cart_orders_admin.py` | `test_admin_add_book_ok_for_admin` | Admin can submit add-book flow |
+
+#### Limits (what automated tests do not cover)
+
+- Payments are not integrated (checkout is “store the order”, not card processing).
+- There is no email sending to test.
+- UI layout changes are only checked where tests assert on key HTML text.
+
+#### Running pytest locally (terminal evidence)
+
+Because pytest is installed inside the project’s virtual environment, I activated the venv first and then ran the suite in verbose mode:
+
+```bash
+source .venv/bin/activate
+pytest -v
+```
+
+Output from my local run:
+
+```text
+============================= test session starts ==============================
+platform darwin -- Python 3.13.3, pytest-9.0.3, pluggy-1.6.0 -- /Users/mohammedhussain/Desktop/bookly-final/.venv/bin/python3.13
+cachedir: .pytest_cache
+rootdir: /Users/mohammedhussain/Desktop/bookly-final
+configfile: pytest.ini
+testpaths: tests
+collecting ... collected 23 items
+
+tests/test_auth.py::test_register_get_ok PASSED                          [  4%]
+tests/test_auth.py::test_login_get_ok PASSED                             [  8%]
+tests/test_auth.py::test_register_login_flow PASSED                      [ 13%]
+tests/test_auth.py::test_register_password_mismatch PASSED               [ 17%]
+tests/test_auth.py::test_login_bad_password PASSED                       [ 21%]
+tests/test_books_reviews.py::test_books_search_param_ok PASSED           [ 26%]
+tests/test_books_reviews.py::test_create_review_requires_login PASSED    [ 30%]
+tests/test_books_reviews.py::test_create_review_ok PASSED                [ 34%]
+tests/test_cart_orders_admin.py::test_cart_requires_login PASSED         [ 39%]
+tests/test_cart_orders_admin.py::test_add_to_cart_ok PASSED              [ 43%]
+tests/test_cart_orders_admin.py::test_checkout_empty_cart_redirects PASSED [ 47%]
+tests/test_cart_orders_admin.py::test_admin_analytics_requires_login PASSED [ 52%]
+tests/test_cart_orders_admin.py::test_admin_analytics_forbidden_for_normal_user PASSED [ 56%]
+tests/test_cart_orders_admin.py::test_admin_analytics_ok_for_admin PASSED [ 60%]
+tests/test_cart_orders_admin.py::test_admin_add_book_requires_login PASSED [ 65%]
+tests/test_cart_orders_admin.py::test_admin_add_book_forbidden_for_normal_user PASSED [ 69%]
+tests/test_cart_orders_admin.py::test_admin_add_book_ok_for_admin PASSED [ 73%]
+tests/test_public_pages.py::test_home_ok PASSED                          [ 78%]
+tests/test_public_pages.py::test_contact_ok PASSED                       [ 82%]
+tests/test_public_pages.py::test_books_list_empty_ok PASSED              [ 86%]
+tests/test_public_pages.py::test_book_detail_404 PASSED                  [ 91%]
+tests/test_public_pages.py::test_book_detail_ok PASSED                   [ 95%]
+tests/test_public_pages.py::test_static_css_served PASSED                [100%]
+
+=============================== warnings summary ===============================
+tests/test_auth.py: 3 warnings
+tests/test_books_reviews.py: 3 warnings
+tests/test_cart_orders_admin.py: 16 warnings
+  /Users/mohammedhussain/Desktop/bookly-final/app.py:48: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    return User.query.get(uid)
+
+tests/test_books_reviews.py::test_create_review_ok
+tests/test_books_reviews.py::test_create_review_ok
+tests/test_cart_orders_admin.py::test_add_to_cart_ok
+tests/test_cart_orders_admin.py::test_admin_add_book_ok_for_admin
+tests/test_public_pages.py::test_book_detail_404
+tests/test_public_pages.py::test_book_detail_ok
+  /Users/mohammedhussain/Desktop/bookly-final/.venv/lib/python3.13/site-packages/flask_sqlalchemy/query.py:30: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    rv = self.get(ident)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 23 passed, 28 warnings in 2.32s ========================
+(.venv) mohammedhussain@Mohammeds-MacBook-Air bookly-final %
+```
+
+### Testing summary table
+
+The rows below match the automated tests in `tests/` (reproducible with `pytest -v`). Pass/Fail and Notes reflect my last full run before submission.
+
+| Test number | Area | What it verifies | Pass/Fail | Notes |
+|-------------|------|------------------|-----------|-------|
+| 1 | Authentication | `GET /register` loads | Pass | `test_register_get_ok` |
+| 2 | Authentication | `GET /login` loads | Pass | `test_login_get_ok` |
+| 3 | Authentication | Register → logout → login works end-to-end | Pass | `test_register_login_flow` |
+| 4 | Authentication | Register rejected when passwords do not match | Pass | `test_register_password_mismatch` |
+| 5 | Authentication | Login rejected when password is wrong | Pass | `test_login_bad_password` |
+| 6 | Books & reviews | Search returns matching book | Pass | `test_books_search_param_ok` |
+| 7 | Books & reviews | Guest cannot POST a review (redirect to login) | Pass | `test_create_review_requires_login` |
+| 8 | Books & reviews | Logged-in user can create a review | Pass | `test_create_review_ok` |
+| 9 | Cart & orders | Guest cannot open cart (redirect) | Pass | `test_cart_requires_login` |
+| 10 | Cart & orders | Logged-in user can add a book to cart | Pass | `test_add_to_cart_ok` |
+| 11 | Cart & orders | Checkout with empty cart is handled safely | Pass | `test_checkout_empty_cart_redirects` |
+| 12 | Admin | Guest cannot open analytics (redirect) | Pass | `test_admin_analytics_requires_login` |
+| 13 | Admin | Non-admin receives 403 on analytics | Pass | `test_admin_analytics_forbidden_for_normal_user` |
+| 14 | Admin | Admin user receives 200 and dashboard content | Pass | `test_admin_analytics_ok_for_admin` |
+| 15 | Admin | Guest cannot open add-book (redirect) | Pass | `test_admin_add_book_requires_login` |
+| 16 | Admin | Non-admin receives 403 on add-book | Pass | `test_admin_add_book_forbidden_for_normal_user` |
+| 17 | Admin | Admin user can submit add-book | Pass | `test_admin_add_book_ok_for_admin` |
+| 18 | Public pages | Home page loads with expected content | Pass | `test_home_ok` |
+| 19 | Public pages | Contact page loads | Pass | `test_contact_ok` |
+| 20 | Public pages | Books list page loads | Pass | `test_books_list_empty_ok` |
+| 21 | Public pages | Unknown book id returns 404 | Pass | `test_book_detail_404` |
+| 22 | Public pages | Book detail shows seeded sample book | Pass | `test_book_detail_ok` |
+| 23 | Public pages | Static CSS endpoint serves dark theme bundle | Pass | `test_static_css_served` |
+
+### Bugs encountered during development
+
+The table below is a bug / issue log in the style used for coursework: it records problems encountered while building bookly, how serious they were, and that they were resolved. It is **not** a list of current security defects—the shipped app uses Werkzeug password hashing and server-side checks as implemented in `models.py` and the blueprints.
+
+To track issues during development, I also used a **GitHub Project** board as a simple bug tracker (`projects/6`). I used Low / Medium / High priority labels to decide what to fix first (for example, authentication, ownership checks, and checkout logic were treated as higher priority than UI tweaks), and the board helped me keep a clear record of what was open, what was in progress, and what was resolved.
+
+| Bug number | Area | Description | Severity | Priority | Solutions | Status |
+|------------|------|-------------|----------|----------|-----------|--------|
+| 1 | Environment | (AI assisted) App crashed on startup when `DATABASE_URL` was missing from `.env` | High | High | Add `.env` using `.env.example`, set `DATABASE_URL` and `SECRET_KEY`, then restart the server. | Resolved |
+| 2 | Database | (AI assisted) First run: empty tables until `flask init-db` was documented and run | Medium | High | Run `python -m flask --app app.py init-db` to create tables and seed the catalogue. | Resolved |
+| 3 | Database | (AI assisted) Iterating on SQLAlchemy models required `flask reset-db` to rebuild schema during dev | Medium | Medium | Run `python -m flask --app app.py reset-db` after model/schema changes to drop/recreate tables and reseed. | Resolved |
+| 4 | Auth | (AI assisted) Login redirect / `next` URL behaviour needed checking after form changes | Medium | Medium | Preserve `next` in the login form/action and redirect to `next` after successful login; verify with manual tests. | Resolved |
+| 5 | Reviews | (AI assisted) Ensuring only the owner can delete or edit a review (server-side guard) | High | High | Add server-side ownership checks (`review.user_id == current_user.id`) in edit/delete routes; hide buttons in templates as a secondary UX measure. | Resolved |
+| 6 | Search | (AI assisted) Verifying search matched title and author case-insensitively (`ILIKE`) | Medium | Medium | Use SQLAlchemy `ilike` filters on `Book.title` and `Book.author` and test with mixed-case queries. | Resolved |
+| 7 | Cart | (AI assisted) Cart line merge behaviour when adding the same book twice (unique constraint) | Medium | Medium | Enforce one row per `(user_id, book_id)` and merge quantities in `add_to_cart`; verify with repeated adds. | Resolved |
+| 8 | Cart | (AI assisted) Quantity 0 or remove: line removed and totals consistent | Medium | Medium | Treat quantity under 1 as delete; recalculate subtotal from remaining lines and confirm via manual tests. | Resolved |
+| 9 | Checkout | (AI assisted) Empty-cart checkout must not create an order; flash + redirect | High | High | Block checkout when cart is empty; flash an error and redirect back to the cart page. | Resolved |
+| 10 | Admin | (AI assisted) Non-admin access to `/admin/analytics` must return 403, not expose data | High | Critical | Add an admin-only decorator that checks `current_user.is_admin`; abort with 403 for non-admins. | Resolved |
+| 11 | Testing | (AI assisted) Pytest uses SQLite in-memory; behaviour must still be validated on Postgres manually | Low | Medium | Run `pytest` on SQLite for speed, and separately verify key flows manually against Postgres (checkout, admin, ownership checks). | Resolved |
+| 12 | Static | (AI assisted) Cover URLs and `/static/img/covers/` paths had to stay consistent with `book_covers.py` | Low | Low | Standardise `cover_url` values to `/static/img/covers/<slug>.svg` and keep slugs generated by `book_covers.py`. | Resolved |
+| 13 | Database / Setup | (AI assisted) Local run failed with password authentication failed because `.env` still contained placeholder `DATABASE_URL` values. Resolved by creating/updating the Postgres role/database and ensuring commands like `python -m flask ...` were run in the terminal (not inside `psql`). | Medium | High | Update `.env` with a real `DATABASE_URL`; set/reset the Postgres password with `ALTER USER ... WITH PASSWORD ...`; exit `psql` with `\q` before running Flask commands. | Resolved |
+| 14 | Static / Seed data | (AI assisted) Book cover images did not appear on cards because the `books` table already contained older seeded rows with empty `cover_url` values, and `flask init-db` only seeds when the catalogue is empty. Resolved by resetting and re-seeding (`flask reset-db`) so seeded books include correct `/static/img/covers/*.svg` paths. | Low | Medium | Run `python -m flask --app app.py reset-db` to reseed with covers (or update existing `books.cover_url` values if data must be kept). | Resolved |
+
+### Use of AI (assistance log)
+
+This table lists where AI-assisted help was used during development and documentation. In places, I also marked content with “(AI)” to make it clear where AI assistance was involved.
+
+My process was:
+
+- I used credited examples/tutorials as a starting point for patterns (routing, forms, validation, and testing structure).
+- When an implementation did not work or needed changing to match bookly, I tried to adjust the code myself first (aligning routes, templates, and database models to this project).
+- When I got stuck, AI helped by suggesting likely causes, pointing me to relevant documentation, and recommending specific videos/tutorial topics that matched the problem. I then applied the fix manually and verified it worked in my project.
+- The final code and write-up were still checked, edited, and tested manually to match how the project actually works.
+
+| Area / section | What AI assistance was used for | Notes / checks I still did |
+|----------------|----------------------------------|----------------------------|
+| README + docs (`README.md`, `docs/*.md`) | Spell-checking, rephrasing for clarity, tightening wording, and structuring sections (TOC, headings). | I verified all steps and claims against the actual repository contents and deployment flow. |
+| Pytest suite (`tests/`) | Drafting test structure and suggesting assertions/fixtures for Flask routes. | I ran the tests, fixed failures, and aligned each test to real routes and behaviours. |
+| Python (Flask / SQLAlchemy) (`app.py`, blueprints, `cli.py`) | Spot-checking patterns (blueprints, decorators, error handlers) and suggesting safer validation/guard logic. | I implemented the logic, tested flows in-browser, and confirmed DB writes/reads in Postgres. |
+| HTML/Jinja templates (`templates/`) | Suggesting layout tweaks and accessibility improvements (labels, alt text, ARIA). | I checked pages visually, verified navigation flows, and ensured server-side checks remained in Python. |
+| CSS/JS (`static/css/styles.css`, `static/js/main.js`) | Minor suggestions for responsiveness and small JS helpers (nav toggle, confirm). | I validated behaviour on multiple screen sizes and confirmed no critical console errors. |
+
+### Lighthouse testing
+
+I ran **Lighthouse** (Chrome DevTools → Lighthouse) against the main pages (home, books list, book detail). Scores and any follow-up tweaks are summarised in the submitted report so this README stays in sync with what assessors receive.
+
+![Lighthouse results - Home](docs/images/validation/lighthouse-home.png)
+
+### HTML, CSS and JS Validation
+
+I validated HTML with the **W3C Markup Validator** and CSS with the **W3C CSS Validator** on representative pages. JavaScript was checked using **JSHint** and with the editor’s built-in diagnostics on `static/js/main.js`.
+
+![W3C CSS validator - no errors](docs/images/validation/w3c-css-validator.png)
+
+![W3C HTML validator results](docs/images/validation/w3c-html-validator.png)
+
+![JSHint results](docs/images/validation/jshint-main-js.png)
+
+---
+
