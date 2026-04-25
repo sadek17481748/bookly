@@ -14,3 +14,5 @@ def test_create_review_requires_login(client, sample_book):
         follow_redirects=False,
     )
     assert r.status_code == 302
+    assert "login" in (r.headers.get("Location") or "").lower()
+
