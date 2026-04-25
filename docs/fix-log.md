@@ -8,3 +8,4 @@ Short notes recorded next to bug-fix commits during local testing.
 - Manual checklist (empty-cart checkout): checkout could post with no lines; short-circuit with flash and redirect to cart like the checklist expects.
 - Manual checklist (admin analytics): non-admin could open the dashboard briefly; decorator now returns forbidden for normal accounts.
 - Manual checklist (catalogue list): older seed rows kept empty jacket paths; init-db backfills cover_url when the title already exists.
+- Local setup (before manual runs): missing DATABASE_URL surfaced as a vague engine error; fail fast with a clear message in create_app.
