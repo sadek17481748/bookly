@@ -26,3 +26,7 @@ def test_book_detail_404(client):
 
 def test_book_detail_ok(client, sample_book):
     r = client.get(f"/books/{sample_book}")
+    assert r.status_code == 200
+    assert b"Test Book Alpha" in r.data
+    assert b"Test Author" in r.data
+
