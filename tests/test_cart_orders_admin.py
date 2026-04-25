@@ -41,3 +41,13 @@ def test_checkout_empty_cart_redirects(client, app):
         db.session.add(u)
         db.session.commit()
 
+    client.post(
+        "/login",
+        data={"email": "empty@example.com", "password": "pw123456"},
+        follow_redirects=True,
+    )
+
+    r = client.post("/orders/checkout", follow_redirects=True)
+    assert r.status_code == 200
+    assert b"cart" in r.data.lower()
+
