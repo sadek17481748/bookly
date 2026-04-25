@@ -108,3 +108,17 @@ def test_admin_add_book_forbidden_for_normal_user(client, app):
         from db import db
         from models import User
 
+        u = User(email="noadmin@example.com", is_admin=False)
+        u.set_password("pw123456")
+        db.session.add(u)
+        db.session.commit()
+
+    client.post(
+        "/login",
+        data={"email": "noadmin@example.com", "password": "pw123456"},
+        follow_redirects=True,
+    )
+
+    r = client.get("/admin/books/new")
+    assert r.status_code == 403
+
