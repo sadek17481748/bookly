@@ -30,3 +30,14 @@ def test_add_to_cart_ok(client, app, sample_book):
     assert r.status_code == 200
     assert b"Test Book Alpha" in r.data
 
+
+def test_checkout_empty_cart_redirects(client, app):
+    with app.app_context():
+        from db import db
+        from models import User
+
+        u = User(email="empty@example.com")
+        u.set_password("pw123456")
+        db.session.add(u)
+        db.session.commit()
+
