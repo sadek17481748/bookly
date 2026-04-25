@@ -86,3 +86,14 @@ def test_admin_analytics_ok_for_admin(client, app):
         u.set_password("pw123456")
         db.session.add(u)
         db.session.commit()
+
+    client.post(
+        "/login",
+        data={"email": "boss@example.com", "password": "pw123456"},
+        follow_redirects=True,
+    )
+
+    r = client.get("/admin/analytics")
+    assert r.status_code == 200
+    assert b"Analytics" in r.data or b"revenue" in r.data.lower()
+
