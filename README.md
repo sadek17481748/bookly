@@ -33,7 +33,7 @@ Booklet is a simple book browsing, review, and purchasing web app built with:
 YOU NEED TO DO THIS STEP:
 
 ```bash
-cd /Users/mohammedhussain/Desktop/bookly
+cd /Users/mohammedhussain/Desktop/bookly-final
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -64,7 +64,7 @@ CREATE DATABASE booklet_db OWNER booklet_user;
 YOU NEED TO DO THIS STEP:
 
 ```bash
-cd /Users/mohammedhussain/Desktop/bookly
+cd /Users/mohammedhussain/Desktop/bookly-final
 cp .env.example .env
 ```
 
@@ -82,7 +82,7 @@ Example `DATABASE_URL`:
 YOU NEED TO DO THIS STEP:
 
 ```bash
-cd /Users/mohammedhussain/Desktop/bookly
+cd /Users/mohammedhussain/Desktop/bookly-final
 source .venv/bin/activate
 python -m flask --app app.py init-db
 ```
@@ -92,7 +92,7 @@ python -m flask --app app.py init-db
 YOU NEED TO DO THIS STEP:
 
 ```bash
-cd /Users/mohammedhussain/Desktop/bookly
+cd /Users/mohammedhussain/Desktop/bookly-final
 source .venv/bin/activate
 python -m flask --app app.py run --debug
 ```
