@@ -17,3 +17,11 @@ def list_orders():
         .all()
     )
     return render_template("orders.html", orders=orders)
+
+
+@orders_bp.get("/checkout")
+@login_required
+def checkout_form():
+    items = CartItem.query.filter_by(user_id=current_user.id).all()
+    subtotal_cents = sum(item.book.price_cents * item.quantity for item in items)
+    return render_template("checkout.html", items=items, subtotal_cents=subtotal_cents)
