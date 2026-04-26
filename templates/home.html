@@ -1,15 +1,26 @@
 {% extends "base.html" %}
 
+{# ============================================================ #}
+{# HOME PAGE                                                     #}
+{# - Public landing page                                         #}
+{# - Primary calls-to-action: browse + register                  #}
+{# - Short feature highlights                                    #}
+{# ============================================================ #}
+
 {% block title %}Home • bookly{% endblock %}
 
 {% block content %}
-  {# Hero: headline, short pitch, primary CTAs #}
+  {# ================= HERO SECTION ================= #}
   <section class="hero">
+    {# Hero text block #}
     <div class="hero-text">
+      {# Main headline #}
       <h1>Find your next great read.</h1>
+      {# Short introduction #}
       <p>
         Browse books, add them to your cart, purchase them, and leave reviews.
       </p>
+      {# Primary call-to-action buttons #}
       <div class="hero-actions">
         <a class="btn" href="{{ url_for('books.list_books') }}">Browse books</a>
         {% if not current_user.is_authenticated %}
@@ -19,12 +30,14 @@
     </div>
   </section>
 
-  {# Two feature cards below the hero #}
+  {# ================= FEATURE HIGHLIGHTS ================= #}
   <section class="grid two">
+    {# Feature: reviews #}
     <div class="card">
       <h2>Reviews</h2>
       <p>Leave a rating and review for any book. You can delete your own reviews.</p>
     </div>
+    {# Feature: checkout #}
     <div class="card">
       <h2>Checkout</h2>
       <p>Add books to your cart, then checkout to place your order — simple and fast.</p>

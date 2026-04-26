@@ -1,8 +1,10 @@
 /* =====================================================================
-   bookly — site-wide styles (dark theme, responsive layout).
+   bookly — site-wide styles
+   - Custom CSS (no Bootstrap / no external UI framework)
+   - Dark theme, responsive layout, shared components
    ===================================================================== */
 
-/* ----- Theme variables + base page background ----- */
+/* ================= THEME VARIABLES + GLOBAL BASE ================= */
 :root {
   --bg: #0b1220;
   --panel: #101a30;
@@ -17,6 +19,7 @@
   --max: 1050px;
 }
 
+/* ================= BASE ELEMENT NORMALISATION ================= */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
 body {
@@ -29,17 +32,20 @@ body {
   line-height: 1.45;
 }
 
+/* ================= LINKS ================= */
 a { color: var(--text); }
 a:hover { color: white; }
 
-/* ----- Centered page column (wraps {% block content %} in base.html) ----- */
+/* ================= LAYOUT CONTAINER ================= */
+/* Centered page column (wraps {% block content %} in base.html) */
 .container {
   width: min(var(--max), calc(100% - 32px));
   margin: 0 auto;
   padding: 24px 0;
 }
 
-/* ----- Skip link: hidden until keyboard focus (WCAG) ----- */
+/* ================= SKIP LINK (ACCESSIBILITY) ================= */
+/* Hidden until keyboard focus (WCAG) */
 .skip-link {
   position: absolute;
   left: -999px;
@@ -51,7 +57,8 @@ a:hover { color: white; }
 }
 .skip-link:focus { left: 10px; z-index: 10; }
 
-/* ----- Sticky top bar: logo, links, mobile menu button ----- */
+/* ================= HEADER + NAVIGATION ================= */
+/* Sticky top bar: logo, links, mobile menu button */
 .site-header {
   position: sticky;
   top: 0;
@@ -95,7 +102,8 @@ a:hover { color: white; }
   color: var(--text);
 }
 
-/* ----- Footer: columns + social icon buttons ----- */
+/* ================= FOOTER ================= */
+/* Columns + social icon buttons */
 .site-footer {
   border-top: 1px solid var(--border);
   padding: 18px 0;
@@ -151,7 +159,8 @@ a:hover { color: white; }
   fill: currentColor;
 }
 
-/* ----- Contact page bullet list ----- */
+/* ================= CONTACT PAGE ================= */
+/* Contact page bullet list */
 .contact-list {
   list-style: none;
   padding: 0;
@@ -160,7 +169,8 @@ a:hover { color: white; }
   gap: 10px;
 }
 
-/* ----- Home: hero strip + feature cards ----- */
+/* ================= HOME PAGE ================= */
+/* Hero strip + feature cards */
 .hero {
   border: 1px solid var(--border);
   background: linear-gradient(180deg, rgba(124, 92, 255, 0.15), rgba(16, 26, 48, 0.65));
@@ -172,7 +182,8 @@ a:hover { color: white; }
 .hero p { margin: 0 0 16px; color: var(--muted); }
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
-/* ----- Generic responsive grids + panel “cards” ----- */
+/* ================= GRID + CARD COMPONENTS ================= */
+/* Generic responsive grids + panel “cards” */
 .grid {
   display: grid;
   gap: 14px;
@@ -189,7 +200,8 @@ a:hover { color: white; }
   box-shadow: var(--shadow);
 }
 
-/* ----- Book grid cards (listing + shared card chrome) ----- */
+/* ================= BOOK LISTING CARDS ================= */
+/* Book grid cards (listing + shared card chrome) */
 .book-card .cover {
   width: 100%;
   aspect-ratio: 3 / 4;
@@ -206,7 +218,8 @@ a:hover { color: white; }
 .price { margin-top: 8px; font-weight: 700; }
 .price.big { font-size: 22px; }
 
-/* ----- Forms: fields, inputs, screen-reader-only labels ----- */
+/* ================= FORMS ================= */
+/* Fields, inputs, screen-reader-only labels */
 .narrow { width: min(520px, 100%); margin: 0 auto; }
 .field { display: grid; gap: 6px; margin-bottom: 12px; }
 .field label { font-weight: 650; }

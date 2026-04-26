@@ -1,4 +1,8 @@
-# Admin-only dashboard: counts and charts from SQL aggregates (requires is_admin on User).
+# ============================================================
+# ADMIN BLUEPRINT (ANALYTICS)
+# - Admin-only dashboard (requires User.is_admin)
+# - Uses SQL aggregates (COUNT/SUM/GROUP BY) for KPI reporting
+# ============================================================
 
 from functools import wraps
 
@@ -14,11 +18,13 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 
 def admin_required(view_func):
-    # Wraps a view so only logged-in users with is_admin=True can open it
+    # ================= ADMIN-ONLY DECORATOR =================
+    # Wraps a view so only logged-in users with is_admin=True can open it.
 
     @wraps(view_func)
     @login_required
     def wrapper(*args, **kwargs):
+        # Reject non-admin users with a 403 page.
         if not getattr(current_user, "is_admin", False):
             abort(403)
         return view_func(*args, **kwargs)
@@ -26,10 +32,12 @@ def admin_required(view_func):
     return wrapper
 
 
-# --- KPIs, top sellers, recent orders, books per category ---
+# ================= ANALYTICS DASHBOARD =================
+# KPIs, top sellers, recent orders, books per category.
 @admin_bp.get("/analytics")
 @admin_required
 def analytics_dashboard():
+    # -------- KPI counts --------
     total_users = db.session.query(func.count(User.id)).scalar() or 0
     total_reviews = db.session.query(func.count(Review.id)).scalar() or 0
     total_orders = db.session.query(func.count(Order.id)).scalar() or 0
@@ -38,12 +46,14 @@ def analytics_dashboard():
     if total_orders > 0:
         avg_order_cents = int(revenue_cents / total_orders)
 
+    # -------- Recent orders --------
     recent_orders = (
         Order.query.order_by(Order.created_at.desc())
         .limit(10)
         .all()
     )
 
+    # -------- Top-selling books --------
     top_books = (
         db.session.query(
             Book.id,
@@ -62,6 +72,7 @@ def analytics_dashboard():
         .all()
     )
 
+    # -------- Catalogue breakdown --------
     books_by_category = (
         db.session.query(Book.category, func.count(Book.id).label("count"))
         .group_by(Book.category)
@@ -69,6 +80,7 @@ def analytics_dashboard():
         .all()
     )
 
+    # -------- Render dashboard template --------
     return render_template(
         "admin_analytics.html",
         total_users=total_users,

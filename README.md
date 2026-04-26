@@ -67,7 +67,7 @@ PostgreSQL is not an afterthought or a “label” on the README:
 
 - **Connection:** the app reads `DATABASE_URL` from the environment (`config.py`, `.env.example`). In development this pointed at a **local Postgres** instance; on Heroku it used the **managed Postgres** add-on URL.
 - **Integrity:** foreign keys tie reviews to users and books, cart lines to users and books, order items to orders and books. `schema.sql` lists the same structure for reference and marking.
-- **Meaningful writes:** checkout creates an `orders` row and multiple `order_items` rows, then deletes `cart_items` for that user—i.e. a **multi-table write** you can verify in `psql` or any SQL client.
+- **Meaningful writes:** checkout creates an `orders` row and multiple `order_items` rows, then deletes `cart_items` for that user—i.e. a **multi-table write** I verified in `psql` and other SQL clients during development.
 - **Read patterns:** the admin dashboard uses **aggregations** (`COUNT`, `SUM`, `GROUP BY`, joins) executed against real tables—exactly the kind of SQL competence Project 3 is meant to evidence, surfaced through the UI.
 
 Automated tests in `tests/` use **SQLite in-memory** only so `pytest` runs quickly **without** Postgres on the machine running CI. For marking and demos I still ran the app against **PostgreSQL** as described in [Development](#development).
@@ -189,6 +189,120 @@ Any extra Figma links or annotated screenshots I used only in the written report
 
 ---
 
+## Website build process and planning (milestones)
+
+This section summarises **how bookly was built**, in the order features were implemented, and how the scope evolved as I worked through the coursework requirements.
+
+### Foundation completion — **28/03**
+
+I started by building the foundation so every later feature had a stable base:
+
+- **Project setup**: virtual environment, dependencies, and a clean Flask project structure.
+- **Configuration**: environment-based settings (`SECRET_KEY`, `DATABASE_URL`) so the same code could run locally and in a hosted environment.
+- **Database first**: a PostgreSQL schema that reflects the core entities and relationships (`users`, `books`, `reviews`, `cart_items`, `orders`, `order_items`) with sensible constraints (foreign keys and uniqueness where needed).
+- **Bootstrap commands and seed data**: a repeatable way to initialise the schema and seed a starter catalogue so pages were never “empty by default”.
+- **Shared UI shell**: `base.html` with navigation, flash messages, and consistent layout, plus a first pass of CSS variables and reusable components.
+
+The practical reason for doing this first was personal experience: once the database and layout are stable, every new page becomes “connect the route to the template to the query”, instead of reinventing structure on every screen.
+
+### Milestone 1 — **31/03** (public pages + shared layout)
+
+This milestone focused on getting the public-facing shell working end-to-end:
+
+- **Home** and **Contact** pages built against the wireframe.
+- A consistent navigation experience across pages (logged out experience first).
+- Early error pages (especially **403/404**) so the site behaved clearly while routes were still being added.
+
+### Milestone 2 — **05/04** (catalogue)
+
+Once the shell was working, I moved onto the first database-driven feature:
+
+- **Books list** (`/books`) populated from the database rather than static HTML.
+- **Book detail** (`/books/<id>`) with price, description, and cover rendering.
+- A simple **search** experience (`?q=`) to demonstrate database filtering.
+- Catalogue seeding and cover URLs so the UI looked complete and consistent.
+
+### Milestone 3 — **10/04** (authentication)
+
+At this point scope shifted from “pages” to “user actions”:
+
+- **Register / login / logout** implemented with hashed passwords and session management.
+- Navigation updated based on authentication state (cart/orders only appear when logged in).
+- Protected routes added so guest users are redirected away from actions that require an account.
+
+### Milestone 4 — **13/04** (reviews)
+
+Reviews were the first feature that required a mix of database relationships and security checks:
+
+- Logged-in users can **create** reviews linked by foreign keys to both the user and the book.
+- Reviews display on the book detail page.
+- **Edit and delete** are restricted to the review owner with server-side checks (not only template logic).
+
+### Milestone 5 — **16/04** (cart)
+
+The cart is implemented as a database feature (not a session-only cart), which made scope and data modelling more important:
+
+- Add-to-cart writes to `cart_items` and merges quantity using a uniqueness rule for one row per (user, book).
+- The cart page supports quantity updates and removals with totals calculated from book prices.
+- Edge cases handled (empty cart, invalid quantities) so the checkout flow would not be fragile later.
+
+### Milestone 6 — **20/04** (checkout + orders)
+
+This milestone turned “basket data” into “transaction history”:
+
+- Checkout form added (minimal shipping/contact fields for coursework realism).
+- Submitting checkout creates an `orders` row and multiple `order_items` rows, then clears the cart for that user.
+- Orders history added so users can view what they purchased after checkout.
+
+### Milestone 7 — **25/04** (admin analytics + final integration)
+
+Admin analytics was the last major feature because it depends on the rest of the data model being correct:
+
+- Admin-only route protection with a clear **403** for non-admin users.
+- Dashboard queries based on aggregates and joins (revenue, order counts, top books, categories).
+- A final integration pass to make flows consistent (navigation, flash messaging, and layout across templates).
+
+### Testing and final foundation pass — **25/04**
+
+Testing was completed alongside feature work, but the final day was a dedicated pass to make sure everything was coherent:
+
+- **Automated testing**: pytest suite for key routes and behaviours using a fast in-memory database for repeatable runs.
+- **Manual testing**: end-to-end walkthroughs on PostgreSQL (browse → auth → review → cart → checkout → orders), plus admin access checks.
+- **Scope reflection**: the largest scope risks were multi-table writes (checkout) and role/ownership enforcement (reviews + admin). Those were the areas I revisited most during the final testing pass because they are easiest to “seem fine” until you try edge cases.
+
+### Personal reflection (time constraints and improved time/communication plan)
+
+From personal experience, project time constraints can change quickly. During this project I was **heavily delayed by personal issues**, which reduced the amount of uninterrupted time I had for development and testing. Even though the core features were completed, the delay meant I had to compress work into fewer sessions, which increases the risk of mistakes and makes progress harder to track.
+
+In future projects, to manage my time and communication better, I would take the following steps.
+
+#### What I would do differently next time
+
+- **Start with a realistic schedule and visible checkpoints**
+  - Break the project into small deliverables (foundation, catalogue, auth, reviews, cart, checkout, admin, testing).
+  - Set short checkpoints (every 2–3 days) so progress is measurable even when time is limited.
+- **Timebox work sessions and protect “core hours”**
+  - Plan focused sessions (for example 60–90 minutes) with a single goal (one route, one feature, or one bug).
+  - Reserve dedicated time for testing and bug fixing rather than leaving it to the end.
+- **Prioritise core functionality first (MVP first)**
+  - Build the “must-have” user journey early: browse → login → cart → checkout → orders.
+  - Treat admin analytics and extra polish as optional until the main flow is stable.
+- **Track decisions and changes as I go**
+  - Keep short notes after each session (what was done, what broke, what is next).
+  - Record database changes and why they were made so I do not lose time re-learning decisions later.
+- **Communicate earlier when delays happen**
+  - If I hit a personal issue or a schedule slip, I would communicate it earlier rather than trying to recover silently.
+  - Share a revised plan (what will be completed first, and what may be reduced) so expectations stay clear.
+- **Reduce risk by testing continuously**
+  - Run automated tests regularly (not only at the end).
+  - Do quick manual checks after each major feature (especially multi-table writes like checkout and role/ownership rules).
+
+#### What I learned
+
+This project reinforced that the biggest risk under time pressure is not writing code—it is losing structure: forgetting what changed, delaying testing, and trying to complete too many features at once. A clearer schedule, earlier communication, and smaller planned deliverables would make future projects more controlled and less stressful, even if delays happen.
+
+---
+
 ## Design
 
 ### Visual language
@@ -233,6 +347,8 @@ Any extra Figma links or annotated screenshots I used only in the written report
 | **python-dotenv** | Load `.env` locally |
 | **gunicorn** | Production WSGI server (Heroku `Procfile`) |
 | **pytest** | Automated tests (`tests/`) |
+
+**Frontend libraries note:** No UI framework such as **Bootstrap** was used. The UI is custom CSS in `static/css/styles.css` and a small amount of vanilla JavaScript in `static/js/main.js` (no jQuery).
 
 ### Tools
 
@@ -331,6 +447,22 @@ python -m flask --app app.py run --debug
 ```
 
 The app served at `http://127.0.0.1:5000` during local runs.
+
+### Troubleshooting (local Postgres setup)
+
+- **`password authentication failed for user ...`**
+  - This usually means `DATABASE_URL` in `.env` still has placeholder values or the Postgres user password does not match.
+  - Fix by updating `.env` to a real connection string and (re)setting the user password in Postgres, for example:
+
+```sql
+ALTER USER bookly_user WITH PASSWORD 'bookly_pass';
+```
+
+- **Commands typed inside `psql` by mistake**
+  - If the prompt looks like `postgres=#` or `postgres-#`, you are inside Postgres interactive mode.
+  - Exit with `\q` to return to the normal terminal prompt before running:
+    - `python -m flask --app app.py init-db`
+    - `python -m flask --app app.py run --debug`
 
 ### Promote an admin user
 
@@ -452,20 +584,22 @@ The 20 rows below match the automated tests in `tests/` (reproducible with `pyte
 
 The table below is a **bug / issue log** in the style used for coursework: it records problems **encountered while building bookly**, how serious they were, and that they were **resolved**. It is **not** a list of current security defects—the shipped app uses **Werkzeug password hashing** and server-side checks as implemented in `models.py` and the blueprints.
 
-| Bug number | Area | Description | Severity | Priority | Status |
-|------------|------|-------------|----------|----------|--------|
-| 1 | Environment | App crashed on startup when `DATABASE_URL` was missing from `.env` | High | High | Resolved |
-| 2 | Database | First run: empty tables until `flask init-db` was documented and run | Medium | High | Resolved |
-| 3 | Database | Iterating on SQLAlchemy models required `flask reset-db` to rebuild schema during dev | Medium | Medium | Resolved |
-| 4 | Auth | Login redirect / `next` URL behaviour needed checking after form changes | Medium | Medium | Resolved |
-| 5 | Reviews | Ensuring only the **owner** can delete or edit a review (server-side guard) | High | High | Resolved |
-| 6 | Search | Verifying search matched **title and author** case-insensitively (`ILIKE`) | Medium | Medium | Resolved |
-| 7 | Cart | Cart line **merge** behaviour when adding the same book twice (unique constraint) | Medium | Medium | Resolved |
-| 8 | Cart | Quantity **0** or remove: line removed and totals consistent | Medium | Medium | Resolved |
-| 9 | Checkout | Empty-cart checkout must not create an order; flash + redirect | High | High | Resolved |
-| 10 | Admin | Non-admin access to `/admin/analytics` must return **403**, not expose data | High | Critical | Resolved |
-| 11 | Testing | Pytest uses **SQLite in-memory**; behaviour must still be validated on **Postgres** manually | Low | Medium | Resolved |
-| 12 | Static | Cover URLs and `/static/img/covers/` paths had to stay consistent with `book_covers.py` | Low | Low | Resolved |
+| Bug number | Area | Description | Severity | Priority | Solutions | Status |
+|------------|------|-------------|----------|----------|-----------|--------|
+| 1 | Environment | App crashed on startup when `DATABASE_URL` was missing from `.env` | High | High | Add `.env` using `.env.example`, set `DATABASE_URL` and `SECRET_KEY`, then restart the server. | Resolved |
+| 2 | Database | First run: empty tables until `flask init-db` was documented and run | Medium | High | Run `python -m flask --app app.py init-db` to create tables and seed the catalogue. | Resolved |
+| 3 | Database | Iterating on SQLAlchemy models required `flask reset-db` to rebuild schema during dev | Medium | Medium | Run `python -m flask --app app.py reset-db` after model/schema changes to drop/recreate tables and reseed. | Resolved |
+| 4 | Auth | Login redirect / `next` URL behaviour needed checking after form changes | Medium | Medium | Preserve `next` in the login form/action and redirect to `next` after successful login; verify with manual tests. | Resolved |
+| 5 | Reviews | Ensuring only the **owner** can delete or edit a review (server-side guard) | High | High | Add server-side ownership checks (`review.user_id == current_user.id`) in edit/delete routes; hide buttons in templates as a secondary UX measure. | Resolved |
+| 6 | Search | Verifying search matched **title and author** case-insensitively (`ILIKE`) | Medium | Medium | Use SQLAlchemy `ilike` filters on `Book.title` and `Book.author` and test with mixed-case queries. | Resolved |
+| 7 | Cart | Cart line **merge** behaviour when adding the same book twice (unique constraint) | Medium | Medium | Enforce one row per `(user_id, book_id)` and merge quantities in `add_to_cart`; verify with repeated adds. | Resolved |
+| 8 | Cart | Quantity **0** or remove: line removed and totals consistent | Medium | Medium | Treat quantity < 1 as delete; recalculate subtotal from remaining lines and confirm via manual tests. | Resolved |
+| 9 | Checkout | Empty-cart checkout must not create an order; flash + redirect | High | High | Block checkout when cart is empty; flash an error and redirect back to the cart page. | Resolved |
+| 10 | Admin | Non-admin access to `/admin/analytics` must return **403**, not expose data | High | Critical | Add an admin-only decorator that checks `current_user.is_admin`; abort with 403 for non-admins. | Resolved |
+| 11 | Testing | Pytest uses **SQLite in-memory**; behaviour must still be validated on **Postgres** manually | Low | Medium | Run pytest on SQLite for speed, and separately verify key flows manually against Postgres (checkout, admin, ownership checks). | Resolved |
+| 12 | Static | Cover URLs and `/static/img/covers/` paths had to stay consistent with `book_covers.py` | Low | Low | Standardise `cover_url` values to `/static/img/covers/<slug>.svg` and keep slugs generated by `book_covers.py`. | Resolved |
+| 13 | Database / Setup | Local run failed with `password authentication failed` because `.env` still contained placeholder `DATABASE_URL` values (`USER:PASSWORD@.../DBNAME`). Resolved by creating/updating the Postgres role/database and ensuring commands like `python -m flask ...` were run in the terminal (not inside `psql`). | Medium | High | Update `.env` with a real `DATABASE_URL`; set/reset the Postgres password with `ALTER USER ... WITH PASSWORD ...`; exit `psql` with `\\q` before running Flask commands. | Resolved |
+| 14 | Static / Seed data | Book cover images did not appear on cards because the `books` table already contained older seeded rows with empty `cover_url` values, and `flask init-db` only seeds when the catalogue is empty. Resolved by resetting and re-seeding (`flask reset-db`) so seeded books include correct `/static/img/covers/*.svg` paths. | Low | Medium | Run `python -m flask --app app.py reset-db` to reseed with covers (or update existing `books.cover_url` values if data must be kept). | Resolved |
 
 
 

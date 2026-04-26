@@ -1,4 +1,9 @@
-# Database models — table names match schema.sql. Money fields are integer cents.
+# ============================================================
+# DATABASE MODELS (SQLAlchemy)
+# - Table names match schema.sql
+# - Money values are stored as integer cents (no floating point)
+# - Relationships connect users ↔ reviews/cart/orders ↔ books
+# ============================================================
 
 from datetime import datetime
 
@@ -8,7 +13,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from db import db
 
 
-# --- Users (login + cart + orders) ---
+# ================= USERS (LOGIN + CART + ORDERS) =================
 class User(db.Model, UserMixin):
     __tablename__ = "users"
 
@@ -31,7 +36,7 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 
-# --- Catalog ---
+# ================= BOOK CATALOG =================
 class Book(db.Model):
     __tablename__ = "books"
 
@@ -50,7 +55,7 @@ class Book(db.Model):
         return f"{self.price_cents / 100:.2f}"
 
 
-# --- Reviews (per user per book) ---
+# ================= REVIEWS (USER ↔ BOOK) =================
 class Review(db.Model):
     __tablename__ = "reviews"
 
@@ -65,7 +70,8 @@ class Review(db.Model):
     book = db.relationship("Book", back_populates="reviews")
 
 
-# --- Shopping cart (one row per user+book; quantity on the row) ---
+# ================= SHOPPING CART =================
+# One row per (user, book). Quantity is stored on the row.
 class CartItem(db.Model):
     __tablename__ = "cart_items"
 
@@ -81,7 +87,8 @@ class CartItem(db.Model):
     __table_args__ = (db.UniqueConstraint("user_id", "book_id", name="uq_cart_user_book"),)
 
 
-# --- Orders (header row + line items with price snapshot) ---
+# ================= ORDERS =================
+# Header row + line items (unit price snapshot stored at checkout time).
 class Order(db.Model):
     __tablename__ = "orders"
 
@@ -94,6 +101,7 @@ class Order(db.Model):
     items = db.relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
 
 
+# ================= ORDER ITEMS =================
 class OrderItem(db.Model):
     __tablename__ = "order_items"
 

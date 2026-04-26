@@ -1,51 +1,69 @@
-{# base.html — site chrome: head, skip link, header nav, flashes, page body, footer #}
+{# ============================================================ #}
+{# BASE LAYOUT (`base.html`)                                     #}
+{# - Shared HTML skeleton for every page                         #}
+{# - Loads global CSS/JS                                         #}
+{# - Contains header navigation + flash messages + footer         #}
+{# ============================================================ #}
 <!doctype html>
 <html lang="en">
   <head>
-    {# Charset, viewport, title block, global CSS/JS #}
+    {# ================= META + ASSETS ================= #}
+    {# Character encoding for proper text display #}
     <meta charset="utf-8" />
+    {# Responsive design for mobile devices #}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {# Per-page title block #}
     <title>{% block title %}bookly{% endblock %}</title>
+    {# Global stylesheet #}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+    {# Global JavaScript (deferred) #}
     <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
   </head>
   <body>
+    {# ================= SKIP LINK ================= #}
     {# Keyboard / screen-reader shortcut to main content #}
     <a class="skip-link" href="#main">Skip to content</a>
 
-    {# Sticky top bar: logo, links, mobile menu button #}
+    {# ================= HEADER + NAVIGATION ================= #}
     <header class="site-header">
       <nav class="nav">
+        {# Site branding #}
         <a class="brand" href="{{ url_for('home') }}">bookly</a>
 
+        {# Navigation links (shown/hidden based on auth role) #}
         <div class="nav-links" id="navLinks">
           <a href="{{ url_for('home') }}">Home</a>
           <a href="{{ url_for('books.list_books') }}">Books</a>
           <a href="{{ url_for('contact') }}">Contact</a>
 
+          {# -------- Authenticated navigation -------- #}
           {% if current_user.is_authenticated %}
             <a href="{{ url_for('cart.view_cart') }}">Cart</a>
             <a href="{{ url_for('orders.list_orders') }}">Orders</a>
             {% if current_user.is_admin %}
               <a href="{{ url_for('admin.analytics_dashboard') }}">Analytics</a>
             {% endif %}
+            {# Logout uses POST to avoid GET side effects #}
             <form class="inline" method="post" action="{{ url_for('auth.logout') }}">
               <button class="linklike" type="submit">Logout</button>
             </form>
           {% else %}
+            {# -------- Guest navigation -------- #}
             <a href="{{ url_for('auth.login_form') }}">Login</a>
             <a class="btn btn-small" href="{{ url_for('auth.register_form') }}">Register</a>
           {% endif %}
         </div>
 
+        {# Mobile menu button (toggled by JS) #}
         <button class="nav-toggle" type="button" aria-controls="navLinks" aria-expanded="false">
           Menu
         </button>
       </nav>
     </header>
 
-    {# Main column: server flash messages then child template content #}
+    {# ================= MAIN CONTENT ================= #}
     <main id="main" class="container">
+      {# -------- Flash messages (server-side) -------- #}
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           <div class="flash-stack" role="status" aria-live="polite">
@@ -56,23 +74,27 @@
         {% endif %}
       {% endwith %}
 
+      {# Child template content #}
       {% block content %}{% endblock %}
     </main>
 
-    {# Site footer: blurb, links, social icons #}
+    {# ================= FOOTER ================= #}
     <footer class="site-footer">
       <div class="container">
         <div class="footer-grid">
+          {# Footer branding #}
           <div class="footer-brand">
             <div class="footer-title">bookly</div>
             <div class="footer-sub">Browse, review, and purchase books.</div>
           </div>
 
+          {# Footer navigation links #}
           <div class="footer-links">
             <a href="{{ url_for('contact') }}">Contact us</a>
             <a href="{{ url_for('books.list_books') }}">Browse books</a>
           </div>
 
+          {# Footer social icons (inline SVG) #}
           <div class="footer-social" aria-label="Social media links">
             <a class="icon-link" href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <svg viewBox="0 0 24 24" role="img" aria-hidden="true">

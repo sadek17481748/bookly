@@ -1,4 +1,9 @@
-# Flask CLI commands: create/reset database, seed books, promote admin user.
+# ============================================================
+# FLASK CLI COMMANDS
+# - init-db: create tables and seed starter catalogue
+# - reset-db: drop/recreate tables (development only)
+# - make-admin: promote an existing user to admin
+# ============================================================
 
 from flask import Flask
 
@@ -9,15 +14,18 @@ from book_covers import cover_static_url
 
 
 def register_cli(app: Flask) -> None:
-    # Attaches `flask init-db`, `flask reset-db`, `flask make-admin` to this app
+    # ================= CLI REGISTRATION =================
+    # Attaches `flask init-db`, `flask reset-db`, `flask make-admin` to this app.
 
     def _seed_books_if_empty() -> None:
-        # If the catalog is empty after create_all(), insert starter rows
+        # ================= SEED HELPER =================
+        # If the catalog is empty after create_all(), insert starter rows.
 
         if Book.query.count() != 0:
             return
 
-        # --- Seed catalog (ORM objects; one Book() per title) ---
+        # ================= SEED CATALOG =================
+        # ORM seed objects (one Book() per title).
         seed_books = [
             Book(
                 title="1984",
@@ -426,7 +434,8 @@ def register_cli(app: Flask) -> None:
 
     @app.cli.command("init-db")
     def init_db() -> None:
-        # Create tables from models.py, then seed if books table has no rows
+        # ================= init-db =================
+        # Creates tables from models.py, then seeds if the books table is empty.
 
         db.create_all()
 
@@ -436,7 +445,8 @@ def register_cli(app: Flask) -> None:
 
     @app.cli.command("reset-db")
     def reset_db() -> None:
-        # Wipes all data — use after a model/schema change during development
+        # ================= reset-db =================
+        # Wipes all data — used after a model/schema change during development.
 
         db.drop_all()
         db.create_all()
@@ -445,7 +455,8 @@ def register_cli(app: Flask) -> None:
 
     @app.cli.command("make-admin")
     def make_admin() -> None:
-        # Sets is_admin=True on an existing user (prompts for email in the terminal)
+        # ================= make-admin =================
+        # Sets is_admin=True on an existing user (prompts for email in the terminal).
 
         email = input("Enter the email to make admin: ").strip().lower()
         if not email:
