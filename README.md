@@ -127,3 +127,24 @@ heroku open
 ```
 
 ## Project structure
+
+```
+bookly/
+  app.py
+  config.py
+  models.py
+  db.py
+  auth.py
+  books.py
+  cart.py
+  orders.py
+  cli.py
+  schema.sql
+  seed_books.sql
+  templates/
+  static/
+  requirements.txt
+  Procfile
+  .env.example
+```
+
