@@ -7,3 +7,7 @@ Honest notes from reconstructing repository history against the final codebase.
 - Confirmed there was no `.gitignore` in the working tree initially; added ignores for `.env`, virtualenvs, and `__pycache__` so secrets and noise never enter commits.
 - Added `.env.example` so collaborators know `SECRET_KEY` and `DATABASE_URL` are required without copying real values.
 
+
+## Models and SQLAlchemy
+
+- Kept models ordered so relationships resolve cleanly (`User` → `Book` → `Review` → cart/order tables).
