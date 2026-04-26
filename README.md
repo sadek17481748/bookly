@@ -68,3 +68,32 @@ cd /Users/mohammedhussain/Desktop/bookly
 cp .env.example .env
 ```
 
+Edit `.env` and set:
+
+- `SECRET_KEY`
+- `DATABASE_URL`
+
+Example `DATABASE_URL`:
+
+`postgresql+psycopg2://booklet_user:change_me@localhost:5432/booklet_db`
+
+### 5) Create tables + seed books
+
+YOU NEED TO DO THIS STEP:
+
+```bash
+cd /Users/mohammedhussain/Desktop/bookly
+source .venv/bin/activate
+python -m flask --app app.py init-db
+```
+
+### 6) Run the app
+
+YOU NEED TO DO THIS STEP:
+
+```bash
+cd /Users/mohammedhussain/Desktop/bookly
+source .venv/bin/activate
+python -m flask --app app.py run --debug
+```
+
