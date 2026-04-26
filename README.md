@@ -129,7 +129,7 @@ heroku open
 ## Project structure
 
 ```
-bookly/
+bookly-final/
   app.py
   config.py
   models.py
@@ -152,3 +152,7 @@ bookly/
 ## Development notes
 
 See `docs/devlog.md` for integration notes captured while curating history.
+
+### Admin access
+
+After registering a user, promote them with `python -m flask --app app.py make-admin` to unlock `/admin/analytics`.
