@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout • booklet{% endblock %}
+
+{% block content %}
+  <h1>Checkout</h1>
+
+  {% if items|length == 0 %}
+    <p>Your cart is empty. <a href="{{ url_for('books.list_books') }}">Browse books</a>.</p>
+  {% else %}
+    <div class="grid two">
+      <section class="card">
+        <h2>Shipping info</h2>
+        <form method="post" action="{{ url_for('orders.checkout_submit') }}">
+          <div class="field">
+            <label for="full_name">Full name</label>
+            <input id="full_name" name="full_name" type="text" autocomplete="name" required />
+          </div>
+          <div class="field">
+            <label for="address">Address</label>
+            <textarea id="address" name="address" rows="3" autocomplete="street-address" required></textarea>
+          </div>
+          <button class="btn" type="submit" data-confirm="Place order?">Place order</button>
+        </form>
+        <p class="hint">
+          This demo app does not charge a real payment method.
+          It still creates an order record in PostgreSQL.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Order summary</h2>
+        <ul class="summary">
+          {% for item in items %}
+            <li>
+              <span>{{ item.book.title }} × {{ item.quantity }}</span>
+              <span>${{ "%.2f"|format((item.book.price_cents * item.quantity) / 100) }}</span>
+            </li>
+          {% endfor %}
+          <li class="total">
+            <span>Total</span>
+            <span>${{ "%.2f"|format(subtotal_cents / 100) }}</span>
+          </li>
+        </ul>
+      </section>
+    </div>
+  {% endif %}
+{% endblock %}
+
