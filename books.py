@@ -1,0 +1,31 @@
+from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_login import current_user, login_required
+
+from db import db
+from models import Book, Review
+
+
+books_bp = Blueprint("books", __name__, url_prefix="/books")
+
+
+@books_bp.get("")
+def list_books():
+    q = (request.args.get("q") or "").strip()
+    query = Book.query
+    if q:
+        like = f"%{q}%"
+        query = query.filter((Book.title.ilike(like)) | (Book.author.ilike(like)))
+
+    books = query.order_by(Book.created_at.desc()).all()
+    return render_template("books.html", books=books, q=q)
+
+
+@books_bp.get("/<int:book_id>")
+def book_detail(book_id: int):
+    book = Book.query.get_or_404(book_id)
+    reviews = (
+        Review.query.filter_by(book_id=book_id)
+        .order_by(Review.created_at.desc())
+        .all()
+    )
+    return render_template("book_detail.html", book=book, reviews=reviews)
