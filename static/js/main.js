@@ -9,3 +9,22 @@ function setupNavToggle() {
   });
 }
 
+function setupConfirmButtons() {
+  document.addEventListener("click", (e) => {
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
+
+    const confirmText = target.getAttribute("data-confirm");
+    if (!confirmText) return;
+
+    const ok = window.confirm(confirmText);
+    if (!ok) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
+}
+
+setupNavToggle();
+setupConfirmButtons();
+
