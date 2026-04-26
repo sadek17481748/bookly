@@ -40,3 +40,7 @@ Honest notes from reconstructing repository history against the final codebase.
 ## Remote
 
 - Intended GitHub origin: `https://github.com/sadek17481748/bookly.git` (add with `git remote add origin <url>` if not already present).
+
+## Admin analytics
+
+- Top books query joins `order_items` to `books`; `func.coalesce` keeps empty dashboards readable when no sales exist yet.
