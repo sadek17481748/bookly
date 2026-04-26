@@ -448,4 +448,27 @@ def register_cli(app: Flask) -> None:
         _seed_books_if_empty()
         print("Database reset and seeded.")
 
-    
+    @app.cli.command("make-admin")
+    def make_admin() -> None:
+        """
+        Promote a user to admin.
+
+        Usage:
+          python -m flask --app app.py make-admin
+        Then enter an email when prompted.
+        """
+
+        email = input("Enter the email to make admin: ").strip().lower()
+        if not email:
+            print("Email is required.")
+            return
+
+        user = User.query.filter_by(email=email).first()
+        if user is None:
+            print("No user found with that email.")
+            return
+
+        user.is_admin = True
+        db.session.commit()
+        print(f"User '{email}' is now an admin.")
+
