@@ -16,3 +16,8 @@ Honest notes from reconstructing repository history against the final codebase.
 
 - `flask init-db` uses SQLAlchemy metadata; `reset-db` exists because iterative schema tweaks during development are easier with a clean recreate plus seed.
 - Optional `seed_books.sql` mirrors the ORM seed list for manual DBA workflows.
+
+## Frontend shell
+
+- Base template uses a skip link, sticky header, and a small JS toggle for the mobile nav (`aria-expanded` updated on open/close).
+- Destructive actions use `data-confirm` with a delegated click handler.
