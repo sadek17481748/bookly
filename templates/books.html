@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Books • booklet{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1>Books</h1>
+
+    <form class="search" method="get" action="{{ url_for('books.list_books') }}">
+      <label class="sr-only" for="q">Search books</label>
+      <input id="q" name="q" type="search" placeholder="Search title or author..." value="{{ q }}" />
+      <button class="btn btn-small" type="submit">Search</button>
+    </form>
+  </div>
+
+  {% if books|length == 0 %}
+    <p>No books found.</p>
+  {% else %}
+    <div class="grid three">
+      {% for book in books %}
+        <article class="card book-card">
+          {% if book.cover_url %}
+            <img class="cover" src="{{ book.cover_url }}" alt="Cover of {{ book.title }}" loading="lazy" />
+          {% else %}
+            <div class="cover placeholder" aria-hidden="true"></div>
+          {% endif %}
+
+          <h2 class="book-title">
+            <a href="{{ url_for('books.book_detail', book_id=book.id) }}">{{ book.title }}</a>
+          </h2>
+          <div class="muted">by {{ book.author }}</div>
+          <div class="hint">{{ book.category }}</div>
+          <div class="price">${{ book.price_dollars() }}</div>
+
+          {% if current_user.is_authenticated %}
+            <form method="post" action="{{ url_for('cart.add_to_cart', book_id=book.id) }}">
+              <input type="hidden" name="quantity" value="1" />
+              <button class="btn btn-secondary btn-small" type="submit">Add to cart</button>
+            </form>
+          {% else %}
+            <div class="hint">Login to add to cart.</div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}
+
