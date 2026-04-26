@@ -39,3 +39,24 @@ def register_submit():
     login_user(user)
     flash("Welcome! Your account was created.", "success")
     return redirect(url_for("books.list_books"))
+
+
+@auth_bp.get("/login")
+def login_form():
+    return render_template("login.html")
+
+
+@auth_bp.post("/login")
+def login_submit():
+    email = (request.form.get("email") or "").strip().lower()
+    password = request.form.get("password") or ""
+
+    user = User.query.filter_by(email=email).first()
+    if user is None or not user.check_password(password):
+        flash("Invalid email or password.", "error")
+        return redirect(url_for("auth.login_form"))
+
+    login_user(user)
+    flash("You are now logged in.", "success")
+    next_url = request.args.get("next")
+    return redirect(next_url or url_for("books.list_books"))
