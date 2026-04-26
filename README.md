@@ -9,6 +9,7 @@
   - [Role of Flask](#role-of-flask)
   - [Database (PostgreSQL)](#database-postgresql)
   - [HTML, CSS, JavaScript](#html-css-javascript)
+- [Quick links (assessor)](#quick-links-assessor)
 - [Features](#features)
 - [User Experience (UX)](#user-experience-ux)
 - [Wireframes](#wireframes)
@@ -42,24 +43,14 @@ The site is intended to demonstrate a realistic “small business” workflow:
 - Logged-in users can add items to a **cart**, adjust quantities, remove lines, and **check out** so that an **order** and **order line items** are written to Postgres.
 - An **admin-only** analytics dashboard reads aggregate data from Postgres (counts, sums, joins) to show revenue, orders, top-selling titles, and category distribution.
 
-### Project 3 scope vs what this submission demonstrates
+## Quick links (assessor)
 
-For **Project 3**, the emphasis was typically on **PostgreSQL**—designing tables, relationships, and queries—often with a **lighter** presentation layer than a full production-style web stack.
-
-This project **goes beyond** that minimal presentation bar and is implemented as a **small full-stack, server-rendered application**:
-
-| Typical Project 3 focus | What bookly adds (and why) |
-|-------------------------|----------------------------|
-| SQL scripts, ER thinking, maybe a thin UI | **End-to-end paths**: browser → Flask routes → SQLAlchemy → **PostgreSQL** → HTML response. That makes the database work **visible and testable** as part of a real use case (browse → cart → checkout → orders). |
-| Less emphasis on auth, sessions, deployment | **Flask-Login** sessions, **environment-based configuration**, and a **Heroku-style** deployment story so Postgres is not “theory only” but runnable **locally and** on a hosted database. |
-
-**Why that is defensible for marking**
-
-1. **PostgreSQL remains the source of truth.** Users, books, reviews, cart rows, orders, and order items all live in Postgres. The ORM generates SQL; constraints (foreign keys, uniqueness on cart lines) match standard relational design taught on the course.
-2. **A thin static page** can show a `SELECT` result, but it does not demonstrate **transactions across steps** (cart updates, checkout clearing the cart while inserting orders) or **authorization** (only the review owner can delete). Those behaviours need **application logic** tied to the database.
-3. **Separation of concerns is still clear:** `schema.sql` documents the DDL; `models.py` mirrors it for SQLAlchemy; `books.py`, `cart.py`, `orders.py` show **which HTTP actions cause which writes** to Postgres.
-
-For assessment, **`schema.sql`**, the **`models.py` ↔ table mapping**, and **`docs/devlog.md`** (setup notes) document the relational design and local setup. The Flask routes and blueprints show **how** that PostgreSQL design is exercised in practice (browse, cart, checkout, admin reads).
+- **Repository (README / code)**: [`sadek17481748/bookly`](https://github.com/sadek17481748/bookly)
+- **Wireframes section (README anchor)**: [Wireframes](https://github.com/sadek17481748/bookly#wireframes)
+- **Live app (Heroku)**: [`bookly-final-98e88d5d388e.herokuapp.com`](https://bookly-final-98e88d5d388e.herokuapp.com/)
+- **Live app login page**: [Login](https://bookly-final-98e88d5d388e.herokuapp.com/login)
+- **GitHub Pages (documentation site)**: [`sadek17481748.github.io/bookly`](https://sadek17481748.github.io/bookly/)
+- **Closed issues (progress log)**: [GitHub Issues (closed)](https://github.com/sadek17481748/bookly/issues?q=is%3Aissue%20state%3Aclosed)
 
 ### Why PostgreSQL is the technical centre of this work
 
@@ -104,6 +95,25 @@ PostgreSQL stores:
 - **Orders** and **order items** (order header + line items with **unit price snapshot** in cents).
 
 SQLAlchemy maps Python classes in `models.py` to these tables. **`flask init-db`** calls `db.create_all()` so the live schema matches the models (`cli.py`). **`schema.sql`** is a human-readable duplicate of the layout for documentation and external review.
+
+### Project 3 scope vs what this submission demonstrates
+
+For **Project 3**, the emphasis was typically on **PostgreSQL**—designing tables, relationships, and queries—often with a **lighter** presentation layer than a full production-style web stack.
+
+This project **goes beyond** that minimal presentation bar and is implemented as a **small full-stack, server-rendered application**:
+
+| Typical Project 3 focus | What bookly adds (and why) |
+|-------------------------|----------------------------|
+| SQL scripts, ER thinking, maybe a thin UI | **End-to-end paths**: browser → Flask routes → SQLAlchemy → **PostgreSQL** → HTML response. That makes the database work **visible and testable** as part of a real use case (browse → cart → checkout → orders). |
+| Less emphasis on auth, sessions, deployment | **Flask-Login** sessions, **environment-based configuration**, and a **Heroku-style** deployment story so Postgres is not “theory only” but runnable **locally and** on a hosted database. |
+
+**Why that is defensible for marking**
+
+1. **PostgreSQL remains the source of truth.** Users, books, reviews, cart rows, orders, and order items all live in Postgres. The ORM generates SQL; constraints (foreign keys, uniqueness on cart lines) match standard relational design taught on the course.
+2. **A thin static page** can show a `SELECT` result, but it does not demonstrate **transactions across steps** (cart updates, checkout clearing the cart while inserting orders) or **authorization** (only the review owner can delete). Those behaviours need **application logic** tied to the database.
+3. **Separation of concerns is still clear:** `schema.sql` documents the DDL; `models.py` mirrors it for SQLAlchemy; `books.py`, `cart.py`, `orders.py` show **which HTTP actions cause which writes** to Postgres.
+
+For assessment, **`schema.sql`**, the **`models.py` ↔ table mapping**, and **`docs/devlog.md`** (setup notes) document the relational design and local setup. The Flask routes and blueprints show **how** that PostgreSQL design is exercised in practice (browse, cart, checkout, admin reads).
 
 ### HTML, CSS, JavaScript
 
@@ -483,6 +493,8 @@ To make marking simpler, I created a dedicated admin account for the analytics d
 
 After logging in, the admin analytics dashboard is available at **`/admin/analytics`**.
 
+**Note (live Heroku app):** The Heroku deployment uses its own Postgres database, so the account must be **registered on the live site** and then promoted to admin (set `users.is_admin = true`). This can be done using `heroku pg:psql` or by running the existing CLI command (`make-admin`) against the Heroku app.
+
 ### Automated tests (no Postgres required for pytest)
 
 ```bash
@@ -496,16 +508,54 @@ Tests use **SQLite in-memory** via `tests/conftest.py` so they run quickly; I st
 
 ## Deployment
 
-I deployed with a **Heroku-style** flow:
+I deployed bookly to Heroku and used Heroku Postgres for the production database.
 
-1. Create app; add **Heroku Postgres** (sets `DATABASE_URL`).
-2. Set **`SECRET_KEY`** on the app.
-3. Push the repo (for example `git push heroku main`, depending on the remote name).
-4. Run migrations / init:  
-   `heroku run python -m flask --app app.py init-db`
-5. Open the site URL.
+### Heroku deployment (step-by-step)
 
-`Procfile` runs `gunicorn app:app`. On Heroku I kept `DATABASE_URL` in the `postgresql+psycopg2://…` form that `config.py` expects.
+**Install and login (local machine):**
+
+```bash
+brew tap heroku/brew && brew install heroku
+heroku login
+```
+
+**Create/link the Heroku app:**
+
+```bash
+cd /path/to/bookly-final
+heroku create bookly-final
+heroku git:remote -a bookly-final
+```
+
+**Add a managed Postgres database (sets `DATABASE_URL`):**
+
+```bash
+heroku addons:create heroku-postgresql:essential-0 -a bookly-final
+```
+
+**Set required config vars:**
+
+```bash
+heroku config:set SECRET_KEY="a-long-random-string" -a bookly-final
+```
+
+**Deploy code and initialise the database (create tables + seed):**
+
+```bash
+git push heroku main
+heroku run -a bookly-final -- python3 -m flask --app app.py init-db
+heroku open -a bookly-final
+```
+
+**Production notes:**
+
+- `Procfile` runs the app with **Gunicorn** (`gunicorn app:app`).
+- Heroku provides `DATABASE_URL` in the `postgres://...` form; the app normalises this to `postgresql://...` for SQLAlchemy compatibility in `config.py`.
+- During deployment I used `heroku logs --tail -a bookly-final` to diagnose startup issues.
+
+**Live site URL (Heroku):**
+
+- `https://bookly-final-98e88d5d388e.herokuapp.com/`
 
 ### GitHub repository + Pages
 
