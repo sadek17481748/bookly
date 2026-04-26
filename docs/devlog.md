@@ -25,3 +25,18 @@ Honest notes from reconstructing repository history against the final codebase.
 ## Commerce flows
 
 - Checkout is intentionally simple: validates name/address, persists `Order` + `OrderItem`, then clears the cart (no payment processor integration).
+
+## Local run (summary)
+
+1. `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
+2. Create Postgres database/user; set `DATABASE_URL` and `SECRET_KEY` in `.env` (copy from `.env.example`).
+3. `python -m flask --app app.py init-db` then `python -m flask --app app.py run --debug`.
+4. Promote an admin with `python -m flask --app app.py make-admin` after registering a user.
+
+## Deploy (summary)
+
+- Heroku-style: set `SECRET_KEY`, provision Postgres (`DATABASE_URL` is injected), `git push heroku main`, then `heroku run python -m flask --app app.py init-db`.
+
+## Remote
+
+- Intended GitHub origin: `https://github.com/sadek17481748/bookly.git` (add with `git remote add origin <url>` if not already present).
