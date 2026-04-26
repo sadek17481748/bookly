@@ -97,3 +97,33 @@ source .venv/bin/activate
 python -m flask --app app.py run --debug
 ```
 
+Open `http://127.0.0.1:5000`.
+
+## Manual test checklist
+
+- Register a new user, log out, log back in
+- Browse books and open a book detail page
+- Add a review, then delete your own review
+- Try deleting someone else’s review (should be blocked)
+- Add items to cart, update quantities, remove items
+- Checkout and verify an order is created (Orders page)
+
+## Deployment (Heroku-compatible)
+
+- Uses `Procfile` for gunicorn
+- Uses `DATABASE_URL` environment variable for Postgres
+
+High-level steps (you do these yourself):
+
+YOU NEED TO DO THIS STEP:
+
+```bash
+heroku create
+heroku addons:create heroku-postgresql:mini
+heroku config:set SECRET_KEY="a-long-random-secret"
+git push heroku main
+heroku run python -m flask --app app.py init-db
+heroku open
+```
+
+## Project structure
