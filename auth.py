@@ -60,3 +60,12 @@ def login_submit():
     flash("You are now logged in.", "success")
     next_url = request.args.get("next")
     return redirect(next_url or url_for("books.list_books"))
+
+
+@auth_bp.post("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("Logged out.", "success")
+    return redirect(url_for("home"))
+
