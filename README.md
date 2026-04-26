@@ -474,6 +474,15 @@ python -m flask --app app.py make-admin
 
 The command prompts for an email; I used the account I wanted to promote so `is_admin` is set and `/admin/analytics` unlocks.
 
+### Assessor / invigilator login (analytics access)
+
+To make marking simpler, I created a dedicated admin account for the analytics dashboard:
+
+- **Email:** `analytics@testemail.com`
+- **Password:** `test123`
+
+After logging in, the admin analytics dashboard is available at **`/admin/analytics`**.
+
 ### Automated tests (no Postgres required for pytest)
 
 ```bash
@@ -497,6 +506,12 @@ I deployed with a **Heroku-style** flow:
 5. Open the site URL.
 
 `Procfile` runs `gunicorn app:app`. On Heroku I kept `DATABASE_URL` in the `postgresql+psycopg2://…` form that `config.py` expects.
+
+### GitHub repository + Pages
+
+- I created the GitHub repository and added the project documentation (`README.md`).
+- To publish the documentation on GitHub Pages, I opened **Settings → Pages**, selected **Deploy from a branch**, chose **`main`** as the source, and saved to generate the Pages site.
+- I also used GitHub **Issues** to log issues and user stories, and to track progress throughout development.
 
 ---
 
