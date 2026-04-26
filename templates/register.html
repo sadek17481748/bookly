@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Register • booklet{% endblock %}
+
+{% block content %}
+  <div class="narrow">
+    <h1>Create account</h1>
+
+    <form method="post" action="{{ url_for('auth.register_submit') }}">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required />
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" minlength="6" required />
+        <div class="hint">Use at least 6 characters.</div>
+      </div>
+
+      <div class="field">
+        <label for="password2">Confirm password</label>
+        <input id="password2" name="password2" type="password" autocomplete="new-password" minlength="6" required />
+      </div>
+
+      <button class="btn" type="submit">Register</button>
+    </form>
+
+    <p class="muted">
+      Already have an account?
+      <a href="{{ url_for('auth.login_form') }}">Login</a>
+    </p>
+  </div>
+{% endblock %}
+
