@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} • booklet{% endblock %}
+
+{% block content %}
+  <div class="book-detail">
+    <div class="book-media">
+      {% if book.cover_url %}
+        <img class="cover large" src="{{ book.cover_url }}" alt="Cover of {{ book.title }}" loading="lazy" />
+      {% else %}
+        <div class="cover large placeholder" aria-hidden="true"></div>
+      {% endif %}
+    </div>
+
+    <div class="book-info">
+      <h1>{{ book.title }}</h1>
+      <p class="muted">by {{ book.author }}</p>
+      <p class="hint">{{ book.category }}</p>
+      <p class="price big">${{ book.price_dollars() }}</p>
+
+      <p>{{ book.description }}</p>
+
+      {% if current_user.is_authenticated %}
+        <form class="row" method="post" action="{{ url_for('cart.add_to_cart', book_id=book.id) }}">
+          <div class="field inline-field">
+            <label for="quantity">Qty</label>
+            <input id="quantity" name="quantity" type="number" min="1" value="1" />
+          </div>
+          <button class="btn btn-secondary" type="submit">Add to cart</button>
+        </form>
+      {% else %}
+        <p class="hint">
+          <a href="{{ url_for('auth.login_form', next=request.path) }}">Login</a>
+          to add to cart and write reviews.
+        </p>
+      {% endif %}
+    </div>
+  </div>
