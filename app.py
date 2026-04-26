@@ -47,3 +47,27 @@ def create_app() -> Flask:
     app.register_blueprint(books_bp)
     app.register_blueprint(cart_bp)
     app.register_blueprint(orders_bp)
+
+    @app.get("/")
+    def home():
+        return render_template("home.html")
+
+    @app.get("/contact")
+    def contact():
+        return render_template("contact.html")
+
+    @app.errorhandler(403)
+    def forbidden(_err):
+        return render_template("403.html"), 403
+
+    register_cli(app)
+    return app
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", "5000"))
+    app.run(host="0.0.0.0", port=port, debug=True)
+
