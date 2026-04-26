@@ -435,4 +435,17 @@ def register_cli(app: Flask) -> None:
 
         print("Database initialized.")
 
+    @app.cli.command("reset-db")
+    def reset_db() -> None:
+        """
+        Drop all tables, recreate them, and seed books.
+
+        Use this when you change the schema during development (like adding 'category').
+        """
+
+        db.drop_all()
+        db.create_all()
+        _seed_books_if_empty()
+        print("Database reset and seeded.")
+
     
