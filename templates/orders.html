@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Orders • booklet{% endblock %}
+
+{% block content %}
+  <h1>Your orders</h1>
+
+  {% if orders|length == 0 %}
+    <p>You have no orders yet. <a href="{{ url_for('books.list_books') }}">Browse books</a>.</p>
+  {% else %}
+    <div class="stack">
+      {% for order in orders %}
+        <article class="card">
+          <div class="row between wrap">
+            <div>
+              <strong>Order #{{ order.id }}</strong>
+              <div class="muted">{{ order.created_at.strftime("%Y-%m-%d %H:%M") }}</div>
+            </div>
+            <div>
+              <strong>${{ "%.2f"|format(order.total_cents / 100) }}</strong>
+            </div>
+          </div>
+
+          <ul class="summary">
+            {% for item in order.items %}
+              <li>
+                <span>{{ item.book.title }} × {{ item.quantity }}</span>
+                <span>${{ "%.2f"|format((item.unit_price_cents * item.quantity) / 100) }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </article>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}
+
