@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Cart • booklet{% endblock %}
+{% block title %}Cart • bookly{% endblock %}
 
 {% block content %}
   <h1>Your cart</h1>
 
+  {# Empty cart vs list of line items + subtotal + checkout link #}
   {% if items|length == 0 %}
     <p>Your cart is empty. <a href="{{ url_for('books.list_books') }}">Browse books</a>.</p>
   {% else %}
@@ -17,6 +18,7 @@
             <div class="muted">${{ item.book.price_dollars() }} each</div>
           </div>
 
+          {# Per line: quantity POST + remove with JS confirm #}
           <div class="row wrap">
             <form class="row" method="post" action="{{ url_for('cart.update_quantity', item_id=item.id) }}">
               <label class="sr-only" for="qty-{{ item.id }}">Quantity</label>
@@ -42,4 +44,3 @@
     <a class="btn" href="{{ url_for('orders.checkout_form') }}">Checkout</a>
   {% endif %}
 {% endblock %}
-

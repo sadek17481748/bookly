@@ -1,20 +1,23 @@
+# Flask CLI commands: create/reset database, seed books, promote admin user.
+
 from flask import Flask
 
 from db import db
 from models import Book, User
 
+from book_covers import cover_static_url
+
 
 def register_cli(app: Flask) -> None:
-    def _seed_books_if_empty() -> None:
-        """
-        Add seed books if the books table is empty.
+    # Attaches `flask init-db`, `flask reset-db`, `flask make-admin` to this app
 
-        This keeps the app beginner-friendly: you get books immediately after `init-db`.
-        """
+    def _seed_books_if_empty() -> None:
+        # If the catalog is empty after create_all(), insert starter rows
 
         if Book.query.count() != 0:
             return
 
+        # --- Seed catalog (ORM objects; one Book() per title) ---
         seed_books = [
             Book(
                 title="1984",
@@ -22,7 +25,7 @@ def register_cli(app: Flask) -> None:
                 category="Dystopian Fiction",
                 price_cents=1499,
                 description="A chilling story about surveillance, control, and truth.",
-                cover_url=None,
+                cover_url=cover_static_url('1984'),
             ),
             Book(
                 title="To Kill a Mockingbird",
@@ -30,7 +33,7 @@ def register_cli(app: Flask) -> None:
                 category="Classic / Historical Fiction",
                 price_cents=1599,
                 description="A powerful classic about justice and compassion in the American South.",
-                cover_url=None,
+                cover_url=cover_static_url('To Kill a Mockingbird'),
             ),
             Book(
                 title="The Great Gatsby",
@@ -38,7 +41,7 @@ def register_cli(app: Flask) -> None:
                 category="Classic / Tragedy",
                 price_cents=1299,
                 description="A tragic tale of wealth, love, and the American Dream.",
-                cover_url=None,
+                cover_url=cover_static_url('The Great Gatsby'),
             ),
             Book(
                 title="Harry Potter and the Sorcerer’s Stone",
@@ -46,7 +49,7 @@ def register_cli(app: Flask) -> None:
                 category="Fantasy",
                 price_cents=1799,
                 description="A young wizard discovers a world of magic and friendship.",
-                cover_url=None,
+                cover_url=cover_static_url('Harry Potter and the Sorcerer’s Stone'),
             ),
             Book(
                 title="The Lord of the Rings",
@@ -54,7 +57,7 @@ def register_cli(app: Flask) -> None:
                 category="Fantasy",
                 price_cents=2499,
                 description="An epic journey to destroy a powerful ring and save Middle-earth.",
-                cover_url=None,
+                cover_url=cover_static_url('The Lord of the Rings'),
             ),
             Book(
                 title="The Hobbit",
@@ -62,7 +65,7 @@ def register_cli(app: Flask) -> None:
                 category="Fantasy",
                 price_cents=1599,
                 description="Bilbo Baggins sets out on an unexpected adventure.",
-                cover_url=None,
+                cover_url=cover_static_url('The Hobbit'),
             ),
             Book(
                 title="Pride and Prejudice",
@@ -70,7 +73,7 @@ def register_cli(app: Flask) -> None:
                 category="Romance / Classic",
                 price_cents=1299,
                 description="A witty romance about manners, misunderstanding, and love.",
-                cover_url=None,
+                cover_url=cover_static_url('Pride and Prejudice'),
             ),
             Book(
                 title="The Catcher in the Rye",
@@ -78,7 +81,7 @@ def register_cli(app: Flask) -> None:
                 category="Coming-of-age Fiction",
                 price_cents=1399,
                 description="A teenager’s candid narration of alienation and growing up.",
-                cover_url=None,
+                cover_url=cover_static_url('The Catcher in the Rye'),
             ),
             Book(
                 title="The Hunger Games",
@@ -86,7 +89,7 @@ def register_cli(app: Flask) -> None:
                 category="Dystopian / Sci-Fi",
                 price_cents=1699,
                 description="A deadly televised competition sparks rebellion.",
-                cover_url=None,
+                cover_url=cover_static_url('The Hunger Games'),
             ),
             Book(
                 title="Brave New World",
@@ -94,7 +97,7 @@ def register_cli(app: Flask) -> None:
                 category="Dystopian / Sci-Fi",
                 price_cents=1499,
                 description="A futuristic society built on control, pleasure, and conditioning.",
-                cover_url=None,
+                cover_url=cover_static_url('Brave New World'),
             ),
             Book(
                 title="The Diary of a Young Girl",
@@ -102,7 +105,7 @@ def register_cli(app: Flask) -> None:
                 category="Biography / Memoir",
                 price_cents=1499,
                 description="Anne Frank’s moving diary written during World War II.",
-                cover_url=None,
+                cover_url=cover_static_url('The Diary of a Young Girl'),
             ),
             Book(
                 title="Long Walk to Freedom",
@@ -110,7 +113,7 @@ def register_cli(app: Flask) -> None:
                 category="Autobiography",
                 price_cents=1999,
                 description="Mandela’s autobiography about resilience and justice.",
-                cover_url=None,
+                cover_url=cover_static_url('Long Walk to Freedom'),
             ),
             Book(
                 title="Steve Jobs",
@@ -118,7 +121,7 @@ def register_cli(app: Flask) -> None:
                 category="Biography",
                 price_cents=1999,
                 description="A biography of Apple co-founder Steve Jobs.",
-                cover_url=None,
+                cover_url=cover_static_url('Steve Jobs'),
             ),
             Book(
                 title="Becoming",
@@ -126,7 +129,7 @@ def register_cli(app: Flask) -> None:
                 category="Memoir",
                 price_cents=1899,
                 description="Michelle Obama’s personal story and journey.",
-                cover_url=None,
+                cover_url=cover_static_url('Becoming'),
             ),
             Book(
                 title="The Wright Brothers",
@@ -134,7 +137,7 @@ def register_cli(app: Flask) -> None:
                 category="Biography",
                 price_cents=1799,
                 description="The inspiring story of the brothers who invented flight.",
-                cover_url=None,
+                cover_url=cover_static_url('The Wright Brothers'),
             ),
             Book(
                 title="Educated",
@@ -142,7 +145,7 @@ def register_cli(app: Flask) -> None:
                 category="Memoir",
                 price_cents=1799,
                 description="A memoir about family, education, and transformation.",
-                cover_url=None,
+                cover_url=cover_static_url('Educated'),
             ),
             Book(
                 title="I Am Malala",
@@ -150,7 +153,7 @@ def register_cli(app: Flask) -> None:
                 category="Biography / Memoir",
                 price_cents=1699,
                 description="The story of Malala and the fight for education.",
-                cover_url=None,
+                cover_url=cover_static_url('I Am Malala'),
             ),
             Book(
                 title="The Glass Castle",
@@ -158,7 +161,7 @@ def register_cli(app: Flask) -> None:
                 category="Memoir",
                 price_cents=1599,
                 description="A memoir of a childhood shaped by poverty and resilience.",
-                cover_url=None,
+                cover_url=cover_static_url('The Glass Castle'),
             ),
             Book(
                 title="Born a Crime",
@@ -166,7 +169,7 @@ def register_cli(app: Flask) -> None:
                 category="Memoir / Humor",
                 price_cents=1699,
                 description="A funny and moving memoir about growing up in South Africa.",
-                cover_url=None,
+                cover_url=cover_static_url('Born a Crime'),
             ),
             Book(
                 title="When Breath Becomes Air",
@@ -174,7 +177,7 @@ def register_cli(app: Flask) -> None:
                 category="Memoir",
                 price_cents=1599,
                 description="A reflection on life, death, and meaning by a neurosurgeon.",
-                cover_url=None,
+                cover_url=cover_static_url('When Breath Becomes Air'),
             ),
             Book(
                 title="Dune",
@@ -182,7 +185,7 @@ def register_cli(app: Flask) -> None:
                 category="Science Fiction",
                 price_cents=1899,
                 description="A sci-fi epic of politics, prophecy, and survival on Arrakis.",
-                cover_url=None,
+                cover_url=cover_static_url('Dune'),
             ),
             Book(
                 title="Foundation",
@@ -190,7 +193,7 @@ def register_cli(app: Flask) -> None:
                 category="Science Fiction",
                 price_cents=1699,
                 description="A classic saga about preserving knowledge in a collapsing empire.",
-                cover_url=None,
+                cover_url=cover_static_url('Foundation'),
             ),
             Book(
                 title="Ender’s Game",
@@ -198,7 +201,7 @@ def register_cli(app: Flask) -> None:
                 category="Science Fiction",
                 price_cents=1699,
                 description="A gifted child is trained to defend humanity in space war.",
-                cover_url=None,
+                cover_url=cover_static_url('Ender’s Game'),
             ),
             Book(
                 title="The Martian",
@@ -206,7 +209,7 @@ def register_cli(app: Flask) -> None:
                 category="Science Fiction",
                 price_cents=1799,
                 description="An astronaut uses science and humor to survive on Mars.",
-                cover_url=None,
+                cover_url=cover_static_url('The Martian'),
             ),
             Book(
                 title="Neuromancer",
@@ -214,7 +217,7 @@ def register_cli(app: Flask) -> None:
                 category="Cyberpunk / Sci-Fi",
                 price_cents=1599,
                 description="A cyberpunk classic that helped define the genre.",
-                cover_url=None,
+                cover_url=cover_static_url('Neuromancer'),
             ),
             Book(
                 title="Snow Crash",
@@ -222,7 +225,7 @@ def register_cli(app: Flask) -> None:
                 category="Cyberpunk / Sci-Fi",
                 price_cents=1699,
                 description="A fast-paced cyberpunk adventure in a hyper-connected world.",
-                cover_url=None,
+                cover_url=cover_static_url('Snow Crash'),
             ),
             Book(
                 title="Ready Player One",
@@ -230,7 +233,7 @@ def register_cli(app: Flask) -> None:
                 category="Sci-Fi / Adventure",
                 price_cents=1599,
                 description="A virtual reality treasure hunt packed with pop culture.",
-                cover_url=None,
+                cover_url=cover_static_url('Ready Player One'),
             ),
             Book(
                 title="The Time Machine",
@@ -238,7 +241,7 @@ def register_cli(app: Flask) -> None:
                 category="Sci-Fi / Classic",
                 price_cents=1199,
                 description="A classic story of time travel and the future of humanity.",
-                cover_url=None,
+                cover_url=cover_static_url('The Time Machine'),
             ),
             Book(
                 title="Frankenstein",
@@ -246,7 +249,7 @@ def register_cli(app: Flask) -> None:
                 category="Sci-Fi / Gothic",
                 price_cents=1199,
                 description="A foundational gothic tale about creation and responsibility.",
-                cover_url=None,
+                cover_url=cover_static_url('Frankenstein'),
             ),
             Book(
                 title="Jurassic Park",
@@ -254,7 +257,7 @@ def register_cli(app: Flask) -> None:
                 category="Sci-Fi / Thriller",
                 price_cents=1699,
                 description="A techno-thriller where resurrected dinosaurs go wrong.",
-                cover_url=None,
+                cover_url=cover_static_url('Jurassic Park'),
             ),
             Book(
                 title="The Da Vinci Code",
@@ -262,7 +265,7 @@ def register_cli(app: Flask) -> None:
                 category="Mystery / Thriller",
                 price_cents=1599,
                 description="A fast-paced mystery involving secrets, symbols, and history.",
-                cover_url=None,
+                cover_url=cover_static_url('The Da Vinci Code'),
             ),
             Book(
                 title="Gone Girl",
@@ -270,7 +273,7 @@ def register_cli(app: Flask) -> None:
                 category="Thriller / Mystery",
                 price_cents=1599,
                 description="A twisty thriller about a marriage and a disappearance.",
-                cover_url=None,
+                cover_url=cover_static_url('Gone Girl'),
             ),
             Book(
                 title="Sherlock Holmes: A Study in Scarlet",
@@ -278,7 +281,7 @@ def register_cli(app: Flask) -> None:
                 category="Mystery / Detective",
                 price_cents=1099,
                 description="The first Sherlock Holmes mystery and introduction to Watson.",
-                cover_url=None,
+                cover_url=cover_static_url('Sherlock Holmes: A Study in Scarlet'),
             ),
             Book(
                 title="The Girl with the Dragon Tattoo",
@@ -286,7 +289,7 @@ def register_cli(app: Flask) -> None:
                 category="Crime / Thriller",
                 price_cents=1699,
                 description="A dark mystery involving a missing person and hidden crimes.",
-                cover_url=None,
+                cover_url=cover_static_url('The Girl with the Dragon Tattoo'),
             ),
             Book(
                 title="Big Little Lies",
@@ -294,7 +297,7 @@ def register_cli(app: Flask) -> None:
                 category="Mystery / Drama",
                 price_cents=1599,
                 description="Secrets and drama build to a shocking event.",
-                cover_url=None,
+                cover_url=cover_static_url('Big Little Lies'),
             ),
             Book(
                 title="In the Woods",
@@ -302,7 +305,7 @@ def register_cli(app: Flask) -> None:
                 category="Crime / Mystery",
                 price_cents=1599,
                 description="A detective novel with psychological depth and suspense.",
-                cover_url=None,
+                cover_url=cover_static_url('In the Woods'),
             ),
             Book(
                 title="The Silent Patient",
@@ -310,7 +313,7 @@ def register_cli(app: Flask) -> None:
                 category="Psychological Thriller",
                 price_cents=1699,
                 description="A therapist tries to uncover why a patient stopped speaking.",
-                cover_url=None,
+                cover_url=cover_static_url('The Silent Patient'),
             ),
             Book(
                 title="And Then There Were None",
@@ -318,7 +321,7 @@ def register_cli(app: Flask) -> None:
                 category="Mystery",
                 price_cents=1299,
                 description="A classic mystery where guests are eliminated one by one.",
-                cover_url=None,
+                cover_url=cover_static_url('And Then There Were None'),
             ),
             Book(
                 title="The Woman in the Window",
@@ -326,7 +329,7 @@ def register_cli(app: Flask) -> None:
                 category="Thriller",
                 price_cents=1599,
                 description="A psychological thriller about what was (or wasn’t) seen.",
-                cover_url=None,
+                cover_url=cover_static_url('The Woman in the Window'),
             ),
             Book(
                 title="The Reversal",
@@ -334,7 +337,7 @@ def register_cli(app: Flask) -> None:
                 category="Legal Thriller",
                 price_cents=1499,
                 description="A legal thriller involving a high-profile reversal case.",
-                cover_url=None,
+                cover_url=cover_static_url('The Reversal'),
             ),
             Book(
                 title="The Alchemist",
@@ -342,7 +345,7 @@ def register_cli(app: Flask) -> None:
                 category="Philosophical Fiction",
                 price_cents=1399,
                 description="A story about purpose, destiny, and following your dream.",
-                cover_url=None,
+                cover_url=cover_static_url('The Alchemist'),
             ),
             Book(
                 title="Life of Pi",
@@ -350,7 +353,7 @@ def register_cli(app: Flask) -> None:
                 category="Adventure / Philosophical Fiction",
                 price_cents=1499,
                 description="A survival story with philosophical and spiritual themes.",
-                cover_url=None,
+                cover_url=cover_static_url('Life of Pi'),
             ),
             Book(
                 title="The Kite Runner",
@@ -358,7 +361,7 @@ def register_cli(app: Flask) -> None:
                 category="Historical Fiction / Drama",
                 price_cents=1599,
                 description="A powerful novel about friendship, guilt, and redemption.",
-                cover_url=None,
+                cover_url=cover_static_url('The Kite Runner'),
             ),
             Book(
                 title="A Thousand Splendid Suns",
@@ -366,7 +369,7 @@ def register_cli(app: Flask) -> None:
                 category="Historical Fiction",
                 price_cents=1599,
                 description="A moving story of love and resilience across generations.",
-                cover_url=None,
+                cover_url=cover_static_url('A Thousand Splendid Suns'),
             ),
             Book(
                 title="The Book Thief",
@@ -374,7 +377,7 @@ def register_cli(app: Flask) -> None:
                 category="Historical Fiction",
                 price_cents=1499,
                 description="A WWII story narrated by Death, centered on books and hope.",
-                cover_url=None,
+                cover_url=cover_static_url('The Book Thief'),
             ),
             Book(
                 title="The Road",
@@ -382,7 +385,7 @@ def register_cli(app: Flask) -> None:
                 category="Post-Apocalyptic Fiction",
                 price_cents=1499,
                 description="A stark journey of survival between father and son.",
-                cover_url=None,
+                cover_url=cover_static_url('The Road'),
             ),
             Book(
                 title="The Fault in Our Stars",
@@ -390,7 +393,7 @@ def register_cli(app: Flask) -> None:
                 category="Romance / Drama",
                 price_cents=1499,
                 description="A heartfelt romance about two teens facing illness.",
-                cover_url=None,
+                cover_url=cover_static_url('The Fault in Our Stars'),
             ),
             Book(
                 title="Me Before You",
@@ -398,7 +401,7 @@ def register_cli(app: Flask) -> None:
                 category="Romance / Drama",
                 price_cents=1499,
                 description="A romance that explores love, choice, and change.",
-                cover_url=None,
+                cover_url=cover_static_url('Me Before You'),
             ),
             Book(
                 title="The Help",
@@ -406,7 +409,7 @@ def register_cli(app: Flask) -> None:
                 category="Historical Fiction",
                 price_cents=1599,
                 description="A story of courage and friendship in 1960s Mississippi.",
-                cover_url=None,
+                cover_url=cover_static_url('The Help'),
             ),
             Book(
                 title="Where the Crawdads Sing",
@@ -414,7 +417,7 @@ def register_cli(app: Flask) -> None:
                 category="Mystery / Drama",
                 price_cents=1699,
                 description="A mystery and coming-of-age story set in the marshes.",
-                cover_url=None,
+                cover_url=cover_static_url('Where the Crawdads Sing'),
             ),
         ]
 
@@ -423,11 +426,7 @@ def register_cli(app: Flask) -> None:
 
     @app.cli.command("init-db")
     def init_db() -> None:
-        """
-        Create all tables and seed books (if books table is empty).
-
-        This uses SQLAlchemy's metadata to create tables. It's simple and beginner friendly.
-        """
+        # Create tables from models.py, then seed if books table has no rows
 
         db.create_all()
 
@@ -437,11 +436,7 @@ def register_cli(app: Flask) -> None:
 
     @app.cli.command("reset-db")
     def reset_db() -> None:
-        """
-        Drop all tables, recreate them, and seed books.
-
-        Use this when you change the schema during development (like adding 'category').
-        """
+        # Wipes all data — use after a model/schema change during development
 
         db.drop_all()
         db.create_all()
@@ -450,13 +445,7 @@ def register_cli(app: Flask) -> None:
 
     @app.cli.command("make-admin")
     def make_admin() -> None:
-        """
-        Promote a user to admin.
-
-        Usage:
-          python -m flask --app app.py make-admin
-        Then enter an email when prompted.
-        """
+        # Sets is_admin=True on an existing user (prompts for email in the terminal)
 
         email = input("Enter the email to make admin: ").strip().lower()
         if not email:

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Checkout • booklet{% endblock %}
+{% block title %}Checkout • bookly{% endblock %}
 
 {% block content %}
   <h1>Checkout</h1>
@@ -9,6 +9,7 @@
     <p>Your cart is empty. <a href="{{ url_for('books.list_books') }}">Browse books</a>.</p>
   {% else %}
     <div class="grid two">
+      {# Left: shipping fields POST to orders.checkout_submit #}
       <section class="card">
         <h2>Shipping info</h2>
         <form method="post" action="{{ url_for('orders.checkout_submit') }}">
@@ -23,11 +24,11 @@
           <button class="btn" type="submit" data-confirm="Place order?">Place order</button>
         </form>
         <p class="hint">
-          This demo app does not charge a real payment method.
-          It still creates an order record in PostgreSQL.
+          No card payment is processed here. The order is stored in the database only.
         </p>
       </section>
 
+      {# Right: read-only summary from current cart #}
       <section class="card">
         <h2>Order summary</h2>
         <ul class="summary">
@@ -46,4 +47,3 @@
     </div>
   {% endif %}
 {% endblock %}
-

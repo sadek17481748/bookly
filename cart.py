@@ -1,3 +1,5 @@
+# Shopping cart: list lines, add book, change quantity, remove line (per logged-in user).
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
@@ -9,12 +11,14 @@ cart_bp = Blueprint("cart", __name__, url_prefix="/cart")
 
 
 def _cart_totals(items):
+    # Sum line totals in cents (expects each item.book loaded)
     subtotal_cents = 0
     for item in items:
         subtotal_cents += item.book.price_cents * item.quantity
     return subtotal_cents
 
 
+# --- Cart page ---
 @cart_bp.get("")
 @login_required
 def view_cart():
@@ -27,6 +31,7 @@ def view_cart():
     return render_template("cart.html", items=items, subtotal_cents=subtotal_cents)
 
 
+# --- Add (merges quantity if same book already in cart — unique user+book in DB) ---
 @cart_bp.post("/add/<int:book_id>")
 @login_required
 def add_to_cart(book_id: int):
@@ -53,6 +58,7 @@ def add_to_cart(book_id: int):
     return redirect(url_for("cart.view_cart"))
 
 
+# --- Quantity update (0 or below removes the row) ---
 @cart_bp.post("/update/<int:item_id>")
 @login_required
 def update_quantity(item_id: int):
@@ -74,6 +80,7 @@ def update_quantity(item_id: int):
     return redirect(url_for("cart.view_cart"))
 
 
+# --- Remove one line ---
 @cart_bp.post("/remove/<int:item_id>")
 @login_required
 def remove_item(item_id: int):
@@ -82,4 +89,3 @@ def remove_item(item_id: int):
     db.session.commit()
     flash("Removed from cart.", "success")
     return redirect(url_for("cart.view_cart"))
-

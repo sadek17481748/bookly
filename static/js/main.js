@@ -1,3 +1,10 @@
+// ---------------------------------------------------------------------------
+// Small scripts for base.html (loaded with defer)
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Mobile nav: toggles .open on #navLinks and updates aria-expanded
+// ---------------------------------------------------------------------------
 function setupNavToggle() {
   const toggle = document.querySelector(".nav-toggle");
   const links = document.getElementById("navLinks");
@@ -9,6 +16,9 @@ function setupNavToggle() {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Buttons/links with data-confirm: browser confirm() before default action
+// ---------------------------------------------------------------------------
 function setupConfirmButtons() {
   document.addEventListener("click", (e) => {
     const target = e.target;
@@ -27,4 +37,3 @@ function setupConfirmButtons() {
 
 setupNavToggle();
 setupConfirmButtons();
-

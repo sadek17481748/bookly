@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}{{ book.title }} • booklet{% endblock %}
+{% block title %}{{ book.title }} • bookly{% endblock %}
 
 {% block content %}
+  {# Top: cover + metadata + add-to-cart #}
   <div class="book-detail">
     <div class="book-media">
       {% if book.cover_url %}
@@ -37,6 +38,7 @@
     </div>
   </div>
 
+  {# Reviews: compose form (if logged in) + list with edit/delete for owner #}
   <section class="section">
     <h2>Reviews</h2>
 
@@ -110,4 +112,3 @@
     {% endif %}
   </section>
 {% endblock %}
-

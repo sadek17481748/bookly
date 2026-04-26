@@ -1,3 +1,5 @@
+# Authentication routes: register, login, logout (Flask blueprint + Flask-Login).
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, login_user, logout_user
 
@@ -8,6 +10,7 @@ from models import User
 auth_bp = Blueprint("auth", __name__)
 
 
+# --- Registration ---
 @auth_bp.get("/register")
 def register_form():
     return render_template("register.html")
@@ -41,6 +44,7 @@ def register_submit():
     return redirect(url_for("books.list_books"))
 
 
+# --- Login / logout ---
 @auth_bp.get("/login")
 def login_form():
     return render_template("login.html")
@@ -58,7 +62,7 @@ def login_submit():
 
     login_user(user)
     flash("You are now logged in.", "success")
-    next_url = request.args.get("next")
+    next_url = request.args.get("next")  # optional return URL after login
     return redirect(next_url or url_for("books.list_books"))
 
 
@@ -68,4 +72,3 @@ def logout():
     logout_user()
     flash("Logged out.", "success")
     return redirect(url_for("home"))
-

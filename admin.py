@@ -1,3 +1,5 @@
+# Admin-only dashboard: counts and charts from SQL aggregates (requires is_admin on User).
+
 from functools import wraps
 
 from flask import Blueprint, abort, render_template
@@ -12,11 +14,7 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 
 def admin_required(view_func):
-    """
-    Simple access control: user must be logged in AND is_admin.
-
-    This keeps the dashboard private (normal users cannot access it).
-    """
+    # Wraps a view so only logged-in users with is_admin=True can open it
 
     @wraps(view_func)
     @login_required
@@ -28,6 +26,7 @@ def admin_required(view_func):
     return wrapper
 
 
+# --- KPIs, top sellers, recent orders, books per category ---
 @admin_bp.get("/analytics")
 @admin_required
 def analytics_dashboard():
@@ -45,7 +44,6 @@ def analytics_dashboard():
         .all()
     )
 
-    # Top-selling books by quantity
     top_books = (
         db.session.query(
             Book.id,
@@ -64,7 +62,6 @@ def analytics_dashboard():
         .all()
     )
 
-    # Basic inventory view: count of books by category
     books_by_category = (
         db.session.query(Book.category, func.count(Book.id).label("count"))
         .group_by(Book.category)
@@ -83,4 +80,3 @@ def analytics_dashboard():
         top_books=top_books,
         books_by_category=books_by_category,
     )
-

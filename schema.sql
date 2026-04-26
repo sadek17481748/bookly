@@ -1,7 +1,9 @@
--- PostgreSQL schema for booklet
--- You can run this manually, but the app's CLI command `flask init-db`
--- will create the same tables automatically using SQLAlchemy.
+-- bookly — PostgreSQL DDL (reference copy).
+-- The app normally creates tables via SQLAlchemy (`flask init-db`); this file documents the layout.
 
+-- ---------------------------------------------------------------------------
+-- Users (login, admin flag, password hash)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -10,6 +12,9 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- ---------------------------------------------------------------------------
+-- Book catalog
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS books (
   id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
@@ -21,6 +26,9 @@ CREATE TABLE IF NOT EXISTS books (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- ---------------------------------------------------------------------------
+-- Reviews (links user + book)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS reviews (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -30,6 +38,9 @@ CREATE TABLE IF NOT EXISTS reviews (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- ---------------------------------------------------------------------------
+-- Shopping cart lines (one row per user + book)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS cart_items (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -39,6 +50,9 @@ CREATE TABLE IF NOT EXISTS cart_items (
   CONSTRAINT uq_cart_user_book UNIQUE (user_id, book_id)
 );
 
+-- ---------------------------------------------------------------------------
+-- Orders (checkout header)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS orders (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
@@ -46,6 +60,9 @@ CREATE TABLE IF NOT EXISTS orders (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+-- ---------------------------------------------------------------------------
+-- Order line items (price snapshot per line)
+-- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS order_items (
   id SERIAL PRIMARY KEY,
   order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
@@ -54,6 +71,9 @@ CREATE TABLE IF NOT EXISTS order_items (
   unit_price_cents INTEGER NOT NULL
 );
 
+-- ---------------------------------------------------------------------------
+-- Indexes used by common lookups
+-- ---------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_reviews_book_id ON reviews(book_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_user_id ON reviews(user_id);
 CREATE INDEX IF NOT EXISTS idx_cart_user_id ON cart_items(user_id);

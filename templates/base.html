@@ -1,18 +1,22 @@
+{# base.html — site chrome: head, skip link, header nav, flashes, page body, footer #}
 <!doctype html>
 <html lang="en">
   <head>
+    {# Charset, viewport, title block, global CSS/JS #}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}booklet{% endblock %}</title>
+    <title>{% block title %}bookly{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
     <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
   </head>
   <body>
+    {# Keyboard / screen-reader shortcut to main content #}
     <a class="skip-link" href="#main">Skip to content</a>
 
+    {# Sticky top bar: logo, links, mobile menu button #}
     <header class="site-header">
       <nav class="nav">
-        <a class="brand" href="{{ url_for('home') }}">booklet</a>
+        <a class="brand" href="{{ url_for('home') }}">bookly</a>
 
         <div class="nav-links" id="navLinks">
           <a href="{{ url_for('home') }}">Home</a>
@@ -40,6 +44,7 @@
       </nav>
     </header>
 
+    {# Main column: server flash messages then child template content #}
     <main id="main" class="container">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -54,11 +59,12 @@
       {% block content %}{% endblock %}
     </main>
 
+    {# Site footer: blurb, links, social icons #}
     <footer class="site-footer">
       <div class="container">
         <div class="footer-grid">
           <div class="footer-brand">
-            <div class="footer-title">booklet</div>
+            <div class="footer-title">bookly</div>
             <div class="footer-sub">Browse, review, and purchase books.</div>
           </div>
 
@@ -89,4 +95,3 @@
     </footer>
   </body>
 </html>
-

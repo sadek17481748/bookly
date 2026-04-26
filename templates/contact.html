@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Contact • booklet{% endblock %}
+{% block title %}Contact • bookly{% endblock %}
 
 {% block content %}
   <div class="narrow">
     <h1>Contact us</h1>
     <p class="muted">
-      This is a school-project contact page. The links below are examples.
+      Placeholder contact details — replace with your own email and phone for production.
     </p>
 
+    {# Static list; no form POST on this page #}
     <section class="card">
       <h2>Get in touch</h2>
       <ul class="contact-list">
-        <li><strong>Email:</strong> <a href="mailto:contact@booklet.example">contact@booklet.example</a></li>
+        <li><strong>Email:</strong> <a href="mailto:contact@bookly.example">contact@bookly.example</a></li>
         <li><strong>Phone:</strong> <a href="tel:+10000000000">+1 (000) 000-0000</a></li>
       </ul>
       <p class="hint">
-        You can replace these with your own details if your teacher requires it.
+        Update this section in <code>templates/contact.html</code> when you go live.
       </p>
     </section>
   </div>
 {% endblock %}
-

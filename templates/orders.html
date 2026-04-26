@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Orders • booklet{% endblock %}
+{% block title %}Orders • bookly{% endblock %}
 
 {% block content %}
   <h1>Your orders</h1>
 
+  {# Each order: id, date, total, then nested line items #}
   {% if orders|length == 0 %}
     <p>You have no orders yet. <a href="{{ url_for('books.list_books') }}">Browse books</a>.</p>
   {% else %}
@@ -34,4 +35,3 @@
     </div>
   {% endif %}
 {% endblock %}
-

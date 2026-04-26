@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Analytics • Admin • booklet{% endblock %}
+{% block title %}Analytics • Admin • bookly{% endblock %}
 
 {% block content %}
   <div class="page-head">
@@ -8,6 +8,7 @@
     <div class="muted">Admin only</div>
   </div>
 
+  {# Row 1: revenue / orders / average order size #}
   <section class="grid three">
     <div class="card">
       <div class="stat-label">Total revenue</div>
@@ -26,6 +27,7 @@
     </div>
   </section>
 
+  {# Row 2: users, reviews, category breakdown #}
   <section class="grid three">
     <div class="card">
       <div class="stat-label">Total users</div>
@@ -45,6 +47,7 @@
     </div>
   </section>
 
+  {# Row 3: top sellers table + recent order list #}
   <section class="grid two">
     <div class="card">
       <h2>Top-selling books</h2>
@@ -93,8 +96,7 @@
           {% endfor %}
         </ul>
       {% endif %}
-      <p class="hint">Tip: place a few orders to see analytics update.</p>
+      <p class="hint">Numbers update when customers complete checkout.</p>
     </div>
   </section>
 {% endblock %}
-

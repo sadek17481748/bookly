@@ -1,3 +1,5 @@
+# Database models — table names match schema.sql. Money fields are integer cents.
+
 from datetime import datetime
 
 from flask_login import UserMixin
@@ -6,6 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from db import db
 
 
+# --- Users (login + cart + orders) ---
 class User(db.Model, UserMixin):
     __tablename__ = "users"
 
@@ -28,6 +31,7 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 
+# --- Catalog ---
 class Book(db.Model):
     __tablename__ = "books"
 
@@ -46,13 +50,14 @@ class Book(db.Model):
         return f"{self.price_cents / 100:.2f}"
 
 
+# --- Reviews (per user per book) ---
 class Review(db.Model):
     __tablename__ = "reviews"
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False, index=True)
     book_id = db.Column(db.Integer, db.ForeignKey("books.id"), nullable=False, index=True)
-    rating = db.Column(db.Integer, nullable=False)  # 1-5
+    rating = db.Column(db.Integer, nullable=False)  # 1–5
     body = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
@@ -60,6 +65,7 @@ class Review(db.Model):
     book = db.relationship("Book", back_populates="reviews")
 
 
+# --- Shopping cart (one row per user+book; quantity on the row) ---
 class CartItem(db.Model):
     __tablename__ = "cart_items"
 
@@ -75,6 +81,7 @@ class CartItem(db.Model):
     __table_args__ = (db.UniqueConstraint("user_id", "book_id", name="uq_cart_user_book"),)
 
 
+# --- Orders (header row + line items with price snapshot) ---
 class Order(db.Model):
     __tablename__ = "orders"
 
@@ -94,8 +101,7 @@ class OrderItem(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey("orders.id"), nullable=False, index=True)
     book_id = db.Column(db.Integer, db.ForeignKey("books.id"), nullable=False, index=True)
     quantity = db.Column(db.Integer, nullable=False)
-    unit_price_cents = db.Column(db.Integer, nullable=False)
+    unit_price_cents = db.Column(db.Integer, nullable=False)  # copy of book price at checkout time
 
     order = db.relationship("Order", back_populates="items")
     book = db.relationship("Book")
-

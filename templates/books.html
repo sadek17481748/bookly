@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Books • booklet{% endblock %}
+{% block title %}Books • bookly{% endblock %}
 
 {% block content %}
+  {# Page title + GET search form (same URL as list) #}
   <div class="page-head">
     <h1>Books</h1>
 
@@ -13,12 +14,14 @@
     </form>
   </div>
 
+  {# Empty state vs responsive card grid #}
   {% if books|length == 0 %}
     <p>No books found.</p>
   {% else %}
     <div class="grid three">
       {% for book in books %}
         <article class="card book-card">
+          {# Cover image or placeholder #}
           {% if book.cover_url %}
             <img class="cover" src="{{ book.cover_url }}" alt="Cover of {{ book.title }}" loading="lazy" />
           {% else %}
@@ -32,6 +35,7 @@
           <div class="hint">{{ book.category }}</div>
           <div class="price">${{ book.price_dollars() }}</div>
 
+          {# Logged-in users can add to cart from the grid #}
           {% if current_user.is_authenticated %}
             <form method="post" action="{{ url_for('cart.add_to_cart', book_id=book.id) }}">
               <input type="hidden" name="quantity" value="1" />
@@ -45,4 +49,3 @@
     </div>
   {% endif %}
 {% endblock %}
-

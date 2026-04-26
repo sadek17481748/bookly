@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Edit review • {{ book.title }} • booklet{% endblock %}
+{% block title %}Edit review • {{ book.title }} • bookly{% endblock %}
 
 {% block content %}
   <div class="narrow">
@@ -10,6 +10,7 @@
       <a href="{{ url_for('books.book_detail', book_id=book.id) }}">{{ book.title }}</a>
     </p>
 
+    {# POST updates this review id (owner check is server-side) #}
     <form class="card" method="post" action="{{ url_for('books.edit_review_submit', book_id=book.id, review_id=review.id) }}">
       <div class="field">
         <label for="rating">Rating (1–5)</label>
@@ -34,4 +35,3 @@
     </form>
   </div>
 {% endblock %}
-

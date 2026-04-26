@@ -1,3 +1,5 @@
+# Book catalog and reviews: list, detail, create/edit/delete (own reviews only).
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
@@ -8,6 +10,7 @@ from models import Book, Review
 books_bp = Blueprint("books", __name__, url_prefix="/books")
 
 
+# --- List & search (optional ?q= on title/author) ---
 @books_bp.get("")
 def list_books():
     q = (request.args.get("q") or "").strip()
@@ -20,6 +23,7 @@ def list_books():
     return render_template("books.html", books=books, q=q)
 
 
+# --- Single book + its reviews ---
 @books_bp.get("/<int:book_id>")
 def book_detail(book_id: int):
     book = Book.query.get_or_404(book_id)
@@ -31,6 +35,7 @@ def book_detail(book_id: int):
     return render_template("book_detail.html", book=book, reviews=reviews)
 
 
+# --- Create review (logged in only) ---
 @books_bp.post("/<int:book_id>/reviews")
 @login_required
 def create_review(book_id: int):
@@ -59,6 +64,7 @@ def create_review(book_id: int):
     return redirect(url_for("books.book_detail", book_id=book.id))
 
 
+# --- Delete review (owner only) ---
 @books_bp.post("/<int:book_id>/reviews/<int:review_id>/delete")
 @login_required
 def delete_review(book_id: int, review_id: int):
@@ -75,6 +81,7 @@ def delete_review(book_id: int, review_id: int):
     return redirect(url_for("books.book_detail", book_id=book_id))
 
 
+# --- Edit review (owner only): form + POST handler ---
 @books_bp.get("/<int:book_id>/reviews/<int:review_id>/edit")
 @login_required
 def edit_review_form(book_id: int, review_id: int):
@@ -123,4 +130,3 @@ def edit_review_submit(book_id: int, review_id: int):
 
     flash("Review updated.", "success")
     return redirect(url_for("books.book_detail", book_id=book_id))
-

@@ -1,3 +1,8 @@
+/* =====================================================================
+   bookly — site-wide styles (dark theme, responsive layout).
+   ===================================================================== */
+
+/* ----- Theme variables + base page background ----- */
 :root {
   --bg: #0b1220;
   --panel: #101a30;
@@ -27,12 +32,14 @@ body {
 a { color: var(--text); }
 a:hover { color: white; }
 
+/* ----- Centered page column (wraps {% block content %} in base.html) ----- */
 .container {
   width: min(var(--max), calc(100% - 32px));
   margin: 0 auto;
   padding: 24px 0;
 }
 
+/* ----- Skip link: hidden until keyboard focus (WCAG) ----- */
 .skip-link {
   position: absolute;
   left: -999px;
@@ -44,6 +51,7 @@ a:hover { color: white; }
 }
 .skip-link:focus { left: 10px; z-index: 10; }
 
+/* ----- Sticky top bar: logo, links, mobile menu button ----- */
 .site-header {
   position: sticky;
   top: 0;
@@ -87,6 +95,7 @@ a:hover { color: white; }
   color: var(--text);
 }
 
+/* ----- Footer: columns + social icon buttons ----- */
 .site-footer {
   border-top: 1px solid var(--border);
   padding: 18px 0;
@@ -142,6 +151,7 @@ a:hover { color: white; }
   fill: currentColor;
 }
 
+/* ----- Contact page bullet list ----- */
 .contact-list {
   list-style: none;
   padding: 0;
@@ -150,6 +160,7 @@ a:hover { color: white; }
   gap: 10px;
 }
 
+/* ----- Home: hero strip + feature cards ----- */
 .hero {
   border: 1px solid var(--border);
   background: linear-gradient(180deg, rgba(124, 92, 255, 0.15), rgba(16, 26, 48, 0.65));
@@ -161,6 +172,7 @@ a:hover { color: white; }
 .hero p { margin: 0 0 16px; color: var(--muted); }
 .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
+/* ----- Generic responsive grids + panel “cards” ----- */
 .grid {
   display: grid;
   gap: 14px;
@@ -177,6 +189,7 @@ a:hover { color: white; }
   box-shadow: var(--shadow);
 }
 
+/* ----- Book grid cards (listing + shared card chrome) ----- */
 .book-card .cover {
   width: 100%;
   aspect-ratio: 3 / 4;
@@ -193,6 +206,7 @@ a:hover { color: white; }
 .price { margin-top: 8px; font-weight: 700; }
 .price.big { font-size: 22px; }
 
+/* ----- Forms: fields, inputs, screen-reader-only labels ----- */
 .narrow { width: min(520px, 100%); margin: 0 auto; }
 .field { display: grid; gap: 6px; margin-bottom: 12px; }
 .field label { font-weight: 650; }
@@ -221,6 +235,7 @@ textarea { resize: vertical; }
   border: 0;
 }
 
+/* ----- Buttons (primary / secondary / danger sizes) ----- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -257,11 +272,13 @@ textarea { resize: vertical; }
 .linklike:hover { color: white; }
 .inline { display: inline; }
 
+/* ----- Flex rows: toolbars, review headers, cart rows ----- */
 .row { display: flex; align-items: center; gap: 12px; }
 .row.between { justify-content: space-between; }
 .wrap { flex-wrap: wrap; }
 .stack { display: grid; gap: 12px; margin-top: 12px; }
 
+/* ----- Books index: title row + search field ----- */
 .page-head {
   display: flex;
   align-items: end;
@@ -272,6 +289,7 @@ textarea { resize: vertical; }
 .search { display: flex; gap: 10px; align-items: center; }
 .search input { width: min(360px, 75vw); }
 
+/* ----- Book detail: cover column + info column ----- */
 .book-detail {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -279,6 +297,7 @@ textarea { resize: vertical; }
   align-items: start;
 }
 
+/* ----- Flask flash categories (success / error) ----- */
 .flash-stack { display: grid; gap: 10px; margin-bottom: 14px; }
 .flash {
   border: 1px solid var(--border);
@@ -289,17 +308,21 @@ textarea { resize: vertical; }
 .flash-success { border-color: rgba(32, 201, 151, 0.35); }
 .flash-error { border-color: rgba(255, 92, 124, 0.40); }
 
+/* ----- Reviews block + checkout order summary list ----- */
 .section { margin-top: 22px; }
 .review-body { margin: 10px 0 0; }
 .rating { letter-spacing: 1px; }
 
+/* ----- Key/value summary lines (cart checkout, order receipt) ----- */
 .summary { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
 .summary li { display: flex; justify-content: space-between; gap: 10px; }
 .summary li.total { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; font-weight: 800; }
 
+/* ----- Admin dashboard: big numbers + side lists ----- */
 .stat-label { color: var(--muted); font-weight: 700; }
 .stat-value { font-size: 26px; font-weight: 900; margin-top: 6px; }
 
+/* ----- Tight vertical lists (admin recent orders, categories) ----- */
 .mini-list {
   list-style: none;
   padding: 0;
@@ -313,6 +336,7 @@ textarea { resize: vertical; }
   gap: 12px;
 }
 
+/* ----- Scrollable tables (admin top sellers) ----- */
 .table-wrap { overflow: auto; }
 .table {
   width: 100%;
@@ -327,11 +351,13 @@ textarea { resize: vertical; }
 .table th { text-align: left; color: var(--muted); font-size: 14px; }
 .table .right { text-align: right; }
 
+/* ----- Narrow screens: simplify grids ----- */
 @media (max-width: 860px) {
   .grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .book-detail { grid-template-columns: 1fr; }
 }
 
+/* ----- Phones: single column + hamburger nav ----- */
 @media (max-width: 620px) {
   .grid.two { grid-template-columns: 1fr; }
   .grid.three { grid-template-columns: 1fr; }

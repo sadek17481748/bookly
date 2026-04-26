@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Register • booklet{% endblock %}
+{% block title %}Register • bookly{% endblock %}
 
 {% block content %}
   <div class="narrow">
     <h1>Create account</h1>
 
+    {# POST creates user then logs them in (see auth.register_submit) #}
     <form method="post" action="{{ url_for('auth.register_submit') }}">
       <div class="field">
         <label for="email">Email</label>
@@ -32,4 +33,3 @@
     </p>
   </div>
 {% endblock %}
-

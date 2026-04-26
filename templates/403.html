@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Forbidden • booklet{% endblock %}
+{% block title %}Forbidden • bookly{% endblock %}
 
 {% block content %}
+  {# Shown when a view calls abort(403), e.g. non-admin opening /admin/analytics #}
   <div class="narrow">
     <h1>403 - Forbidden</h1>
     <p class="muted">You don’t have access to that page.</p>
     <a class="btn" href="{{ url_for('home') }}">Go home</a>
   </div>
 {% endblock %}
-

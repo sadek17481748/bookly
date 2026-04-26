@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Login • booklet{% endblock %}
+{% block title %}Login • bookly{% endblock %}
 
 {% block content %}
   <div class="narrow">
     <h1>Login</h1>
 
+    {# POST to login_submit; `next` query string preserved for redirect after login #}
     <form method="post" action="{{ url_for('auth.login_submit', next=request.args.get('next')) }}">
       <div class="field">
         <label for="email">Email</label>
@@ -26,4 +27,3 @@
     </p>
   </div>
 {% endblock %}
-
