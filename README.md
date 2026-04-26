@@ -29,3 +29,42 @@ Booklet is a simple book browsing, review, and purchasing web app built with:
 - PostgreSQL 14+ recommended
 
 ### 2) Create a virtual environment and install dependencies
+
+YOU NEED TO DO THIS STEP:
+
+```bash
+cd /Users/mohammedhussain/Desktop/bookly
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+### 3) Create the PostgreSQL database + user
+
+YOU NEED TO DO THIS STEP (example values):
+
+```bash
+# If you installed Postgres via Homebrew, start it:
+brew services start postgresql
+
+# Create a DB user + database (you can change names/passwords)
+psql postgres
+```
+
+In the `psql` prompt:
+
+```sql
+CREATE USER booklet_user WITH PASSWORD 'change_me';
+CREATE DATABASE booklet_db OWNER booklet_user;
+\q
+```
+
+### 4) Create a `.env` file
+
+YOU NEED TO DO THIS STEP:
+
+```bash
+cd /Users/mohammedhussain/Desktop/bookly
+cp .env.example .env
+```
+
