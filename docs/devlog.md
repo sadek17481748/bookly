@@ -21,3 +21,7 @@ Honest notes from reconstructing repository history against the final codebase.
 
 - Base template uses a skip link, sticky header, and a small JS toggle for the mobile nav (`aria-expanded` updated on open/close).
 - Destructive actions use `data-confirm` with a delegated click handler.
+
+## Commerce flows
+
+- Checkout is intentionally simple: validates name/address, persists `Order` + `OrderItem`, then clears the cart (no payment processor integration).
