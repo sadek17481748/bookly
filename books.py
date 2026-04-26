@@ -29,3 +29,31 @@ def book_detail(book_id: int):
         .all()
     )
     return render_template("book_detail.html", book=book, reviews=reviews)
+
+
+@books_bp.post("/<int:book_id>/reviews")
+@login_required
+def create_review(book_id: int):
+    book = Book.query.get_or_404(book_id)
+    rating_raw = request.form.get("rating") or ""
+    body = (request.form.get("body") or "").strip()
+
+    try:
+        rating = int(rating_raw)
+    except ValueError:
+        rating = 0
+
+    if rating < 1 or rating > 5:
+        flash("Rating must be between 1 and 5.", "error")
+        return redirect(url_for("books.book_detail", book_id=book.id))
+
+    if not body:
+        flash("Review text is required.", "error")
+        return redirect(url_for("books.book_detail", book_id=book.id))
+
+    review = Review(user_id=current_user.id, book_id=book.id, rating=rating, body=body)
+    db.session.add(review)
+    db.session.commit()
+
+    flash("Review posted!", "success")
+    return redirect(url_for("books.book_detail", book_id=book.id))
