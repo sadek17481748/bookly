@@ -148,3 +148,7 @@ bookly/
   .env.example
 ```
 
+
+## Development notes
+
+See `docs/devlog.md` for integration notes captured while curating history.
