@@ -25,3 +25,29 @@ def view_cart():
     )
     subtotal_cents = _cart_totals(items)
     return render_template("cart.html", items=items, subtotal_cents=subtotal_cents)
+
+
+@cart_bp.post("/add/<int:book_id>")
+@login_required
+def add_to_cart(book_id: int):
+    book = Book.query.get_or_404(book_id)
+    qty_raw = request.form.get("quantity") or "1"
+
+    try:
+        qty = int(qty_raw)
+    except ValueError:
+        qty = 1
+
+    if qty < 1:
+        qty = 1
+
+    item = CartItem.query.filter_by(user_id=current_user.id, book_id=book.id).first()
+    if item is None:
+        item = CartItem(user_id=current_user.id, book_id=book.id, quantity=qty)
+        db.session.add(item)
+    else:
+        item.quantity += qty
+
+    db.session.commit()
+    flash(f"Added to cart: {book.title}", "success")
+    return redirect(url_for("cart.view_cart"))
