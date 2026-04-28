@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 import re
 
 
@@ -26,6 +27,15 @@ def slug_for_title(title: str) -> str:
 
 
 def cover_static_url(title: str) -> str:
-    """URL path served by Flask static (see static/img/covers/*.svg)."""
-    # ================= BUILD STATIC PATH =================
-    return f"/static/img/covers/{slug_for_title(title)}.svg"
+    """URL path served by Flask static (see static/img/covers/*)."""
+    # ================= PREFER REAL COVER IMAGES =================
+    # If a raster cover exists for this title, use it; otherwise fall back to SVG.
+    slug = slug_for_title(title)
+    covers_dir = Path(__file__).resolve().parent / "static" / "img" / "covers"
+
+    for ext in (".png", ".jpg", ".jpeg", ".webp", ".svg"):
+        if (covers_dir / f"{slug}{ext}").exists():
+            return f"/static/img/covers/{slug}{ext}"
+
+    # Should not happen, but keeps a stable URL shape.
+    return f"/static/img/covers/{slug}.svg"
