@@ -36,9 +36,9 @@
 
 ## Overview
 
-**bookly** is a data-driven web application for browsing books, writing reviews, managing a shopping cart, and completing a checkout flow that records purchases in a **PostgreSQL** relational database.
+**bookly** is a web app for browsing books, writing reviews, using a shopping cart, and checking out. Purchases are stored in a **PostgreSQL** database.
 
-The site is intended to demonstrate a realistic “small business” workflow:
+The site shows a realistic “small business” workflow:
 
 - Visitors can browse catalog content **read from the database** (not hard-coded pages for each book).
 - Registered users can **authenticate** securely (passwords stored as hashes, never plaintext).
@@ -48,10 +48,10 @@ The site is intended to demonstrate a realistic “small business” workflow:
 
 ### Project goals
 
-- Demonstrate a **relational PostgreSQL** design with realistic relationships and constraints (users, books, reviews, cart, orders).
-- Build clear **end-to-end flows** where database reads/writes are visible through the UI (browse → cart → checkout → orders).
-- Implement **authentication and authorisation** properly (hashed passwords, session-based login, owner-only review edit/delete, admin-only analytics).
-- Keep the project approachable for marking by using **server-rendered Flask** and a consistent file structure.
+- Demonstrate a **relational PostgreSQL** design (users, books, reviews, cart, orders).
+- Show clear **end-to-end flows** where DB reads/writes show up in the UI (browse → cart → checkout → orders).
+- Implement **auth and permissions** properly (hashed passwords, session login, owner-only review edit/delete, admin-only analytics).
+- Keep the project easy to mark by using **server-rendered Flask** and a consistent file structure.
 
 ## Quick links (assessor)
 
@@ -185,7 +185,7 @@ Low-fidelity wireframes for bookly are in this repository as a single PDF:
 
 - **[`docs/wireframe-bookly.pdf`](docs/wireframe-bookly.pdf)** — planning layouts for the main flows (home, catalogue, book detail, auth, cart/checkout, orders, admin). The screens map to the live routes: **Home** (`/`), **Books** (`/books`), **Book detail** (`/books/<id>`), **Login / Register**, **Cart**, **Checkout**, **Orders**, and **Admin analytics** (`/admin/analytics`).
 
-Any extra Figma links or annotated screenshots I used only in the written report stay in the **coursework appendix**; this PDF is the canonical wireframe asset in the repo.
+Any extra Figma links or annotated screenshots I used only in the written report stay in the **coursework appendix**; this PDF is the main wireframe file in the repo.
 
 ---
 
@@ -391,11 +391,12 @@ These choices are implemented as CSS variables at the top of `static/css/styles.
 | `cart.py` | Cart blueprint |
 | `orders.py` | Orders + checkout blueprint |
 | `admin.py` | Admin analytics blueprint + `admin_required` decorator |
-| `cli.py` | `flask init-db`, `reset-db`, `make-admin`; seeds books if empty |
-| `templates/` | Jinja2 HTML |
+| `cli.py` | `flask init-db`, `reset-db`, `make-admin`; seeds books and back-fills `cover_url` values |
+| `templates/` | Jinja2 HTML (includes admin pages) |
+| `templates/admin_add_book.html` | Admin-only “Add book” form (category + cover selection) |
 | `static/css/styles.css` | Site styles |
 | `static/js/main.js` | Nav toggle + confirm helper |
-| `static/img/covers/` | One SVG cover per seeded book title |
+| `static/img/covers/` | Cover assets used by the catalogue (SVG placeholders + any added raster covers) |
 | `schema.sql` | Reference DDL for PostgreSQL |
 | `seed_books.sql` | Optional bulk SQL seed (includes `cover_url` paths) |
 | `tests/` | Pytest suite + `conftest.py` (in-memory SQLite for CI speed) |
@@ -406,7 +407,9 @@ These choices are implemented as CSS variables at the top of `static/css/styles.
 | `.gitignore` | Ignores `.env`, `.venv`, `__pycache__`, etc. |
 | `docs/devlog.md` | Setup / integration notes |
 | `docs/testing.md` | Feature ↔ automated test mapping |
+| `docs/legacy-code.md` | Small “before → after” code snapshots for assessor review |
 | `docs/wireframe-bookly.pdf` | Wireframes (PDF) for main screens and flows |
+| `docs/images/validation/` | Evidence screenshots (Lighthouse, W3C validators, JSHint, responsiveness, 404) |
 
 ---
 
@@ -572,7 +575,7 @@ heroku open -a bookly-final
 
 ### Why PostgreSQL is the technical centre of this work
 
-PostgreSQL is not an afterthought or a “label” on the README:
+PostgreSQL is a core part of the project:
 
 - **Connection:** the app reads `DATABASE_URL` from the environment (`config.py`, `.env.example`). In development this pointed at a **local Postgres** instance; on Heroku it used the **managed Postgres** add-on URL.
 - **Integrity:** foreign keys tie reviews to users and books, cart lines to users and books, order items to orders and books. `schema.sql` lists the same structure for reference and marking.
@@ -625,7 +628,7 @@ This project **goes beyond** that minimal presentation bar and is implemented as
 | SQL scripts, ER thinking, maybe a thin UI | **End-to-end paths**: browser → Flask routes → SQLAlchemy → **PostgreSQL** → HTML response. That makes the database work **visible and testable** as part of a real use case (browse → cart → checkout → orders). |
 | Less emphasis on auth, sessions, deployment | **Flask-Login** sessions, **environment-based configuration**, and a **Heroku-style** deployment story so Postgres is not “theory only” but runnable **locally and** on a hosted database. |
 
-**Why that is defensible for marking**
+**Why this still fits the marking criteria**
 
 1. **PostgreSQL remains the source of truth.** Users, books, reviews, cart rows, orders, and order items all live in Postgres. The ORM generates SQL; constraints (foreign keys, uniqueness on cart lines) match standard relational design taught on the course.
 2. **A thin static page** can show a `SELECT` result, but it does not demonstrate **transactions across steps** (cart updates, checkout clearing the cart while inserting orders) or **authorization** (only the review owner can delete). Those behaviours need **application logic** tied to the database.
@@ -641,7 +644,7 @@ For assessment, **`schema.sql`**, the **`models.py` ↔ table mapping**, and **`
 
 ### Why this approach?
 
-Server-rendered Flask keeps the **data model and SQL story** in the foreground: every important screen is backed by a query or write that maps clearly to **PostgreSQL**. That aligns with Project 3 learning outcomes while still delivering a coherent small product.
+Server-rendered Flask keeps the database work clear: every important screen is backed by a query or a write to **PostgreSQL**. This matches Project 3 learning outcomes while still being a complete small app.
 
 ---
 
@@ -662,7 +665,7 @@ I complemented automated tests with manual runs in the browser, recording **what
 | 7 | Auth | Log out | Session cleared; home or login | Pass | Screenshot pending | `docs/images/manual-testing/07-logout.png` |
 | 8 | Auth | Log in with correct password | Redirect; flash success | Pass |  | [08-login-success](docs/images/manual-testing/08-login-success.png) |
 | 9 | Auth | Log in with wrong password | Stays on login; flash error | Pass | Screenshot pending | `docs/images/manual-testing/09-login-fail.png` |
-| 10 | Auth | Register duplicate email | Error; no duplicate user | Pass | Screenshot pending | `docs/images/manual-testing/10-register-duplicate.png` |
+| 10 | Auth | Register duplicate email | Error; no duplicate user | Pass |  | [10-register-duplicate](docs/images/manual-testing/10-register-duplicate.png) |
 | 11 | Reviews | While logged out, open book detail | No POST review without login | Pass | Screenshot pending | `docs/images/manual-testing/11-reviews-guest.png` |
 | 12 | Reviews | Post a review (logged in) | Review appears on page | Pass |  | [12-review-created](docs/images/manual-testing/12-review-created.png) |
 | 13 | Reviews | Edit **your** review | Updated text/rating shown | Pass |  | [13-review-edit](docs/images/manual-testing/13-review-edit.png) |
@@ -674,6 +677,7 @@ I complemented automated tests with manual runs in the browser, recording **what
 | 19 | Orders | Checkout with items | Order on Orders page; cart empty | Pass |  | [19-checkout-success](docs/images/manual-testing/19-checkout-success.png)<br>[19b-orders-page](docs/images/manual-testing/19b-orders-page.png) |
 | 20 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page | Pass | Screenshot pending | `docs/images/manual-testing/20-analytics-403.png` |
 | 21 | Admin | Same as admin user | Dashboard metrics load | Pass |  | [21-analytics-admin](docs/images/manual-testing/21-analytics-admin.png) |
+| 22 | Admin | Add a new book via Analytics → Add book | Book created and visible in catalogue | Pass |  | [22-admin-add-book](docs/images/manual-testing/22-admin-add-book.png)<br>[23-admin-book-added](docs/images/manual-testing/23-admin-book-added.png) |
 
 #### 404 page (assessor note + evidence)
 
