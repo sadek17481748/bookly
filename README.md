@@ -52,6 +52,34 @@ The site is intended to demonstrate a realistic “small business” workflow:
 - **GitHub Pages (documentation site)**: [`sadek17481748.github.io/bookly`](https://sadek17481748.github.io/bookly/)
 - **Closed issues (progress log)**: [GitHub Issues (closed)](https://github.com/sadek17481748/bookly/issues?q=is%3Aissue%20state%3Aclosed)
 
+## Key UI screenshots (assessor)
+
+Screenshots are shown below so key screens are visible directly in this README.
+
+### Home
+
+![Home page](docs/images/manual-testing/01-home.png)
+
+### Books
+
+![Books list page](docs/images/manual-testing/03-books-list.png)
+
+### Contact
+
+*(Screenshot to be added as `docs/images/manual-testing/02-contact.png`.)*
+
+### Login
+
+![Login page](docs/images/manual-testing/08-login-success.png)
+
+### Register
+
+![Register page](docs/images/manual-testing/06a-register-form.png)
+
+### Analytics (admin)
+
+![Analytics dashboard](docs/images/manual-testing/21-analytics-admin.png)
+
 ### Why PostgreSQL is the technical centre of this work
 
 PostgreSQL is not an afterthought or a “label” on the README:
@@ -586,27 +614,27 @@ I complemented automated tests with manual runs in the browser, recording **what
 
 | # | Area | Step | Expected | Pass/Fail | Notes | Screenshot evidence |
 |---|------|------|----------|-----------|-------|-------------------|
-| 1 | Public | Open `/` | Home loads; branding and hero visible |  |  | `docs/images/manual-testing/01-home.png` |
+| 1 | Public | Open `/` | Home loads; branding and hero visible |  |  | [01-home](docs/images/manual-testing/01-home.png) |
 | 2 | Public | Open `/contact` | Contact content loads |  |  | `docs/images/manual-testing/02-contact.png` |
-| 3 | Public | Open `/books` | Catalog or empty state loads |  |  | `docs/images/manual-testing/03-books-list.png` |
-| 4 | Public | Use search `?q=` with a known title | Matching books appear |  |  | `docs/images/manual-testing/04-search.png` |
-| 5 | Public | Open a book detail URL | Title, author, price, description |  |  | `docs/images/manual-testing/05-book-detail.png` |
-| 6 | Auth | Register a new user | Redirect to books; flash success |  |  | `docs/images/manual-testing/06-register-success.png` |
+| 3 | Public | Open `/books` | Catalog or empty state loads |  |  | [03-books-list](docs/images/manual-testing/03-books-list.png) |
+| 4 | Public | Use search `?q=` with a known title | Matching books appear |  |  | [04-search](docs/images/manual-testing/04-search.png)<br>[04b-search-no-results](docs/images/manual-testing/04b-search-no-results.png) |
+| 5 | Public | Open a book detail URL | Title, author, price, description |  |  | [05-book-detail](docs/images/manual-testing/05-book-detail.png) |
+| 6 | Auth | Register a new user | Redirect to books; flash success |  |  | [06a-register-form](docs/images/manual-testing/06a-register-form.png)<br>[06-register-success](docs/images/manual-testing/06-register-success.png) |
 | 7 | Auth | Log out | Session cleared; home or login |  |  | `docs/images/manual-testing/07-logout.png` |
-| 8 | Auth | Log in with correct password | Redirect; flash success |  |  | `docs/images/manual-testing/08-login-success.png` |
+| 8 | Auth | Log in with correct password | Redirect; flash success |  |  | [08-login-success](docs/images/manual-testing/08-login-success.png) |
 | 9 | Auth | Log in with wrong password | Stays on login; flash error |  |  | `docs/images/manual-testing/09-login-fail.png` |
 | 10 | Auth | Register duplicate email | Error; no duplicate user |  |  | `docs/images/manual-testing/10-register-duplicate.png` |
 | 11 | Reviews | While logged out, open book detail | No POST review without login |  |  | `docs/images/manual-testing/11-reviews-guest.png` |
-| 12 | Reviews | Post a review (logged in) | Review appears on page |  |  | `docs/images/manual-testing/12-review-created.png` |
-| 13 | Reviews | Edit **your** review | Updated text/rating shown |  |  | `docs/images/manual-testing/13-review-edit.png` |
-| 14 | Reviews | Delete **your** review | Review removed |  |  | `docs/images/manual-testing/14-review-delete.png` |
-| 15 | Reviews | Attempt to delete another user’s review (second account) | Blocked with message |  |  | `docs/images/manual-testing/15-review-owner-block.png` |
-| 16 | Cart | Add book to cart | Line appears with correct title/qty |  |  | `docs/images/manual-testing/16-cart-add.png` |
-| 17 | Cart | Change quantity / remove line | Totals and rows update |  |  | `docs/images/manual-testing/17-cart-update-remove.png` |
+| 12 | Reviews | Post a review (logged in) | Review appears on page |  |  | [12-review-created](docs/images/manual-testing/12-review-created.png) |
+| 13 | Reviews | Edit **your** review | Updated text/rating shown |  |  | [13-review-edit](docs/images/manual-testing/13-review-edit.png) |
+| 14 | Reviews | Delete **your** review | Review removed |  |  | [14-review-delete](docs/images/manual-testing/14-review-delete.png) |
+| 15 | Reviews | Attempt to delete another user’s review (second account) | Blocked with message |  |  | [15-review-owner-block](docs/images/manual-testing/15-review-owner-block.png) |
+| 16 | Cart | Add book to cart | Line appears with correct title/qty |  |  | [16-cart-add](docs/images/manual-testing/16-cart-add.png) |
+| 17 | Cart | Change quantity / remove line | Totals and rows update |  |  | [17-cart-update-remove](docs/images/manual-testing/17-cart-update-remove.png) |
 | 18 | Cart | Checkout with empty cart | Error flash; redirect to cart |  |  | `docs/images/manual-testing/18-checkout-empty.png` |
-| 19 | Orders | Checkout with items | Order on Orders page; cart empty |  |  | `docs/images/manual-testing/19-checkout-success.png` |
+| 19 | Orders | Checkout with items | Order on Orders page; cart empty |  |  | [19-checkout-success](docs/images/manual-testing/19-checkout-success.png)<br>[19b-orders-page](docs/images/manual-testing/19b-orders-page.png) |
 | 20 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page |  |  | `docs/images/manual-testing/20-analytics-403.png` |
-| 21 | Admin | Same as admin user | Dashboard metrics load |  |  | `docs/images/manual-testing/21-analytics-admin.png` |
+| 21 | Admin | Same as admin user | Dashboard metrics load |  |  | [21-analytics-admin](docs/images/manual-testing/21-analytics-admin.png) |
 
 Where something failed during manual runs, I kept **screenshots** or a short log and noted the fix in the bug table or devlog.
 
@@ -745,12 +773,46 @@ These are **third-party tutorials and playlists** that helped while building boo
 | **Book cover graphics** | `static/img/covers/*.svg` (50 files) | Generated SVG “posters” (gradient + title + author + small bookly label). Served as static files; `cover_url` in the DB points at paths like `/static/img/covers/1984.svg`. |
 | **Icons in footer** | Inline `<svg>` in `templates/base.html` | Simple vector icons for social links (not raster images). |
 
+### Image credits
+
+The catalogue uses cover images to make the UI feel closer to a real storefront. Where a real-world cover thumbnail was used, the source is credited below.
+
+| Asset | Source / link | Credit / licence note |
+|------|---------------|------------------------|
+| **Book cover images** (`static/img/covers/*.{png,jpg,svg}`) | *(links to be added)* | Local cover assets served from `static/img/covers/`. Individual external sources are credited in the rows below. |
+| **Cover source (Where the Crawdads Sing)** | [Wikipedia page](https://en.wikipedia.org/wiki/Where_the_Crawdads_Sing) | Source link for the cover image used. |
+| **Cover source (The Help)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Help) | Source link for the cover image used. |
+| **Cover source (Me Before You)** | [Wikipedia page](https://en.wikipedia.org/wiki/Me_Before_You) | Source link for the cover image used. |
+| **Cover source (The Road)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Road) | Source link for the cover image used. |
+| **Cover source (Life of Pi)** | [Wikipedia page](https://en.wikipedia.org/wiki/Life_of_Pi) | Source link for the cover image used. |
+| **Cover source (The Kite Runner)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Kite_Runner) | Source link for the cover image used. |
+| **Cover source (A Thousand Splendid Suns)** | [Wikipedia page](https://en.wikipedia.org/wiki/A_Thousand_Splendid_Suns) | Source link for the cover image used. |
+| **Cover source (The Alchemist)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Alchemist_(novel)) | Source link for the cover image used. |
+| **Cover source (The Woman in the Window)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Woman_in_the_Window) | Source link for the cover image used. |
+| **Cover source (The Reversal)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Reversal) | Source link for the cover image used. |
+| **Cover source (And Then There Were None)** | [Wikipedia page](https://en.wikipedia.org/wiki/And_Then_There_Were_None) | Source link for the cover image used. |
+| **Cover source (Big Little Lies)** | [Wikipedia page](https://en.wikipedia.org/wiki/Big_Little_Lies_(novel)) | Source link for the cover image used. |
+| **Cover source (The Silent Patient)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Silent_Patient) | Source link for the cover image used. |
+| **Cover source (In the Woods)** | [Wikipedia page](https://en.wikipedia.org/wiki/In_the_Woods) | Source link for the cover image used. |
+| **Cover source (Gone Girl)** | [Wikipedia page](https://en.wikipedia.org/wiki/Gone_Girl_(novel)) | Source link for the cover image used. |
+| **Cover source (The Girl with the Dragon Tattoo)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Girl_with_the_Dragon_Tattoo) | Source link for the cover image used. |
+| **Cover source (The Da Vinci Code)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Da_Vinci_Code) | Source link for the cover image used. |
+| **Cover source (Ready Player One)** | [Wikipedia page](https://en.wikipedia.org/wiki/Ready_Player_One) | Source link for the cover image used. |
+| **Cover source (Frankenstein)** | [Wikipedia page](https://en.wikipedia.org/wiki/Frankenstein) | Source link for the cover image used. |
+| **Cover source (The Martian)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Martian) | Source link for the cover image used. |
+| **Cover source (Ender’s Game)** | [Wikipedia page](https://en.wikipedia.org/wiki/Ender%27s_Game) | Source link for the cover image used. |
+| **Cover source (Dune)** | [Wikipedia page](https://en.wikipedia.org/wiki/Dune_(novel)) | Source link for the cover image used. |
+| **Cover source (The Hobbit)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Hobbit) | Source link for the cover image used. |
+| **Cover source (The Great Gatsby)** | [Wikipedia page](https://en.wikipedia.org/wiki/The_Great_Gatsby) | Source link for the cover image used. |
+| **Wireframes PDF** (`docs/wireframe-bookly.pdf`) | N/A | Created by me during the planning phase. |
+| **Footer icons** (inline `<svg>`) | *(links to be added if applicable)* | Vector icons embedded directly in templates. |
+
 ---
 
 ## Attributions
 
 - **Book metadata** in `cli.py` / `seed_books.sql` is synthetic catalogue text for coursework (not an official publisher catalogue).
-- **Cover SVGs** are generated placeholders (gradient + title + author) under `static/img/covers/` (listed under **Images used in this project** above).
+- **Cover assets** live under `static/img/covers/` (a mix of SVG placeholders and raster cover images where credited in the Image credits section).
 - **Social icons** in the footer use simple SVG paths; outbound links are examples only.
 - **Learning sources** are listed under [Sources and references](#sources-and-references); bookly’s implementation was written for this coursework and follows those tutorials only at a **conceptual** level unless otherwise cited in code comments.
 
