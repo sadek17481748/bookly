@@ -76,7 +76,7 @@ Screenshots are shown below so key screens are visible directly in this README.
 
 ### Contact
 
-*(Screenshot to be added as `docs/images/manual-testing/02-contact.png`.)*
+![Contact page](docs/images/manual-testing/02-contact.png)
 
 ### Login
 
