@@ -59,6 +59,8 @@ The site shows a realistic “small business” workflow:
 - **Wireframes section (README anchor)**: [Wireframes](https://github.com/sadek17481748/bookly#wireframes)
 - **Live app (Heroku)**: [`bookly-final-98e88d5d388e.herokuapp.com`](https://bookly-final-98e88d5d388e.herokuapp.com/)
 - **Live app login page**: [Login](https://bookly-final-98e88d5d388e.herokuapp.com/login)
+- **Analytics dashboard (admin-only)**: [`/admin/analytics`](https://bookly-final-98e88d5d388e.herokuapp.com/admin/analytics) — shows revenue, orders, top sellers, and catalogue breakdown (requires the assessor admin login).
+- **Assessor analytics login**: `analytics@testemail.com` / `test123` — admin account for accessing the analytics dashboard on the live site.
 - **GitHub Pages (documentation site)**: [`sadek17481748.github.io/bookly`](https://sadek17481748.github.io/bookly/)
 - **Closed issues (progress log)**: [GitHub Issues (closed)](https://github.com/sadek17481748/bookly/issues?q=is%3Aissue%20state%3Aclosed)
 
@@ -687,6 +689,43 @@ I complemented automated tests with manual runs in the browser, recording **what
 
 Where something failed during manual runs, I kept **screenshots** or a short log and noted the fix in the bug table or devlog.
 
+#### Validation and edge-case checks (input correctness)
+
+These checks focus on places where user input can be correct/incorrect and where logic could break if validation was missing. Most validation is **server-side** (Flask routes) and is shown to the user via **flash messages**.
+
+- **Register (`/register`)**
+  - **Valid**: new email + matching passwords → account created and logged in.
+  - **Invalid**:
+    - duplicate email → blocked with a message (see manual test **#10**).
+    - password confirmation mismatch → blocked with an error flash.
+
+- **Login (`/login`)**
+  - **Valid**: correct email/password → logged in and redirected.
+  - **Invalid**: wrong password → stays on login with error flash (manual test **#9**).
+
+- **Reviews (create/edit/delete)**
+  - **Create review**:
+    - blocked when logged out (redirect to login; manual test **#11**).
+    - rating must be **1–5** and body must not be empty (server-side checks).
+  - **Edit/delete**:
+    - only the review owner can edit/delete (server-side ownership guard; manual tests **#13–#15**).
+
+- **Cart**
+  - **Quantity rules**: quantity < 1 is treated as remove (keeps totals consistent).
+  - **Auth guard**: cart routes require login (tested in automated suite).
+
+- **Checkout**
+  - **Empty cart**: checkout is blocked with a flash + redirect back to cart (manual test **#18**).
+  - **Valid**: creates an order + order items and clears the cart (manual test **#19**).
+
+- **Admin-only routes**
+  - Non-admins receive **403** on analytics and admin pages (manual test **#20**, automated tests).
+  - Admin “Add book” checks:
+    - required fields (title/author/price) must be present.
+    - price must be numeric and > 0.
+    - optional cover filename must exist under `static/img/covers/`.
+    - duplicate (title + author) is blocked.
+
 ### Automated testing
 
 For this project, I used **pytest** to write automated tests. The tests are located in the `tests/` directory and include:
@@ -708,9 +747,76 @@ These resources helped me understand how to set up test environments, use an **i
 
 A compact **function name → feature** map is in **`docs/testing.md`**.
 
+#### Running pytest locally (terminal evidence)
+
+Because `pytest` is installed inside the project’s virtual environment, I activated the venv first and then ran the suite in verbose mode:
+
+```bash
+source .venv/bin/activate
+pytest -v
+```
+
+Output from my local run:
+
+```text
+mohammedhussain@Mohammeds-MacBook-Air bookly-final % source .venv/bin/activate
+pytest -v
+===================== test session starts =====================
+platform darwin -- Python 3.13.3, pytest-9.0.3, pluggy-1.6.0 -- /Users/mohammedhussain/Desktop/bookly-final/.venv/bin/python3.13
+cachedir: .pytest_cache
+rootdir: /Users/mohammedhussain/Desktop/bookly-final
+configfile: pytest.ini
+testpaths: tests
+collected 23 items                                            
+
+tests/test_auth.py::test_register_get_ok PASSED         [  4%]
+tests/test_auth.py::test_login_get_ok PASSED            [  8%]
+tests/test_auth.py::test_register_login_flow PASSED     [ 13%]
+tests/test_auth.py::test_register_password_mismatch PASSED [ 17%]
+tests/test_auth.py::test_login_bad_password PASSED      [ 21%]
+tests/test_books_reviews.py::test_books_search_param_ok PASSED [ 26%]
+tests/test_books_reviews.py::test_create_review_requires_login PASSED [ 30%]
+tests/test_books_reviews.py::test_create_review_ok PASSED [ 34%]
+tests/test_cart_orders_admin.py::test_cart_requires_login PASSED [ 39%]
+tests/test_cart_orders_admin.py::test_add_to_cart_ok PASSED [ 43%]
+tests/test_cart_orders_admin.py::test_checkout_empty_cart_redirects PASSED [ 47%]
+tests/test_cart_orders_admin.py::test_admin_analytics_requires_login PASSED [ 52%]
+tests/test_cart_orders_admin.py::test_admin_analytics_forbidden_for_normal_user PASSED [ 56%]
+tests/test_cart_orders_admin.py::test_admin_analytics_ok_for_admin PASSED [ 60%]
+tests/test_cart_orders_admin.py::test_admin_add_book_requires_login PASSED [ 65%]
+tests/test_cart_orders_admin.py::test_admin_add_book_forbidden_for_normal_user PASSED [ 69%]
+tests/test_cart_orders_admin.py::test_admin_add_book_ok_for_admin PASSED [ 73%]
+tests/test_public_pages.py::test_home_ok PASSED         [ 78%]
+tests/test_public_pages.py::test_contact_ok PASSED      [ 82%]
+tests/test_public_pages.py::test_books_list_empty_ok PASSED [ 86%]
+tests/test_public_pages.py::test_book_detail_404 PASSED [ 91%]
+tests/test_public_pages.py::test_book_detail_ok PASSED  [ 95%]
+tests/test_public_pages.py::test_static_css_served PASSED [100%]
+
+====================== warnings summary =======================
+tests/test_auth.py: 3 warnings
+tests/test_books_reviews.py: 3 warnings
+tests/test_cart_orders_admin.py: 16 warnings
+  /Users/mohammedhussain/Desktop/bookly-final/app.py:48: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    return User.query.get(uid)
+
+tests/test_books_reviews.py::test_create_review_ok
+tests/test_books_reviews.py::test_create_review_ok
+tests/test_cart_orders_admin.py::test_add_to_cart_ok
+tests/test_cart_orders_admin.py::test_admin_add_book_ok_for_admin
+tests/test_public_pages.py::test_book_detail_404
+tests/test_public_pages.py::test_book_detail_ok
+  /Users/mohammedhussain/Desktop/bookly-final/.venv/lib/python3.13/site-packages/flask_sqlalchemy/query.py:30: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    rv = self.get(ident)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=============== 23 passed, 28 warnings in 2.12s ===============
+(.venv) mohammedhussain@Mohammeds-MacBook-Air bookly-final %
+```
+
 ### Testing summary table
 
-The 20 rows below match the automated tests in `tests/` (reproducible with `pytest -v`). **Pass/Fail** and **Notes** reflect my last full run before submission.
+The rows below match the automated tests in `tests/` (reproducible with `pytest -v`). **Pass/Fail** and **Notes** reflect my last full run before submission.
 
 | Test number | Area | What it verifies | Pass/Fail | Notes |
 |---------------|------|------------------|-----------|-------|
@@ -733,7 +839,6 @@ The 20 rows below match the automated tests in `tests/` (reproducible with `pyte
 | 17 | Public pages | Books list page loads | Pass | `test_books_list_empty_ok` |
 | 18 | Public pages | Unknown book id returns **404** | Pass | `test_book_detail_404` |
 | 19 | Public pages | Book detail shows seeded sample book | Pass | `test_book_detail_ok` |
-| 20 | Public pages | Global stylesheet is served (`/static/css/styles.css`) | Pass | `test_static_css_served` |
 
 ### Bugs encountered during development
 
@@ -1024,6 +1129,7 @@ The catalogue uses cover images to make the UI feel closer to a real storefront.
 ## Additional Notes
 
 - **Use of AI:** Generative AI was used as an **assistant** during development (mainly spell-checking and improving the clarity of documentation). It also helped with **drafting and iterating on automated tests** and discussing approaches for parts of the Python/Flask code (validation, structure, and edge cases). The final implementation was still **written/edited, verified, and tested by me**, and any AI suggestions were only kept when they matched the project’s real behaviour. A concise log of AI-assisted areas is included in **Testing and Bugs → Use of AI (assistance log)**.
+- **`docs/legacy-code.md` (development snapshots):** Earlier in development, my GitHub/Heroku setup ended up in a broken state (the repo would not accept new commits reliably and the Heroku connection stopped working). I restarted the project setup and moved the work into a fresh repository on a new GitHub account, linked to a new Heroku app/account. To make the development progression easy to review, I kept small “before → after” code snapshots in `docs/legacy-code.md`.
 - **`docs/devlog.md`** — local setup, CLI commands, checkout assumptions, cover pipeline.
 - **`docs/testing.md`** — expanded automated testing description.
 - During development, when the schema changed, I used **`flask reset-db`** (destructive) and re-seeded as needed.
