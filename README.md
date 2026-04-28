@@ -657,7 +657,7 @@ I complemented automated tests with manual runs in the browser, recording **what
 | # | Area | Step | Expected | Pass/Fail | Notes | Screenshot evidence |
 |---|------|------|----------|-----------|-------|-------------------|
 | 1 | Public | Open `/` | Home loads; branding and hero visible | Pass |  | [01-home](docs/images/manual-testing/01-home.png) |
-| 2 | Public | Open `/contact` | Contact content loads | Pass | Screenshot pending | `docs/images/manual-testing/02-contact.png` |
+| 2 | Public | Open `/contact` | Contact content loads | Pass |  | [02-contact](docs/images/manual-testing/02-contact.png) |
 | 3 | Public | Open `/books` | Catalog or empty state loads | Pass |  | [03-books-list](docs/images/manual-testing/03-books-list.png) |
 | 4 | Public | Use search `?q=` with a known title | Matching books appear | Pass |  | [04-search](docs/images/manual-testing/04-search.png)<br>[04b-search-no-results](docs/images/manual-testing/04b-search-no-results.png) |
 | 5 | Public | Open a book detail URL | Title, author, price, description | Pass |  | [05-book-detail](docs/images/manual-testing/05-book-detail.png) |
