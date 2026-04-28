@@ -702,6 +702,10 @@ I complemented automated tests with manual runs in the browser, recording **what
 | 25 | Admin | Add a new book via Analytics → Add book | Book created and visible in catalogue | Pass |  | [22-admin-add-book](docs/images/manual-testing/22-admin-add-book.png)<br>[23-admin-book-added](docs/images/manual-testing/23-admin-book-added.png) |
 | 26 | Orders | Large order test (multiple items and quantities) | Cart subtotal matches checkout total; order summary lists all items | Pass |  | [27-large-order-cart](docs/images/manual-testing/27-large-order-cart.png)<br>[28-large-order-checkout](docs/images/manual-testing/28-large-order-checkout.png)<br>[29-large-order-checkout-total](docs/images/manual-testing/29-large-order-checkout-total.png) |
 | 27 | Orders | Log out during checkout, then log back in | Redirects to login and returns to checkout (via `next=`); checkout can continue | Pass |  | [30-checkout-logout-login-continue](docs/images/manual-testing/30-checkout-logout-login-continue.png) |
+| 28 | Auth | When logged in, check the navigation bar | Login/Register are hidden; authenticated links are shown instead (Cart/Orders/Logout) | Pass |  | [31-nav-logged-in-hides-login-register](docs/images/manual-testing/31-nav-logged-in-hides-login-register.png) |
+| 29 | Reviews | Attempt to post a review while logged out | Redirects to login; after login the user can return and submit the review | Pass |  | Screenshot pending (`docs/images/manual-testing/32-review-login-required.png`) |
+| 30 | Cart | Attempt “Add to cart” while logged out | Redirects to login; after login the user can add the book to cart | Pass |  | Screenshot pending (`docs/images/manual-testing/33-cart-login-required.png`) |
+| 31 | Admin | Add book: enter an invalid price (non-numeric or 0/negative) | Blocked with validation errors (“Price must be a number (e.g. 12.99).” / “Price must be greater than 0.”) | Pass |  | Screenshot pending (`docs/images/manual-testing/34-admin-add-book-invalid-price.png`) |
 
 #### 404 page (assessor note + evidence)
 
