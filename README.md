@@ -321,6 +321,19 @@ This project reinforced that the biggest risk under time pressure is not writing
 - **Gradients** on hero and buttons for depth; **cards** with subtle borders and shadows for content grouping.
 - **Typography:** system UI stack (`ui-sans-serif`, `system-ui`, …) for fast loading and native feel.
 
+### Colour scheme (and why)
+
+The site uses a **dark, high-contrast** palette to keep long reading sessions comfortable and to make book covers and cards stand out clearly.
+
+- **Background (`--bg`)**: deep navy used as the base canvas so content panels feel separated without heavy borders.
+- **Panels (`--panel`)**: slightly lighter navy for cards and sections to create depth while staying consistent with the dark theme.
+- **Text (`--text`) + muted text (`--muted`)**: bright off-white for readability, with a muted variant for secondary information (author names, timestamps, hints).
+- **Primary brand (`--brand`)**: purple accent for primary actions and key highlights (buttons, links) to give the UI a recognisable identity.
+- **Secondary accent (`--brand2`)**: green accent used sparingly to add contrast in gradients and to avoid a single-colour interface.
+- **Danger (`--danger`)**: pink/red accent reserved for destructive actions (delete/remove) so risk actions are visually obvious.
+
+These choices are implemented as CSS variables at the top of `static/css/styles.css` so the palette is consistent across the whole site and easy to adjust in one place.
+
 ### Layout
 
 - **Max content width** (`--max`) with horizontal padding so lines do not stretch too wide on large monitors.
@@ -569,31 +582,31 @@ heroku open -a bookly-final
 
 ### Manual testing
 
-I complemented automated tests with manual runs in the browser, recording **what I did**, **what I expected**, and **what happened**. The table below is the checklist I used; I filled **Pass/Fail** and **Notes** as I went.
+I complemented automated tests with manual runs in the browser, recording **what I did**, **what I expected**, and **what happened**. The table below is the checklist I used; I filled **Pass/Fail**, **Notes**, and captured screenshots in `docs/images/manual-testing/`.
 
-| # | Area | Step | Expected | Pass/Fail | Notes |
-|---|------|------|----------|-----------|-------|
-| 1 | Public | Open `/` | Home loads; branding and hero visible |  |  |
-| 2 | Public | Open `/contact` | Contact content loads |  |  |
-| 3 | Public | Open `/books` | Catalog or empty state loads |  |  |
-| 4 | Public | Use search `?q=` with a known title | Matching books appear |  |  |
-| 5 | Public | Open a book detail URL | Title, author, price, description |  |  |
-| 6 | Auth | Register a new user | Redirect to books; flash success |  |  |
-| 7 | Auth | Log out | Session cleared; home or login |  |  |
-| 8 | Auth | Log in with correct password | Redirect; flash success |  |  |
-| 9 | Auth | Log in with wrong password | Stays on login; flash error |  |  |
-| 10 | Auth | Register duplicate email | Error; no duplicate user |  |  |
-| 11 | Reviews | While logged out, open book detail | No POST review without login |  |  |
-| 12 | Reviews | Post a review (logged in) | Review appears on page |  |  |
-| 13 | Reviews | Edit **your** review | Updated text/rating shown |  |  |
-| 14 | Reviews | Delete **your** review | Review removed |  |  |
-| 15 | Reviews | Attempt to delete another user’s review (second account) | Blocked with message |  |  |
-| 16 | Cart | Add book to cart | Line appears with correct title/qty |  |  |
-| 17 | Cart | Change quantity / remove line | Totals and rows update |  |  |
-| 18 | Cart | Checkout with empty cart | Error flash; redirect to cart |  |  |
-| 19 | Orders | Checkout with items | Order on Orders page; cart empty |  |  |
-| 20 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page |  |  |
-| 21 | Admin | Same as admin user | Dashboard metrics load |  |  |
+| # | Area | Step | Expected | Pass/Fail | Notes | Screenshot evidence |
+|---|------|------|----------|-----------|-------|-------------------|
+| 1 | Public | Open `/` | Home loads; branding and hero visible |  |  | `docs/images/manual-testing/01-home.png` |
+| 2 | Public | Open `/contact` | Contact content loads |  |  | `docs/images/manual-testing/02-contact.png` |
+| 3 | Public | Open `/books` | Catalog or empty state loads |  |  | `docs/images/manual-testing/03-books-list.png` |
+| 4 | Public | Use search `?q=` with a known title | Matching books appear |  |  | `docs/images/manual-testing/04-search.png` |
+| 5 | Public | Open a book detail URL | Title, author, price, description |  |  | `docs/images/manual-testing/05-book-detail.png` |
+| 6 | Auth | Register a new user | Redirect to books; flash success |  |  | `docs/images/manual-testing/06-register-success.png` |
+| 7 | Auth | Log out | Session cleared; home or login |  |  | `docs/images/manual-testing/07-logout.png` |
+| 8 | Auth | Log in with correct password | Redirect; flash success |  |  | `docs/images/manual-testing/08-login-success.png` |
+| 9 | Auth | Log in with wrong password | Stays on login; flash error |  |  | `docs/images/manual-testing/09-login-fail.png` |
+| 10 | Auth | Register duplicate email | Error; no duplicate user |  |  | `docs/images/manual-testing/10-register-duplicate.png` |
+| 11 | Reviews | While logged out, open book detail | No POST review without login |  |  | `docs/images/manual-testing/11-reviews-guest.png` |
+| 12 | Reviews | Post a review (logged in) | Review appears on page |  |  | `docs/images/manual-testing/12-review-created.png` |
+| 13 | Reviews | Edit **your** review | Updated text/rating shown |  |  | `docs/images/manual-testing/13-review-edit.png` |
+| 14 | Reviews | Delete **your** review | Review removed |  |  | `docs/images/manual-testing/14-review-delete.png` |
+| 15 | Reviews | Attempt to delete another user’s review (second account) | Blocked with message |  |  | `docs/images/manual-testing/15-review-owner-block.png` |
+| 16 | Cart | Add book to cart | Line appears with correct title/qty |  |  | `docs/images/manual-testing/16-cart-add.png` |
+| 17 | Cart | Change quantity / remove line | Totals and rows update |  |  | `docs/images/manual-testing/17-cart-update-remove.png` |
+| 18 | Cart | Checkout with empty cart | Error flash; redirect to cart |  |  | `docs/images/manual-testing/18-checkout-empty.png` |
+| 19 | Orders | Checkout with items | Order on Orders page; cart empty |  |  | `docs/images/manual-testing/19-checkout-success.png` |
+| 20 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page |  |  | `docs/images/manual-testing/20-analytics-403.png` |
+| 21 | Admin | Same as admin user | Dashboard metrics load |  |  | `docs/images/manual-testing/21-analytics-admin.png` |
 
 Where something failed during manual runs, I kept **screenshots** or a short log and noted the fix in the bug table or devlog.
 

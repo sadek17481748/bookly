@@ -75,6 +75,10 @@ def create_app() -> Flask:
     def forbidden(_err):
         return render_template("403.html"), 403
 
+    @app.errorhandler(404)
+    def not_found(_err):
+        return render_template("404.html"), 404
+
     # ================= FLASK CLI COMMANDS =================
     # init-db, reset-db, make-admin
     register_cli(app)
