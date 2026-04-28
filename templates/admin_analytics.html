@@ -13,7 +13,10 @@
   {# ================= PAGE HEADER ================= #}
   <div class="page-head">
     <h1>Analytics dashboard</h1>
-    <div class="muted">Admin only</div>
+    <div class="row wrap">
+      <div class="muted">Admin only</div>
+      <a class="btn btn-small btn-secondary" href="{{ url_for('admin.new_book_form') }}">Add book</a>
+    </div>
   </div>
 
   {# ================= ROW 1: KPI SUMMARY ================= #}
