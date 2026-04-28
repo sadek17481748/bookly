@@ -3,12 +3,6 @@
 ## Table of Contents
 
 - [Overview](#overview)
-  - [Project 3 scope vs what this submission demonstrates](#project-3-scope-vs-what-this-submission-demonstrates)
-  - [Why PostgreSQL is the technical centre of this work](#why-postgresql-is-the-technical-centre-of-this-work)
-  - [Request flow overview](#request-flow-overview)
-  - [Role of Flask](#role-of-flask)
-  - [Database (PostgreSQL)](#database-postgresql)
-  - [HTML, CSS, JavaScript](#html-css-javascript)
 - [Quick links (assessor)](#quick-links-assessor)
 - [Features](#features)
 - [User Experience (UX)](#user-experience-ux)
@@ -18,6 +12,13 @@
 - [File Structure](#file-structure)
 - [Development](#development)
 - [Deployment](#deployment)
+- [Technical overview](#technical-overview)
+  - [Why PostgreSQL is the technical centre of this work](#why-postgresql-is-the-technical-centre-of-this-work)
+  - [Request flow overview](#request-flow-overview)
+  - [Role of Flask](#role-of-flask)
+  - [Project 3 scope vs what this submission demonstrates](#project-3-scope-vs-what-this-submission-demonstrates)
+  - [Database (PostgreSQL)](#database-postgresql)
+  - [HTML, CSS, JavaScript](#html-css-javascript)
 - [Testing and Bugs](#testing-and-bugs)
   - [Manual Testing](#manual-testing)
   - [Automated Testing](#automated-testing)
@@ -80,79 +81,6 @@ Screenshots are shown below so key screens are visible directly in this README.
 
 ![Analytics dashboard](docs/images/manual-testing/21-analytics-admin.png)
 
-### Why PostgreSQL is the technical centre of this work
-
-PostgreSQL is not an afterthought or a “label” on the README:
-
-- **Connection:** the app reads `DATABASE_URL` from the environment (`config.py`, `.env.example`). In development this pointed at a **local Postgres** instance; on Heroku it used the **managed Postgres** add-on URL.
-- **Integrity:** foreign keys tie reviews to users and books, cart lines to users and books, order items to orders and books. `schema.sql` lists the same structure for reference and marking.
-- **Meaningful writes:** checkout creates an `orders` row and multiple `order_items` rows, then deletes `cart_items` for that user—i.e. a **multi-table write** I verified in `psql` and other SQL clients during development.
-- **Read patterns:** the admin dashboard uses **aggregations** (`COUNT`, `SUM`, `GROUP BY`, joins) executed against real tables—exactly the kind of SQL competence Project 3 is meant to evidence, surfaced through the UI.
-
-Automated tests in `tests/` use **SQLite in-memory** only so `pytest` runs quickly **without** Postgres on the machine running CI. For marking and demos I still ran the app against **PostgreSQL** as described in [Development](#development).
-
-### Request flow overview
-
-1. The browser requests a URL (e.g. `/books`).
-2. Flask maps the URL to a **view function** in a blueprint (`books.py`, `cart.py`, etc.).
-3. The view uses **SQLAlchemy** to query or change rows in **PostgreSQL** (via `DATABASE_URL`).
-4. Flask renders a **Jinja2** template and injects the results (e.g. `books`, `reviews`).
-5. The server returns **HTML**; the browser requests **static** assets (`styles.css`, `main.js`).
-6. Small behaviours (mobile nav toggle, `data-confirm` on delete) are handled in **JavaScript** without replacing server-side validation.
-
-This is **server-side rendering**, not a single-page React/Vue app: most HTML is produced on the server, which keeps the project understandable while still being “full stack” in the sense of **HTTP + app + database**.
-
-### Role of Flask
-
-Flask provides the **web layer** between the user and PostgreSQL:
-
-- **Routing:** maps paths like `/`, `/books`, `/cart`, `/orders/checkout` to Python functions.
-- **HTTP verbs:** distinguishes **GET** (show form or page) from **POST** (submit form, mutate data).
-- **Sessions / auth:** Flask-Login loads the current user from the session cookie and ties actions to `users.id` in Postgres.
-- **Templates:** connects each response to a file under `templates/`.
-- **Blueprints:** splits features into `auth.py`, `books.py`, `cart.py`, `orders.py`, `admin.py` so the codebase stays readable.
-
-### Database (PostgreSQL)
-
-PostgreSQL stores:
-
-- **Users** (email, password hash, admin flag, timestamps).
-- **Books** (title, author, category, price in cents, description, optional `cover_url`).
-- **Reviews** (rating, body, links to user and book).
-- **Cart items** (per user and book, quantity; unique constraint so one row merges quantities).
-- **Orders** and **order items** (order header + line items with **unit price snapshot** in cents).
-
-SQLAlchemy maps Python classes in `models.py` to these tables. **`flask init-db`** calls `db.create_all()` so the live schema matches the models (`cli.py`). **`schema.sql`** is a human-readable duplicate of the layout for documentation and external review.
-
-### Project 3 scope vs what this submission demonstrates
-
-For **Project 3**, the emphasis was typically on **PostgreSQL**—designing tables, relationships, and queries—often with a **lighter** presentation layer than a full production-style web stack.
-
-This project **goes beyond** that minimal presentation bar and is implemented as a **small full-stack, server-rendered application**:
-
-| Typical Project 3 focus | What bookly adds (and why) |
-|-------------------------|----------------------------|
-| SQL scripts, ER thinking, maybe a thin UI | **End-to-end paths**: browser → Flask routes → SQLAlchemy → **PostgreSQL** → HTML response. That makes the database work **visible and testable** as part of a real use case (browse → cart → checkout → orders). |
-| Less emphasis on auth, sessions, deployment | **Flask-Login** sessions, **environment-based configuration**, and a **Heroku-style** deployment story so Postgres is not “theory only” but runnable **locally and** on a hosted database. |
-
-**Why that is defensible for marking**
-
-1. **PostgreSQL remains the source of truth.** Users, books, reviews, cart rows, orders, and order items all live in Postgres. The ORM generates SQL; constraints (foreign keys, uniqueness on cart lines) match standard relational design taught on the course.
-2. **A thin static page** can show a `SELECT` result, but it does not demonstrate **transactions across steps** (cart updates, checkout clearing the cart while inserting orders) or **authorization** (only the review owner can delete). Those behaviours need **application logic** tied to the database.
-3. **Separation of concerns is still clear:** `schema.sql` documents the DDL; `models.py` mirrors it for SQLAlchemy; `books.py`, `cart.py`, `orders.py` show **which HTTP actions cause which writes** to Postgres.
-
-For assessment, **`schema.sql`**, the **`models.py` ↔ table mapping**, and **`docs/devlog.md`** (setup notes) document the relational design and local setup. The Flask routes and blueprints show **how** that PostgreSQL design is exercised in practice (browse, cart, checkout, admin reads).
-
-### HTML, CSS, JavaScript
-
-- **HTML / Jinja2** under `templates/` builds pages and loops (e.g. book grid, review list).
-- **CSS** in `static/css/styles.css` defines layout, dark theme, responsive grids, forms, and admin tables.
-- **JavaScript** in `static/js/main.js` adds progressive enhancements (nav toggle, confirm before destructive POSTs). **Security rules stay on the server** (e.g. “only delete your own review” is enforced in Python, not only in JS).
-
-### Why this approach?
-
-Server-rendered Flask keeps the **data model and SQL story** in the foreground: every important screen is backed by a query or write that maps clearly to **PostgreSQL**. That aligns with Project 3 learning outcomes while still delivering a coherent small product.
-
 ---
 
 ## Features
@@ -209,7 +137,8 @@ Server-rendered Flask keeps the **data model and SQL story** in the foreground: 
 
 ### Responsive behaviour
 
-- CSS breakpoints stack grids on smaller screens; book detail becomes single column; footer columns collapse.
+- **Best viewed on laptop/desktop:** the catalogue grid, checkout summary, order history, and especially the **admin analytics tables** are easier to read and compare on a wider screen (more items visible at once, less scrolling).
+- **Phone/tablet support:** the site was adjusted to be usable on smaller screens (responsive CSS breakpoints stack multi-column layouts into a single column, the book detail page collapses, the footer becomes one column, and the navigation switches to a hamburger menu).
 
 ### Target audience & user stories
 
@@ -606,6 +535,83 @@ heroku open -a bookly-final
 
 ---
 
+## Technical overview
+
+### Why PostgreSQL is the technical centre of this work
+
+PostgreSQL is not an afterthought or a “label” on the README:
+
+- **Connection:** the app reads `DATABASE_URL` from the environment (`config.py`, `.env.example`). In development this pointed at a **local Postgres** instance; on Heroku it used the **managed Postgres** add-on URL.
+- **Integrity:** foreign keys tie reviews to users and books, cart lines to users and books, order items to orders and books. `schema.sql` lists the same structure for reference and marking.
+- **Meaningful writes:** checkout creates an `orders` row and multiple `order_items` rows, then deletes `cart_items` for that user—i.e. a **multi-table write** I verified in `psql` and other SQL clients during development.
+- **Read patterns:** the admin dashboard uses **aggregations** (`COUNT`, `SUM`, `GROUP BY`, joins) executed against real tables—exactly the kind of SQL competence Project 3 is meant to evidence, surfaced through the UI.
+
+Automated tests in `tests/` use **SQLite in-memory** only so `pytest` runs quickly **without** Postgres on the machine running CI. For marking and demos I still ran the app against **PostgreSQL** as described in [Development](#development).
+
+### Request flow overview
+
+1. The browser requests a URL (e.g. `/books`).
+2. Flask maps the URL to a **view function** in a blueprint (`books.py`, `cart.py`, etc.).
+3. The view uses **SQLAlchemy** to query or change rows in **PostgreSQL** (via `DATABASE_URL`).
+4. Flask renders a **Jinja2** template and injects the results (e.g. `books`, `reviews`).
+5. The server returns **HTML**; the browser requests **static** assets (`styles.css`, `main.js`).
+6. Small behaviours (mobile nav toggle, `data-confirm` on delete) are handled in **JavaScript** without replacing server-side validation.
+
+This is **server-side rendering**, not a single-page React/Vue app: most HTML is produced on the server, which keeps the project understandable while still being “full stack” in the sense of **HTTP + app + database**.
+
+### Role of Flask
+
+Flask provides the **web layer** between the user and PostgreSQL:
+
+- **Routing:** maps paths like `/`, `/books`, `/cart`, `/orders/checkout` to Python functions.
+- **HTTP verbs:** distinguishes **GET** (show form or page) from **POST** (submit form, mutate data).
+- **Sessions / auth:** Flask-Login loads the current user from the session cookie and ties actions to `users.id` in Postgres.
+- **Templates:** connects each response to a file under `templates/`.
+- **Blueprints:** splits features into `auth.py`, `books.py`, `cart.py`, `orders.py`, `admin.py` so the codebase stays readable.
+
+### Database (PostgreSQL)
+
+PostgreSQL stores:
+
+- **Users** (email, password hash, admin flag, timestamps).
+- **Books** (title, author, category, price in cents, description, optional `cover_url`).
+- **Reviews** (rating, body, links to user and book).
+- **Cart items** (per user and book, quantity; unique constraint so one row merges quantities).
+- **Orders** and **order items** (order header + line items with **unit price snapshot** in cents).
+
+SQLAlchemy maps Python classes in `models.py` to these tables. **`flask init-db`** calls `db.create_all()` so the live schema matches the models (`cli.py`). **`schema.sql`** is a human-readable duplicate of the layout for documentation and external review.
+
+### Project 3 scope vs what this submission demonstrates
+
+For **Project 3**, the emphasis was typically on **PostgreSQL**—designing tables, relationships, and queries—often with a **lighter** presentation layer than a full production-style web stack.
+
+This project **goes beyond** that minimal presentation bar and is implemented as a **small full-stack, server-rendered application**:
+
+| Typical Project 3 focus | What bookly adds (and why) |
+|-------------------------|----------------------------|
+| SQL scripts, ER thinking, maybe a thin UI | **End-to-end paths**: browser → Flask routes → SQLAlchemy → **PostgreSQL** → HTML response. That makes the database work **visible and testable** as part of a real use case (browse → cart → checkout → orders). |
+| Less emphasis on auth, sessions, deployment | **Flask-Login** sessions, **environment-based configuration**, and a **Heroku-style** deployment story so Postgres is not “theory only” but runnable **locally and** on a hosted database. |
+
+**Why that is defensible for marking**
+
+1. **PostgreSQL remains the source of truth.** Users, books, reviews, cart rows, orders, and order items all live in Postgres. The ORM generates SQL; constraints (foreign keys, uniqueness on cart lines) match standard relational design taught on the course.
+2. **A thin static page** can show a `SELECT` result, but it does not demonstrate **transactions across steps** (cart updates, checkout clearing the cart while inserting orders) or **authorization** (only the review owner can delete). Those behaviours need **application logic** tied to the database.
+3. **Separation of concerns is still clear:** `schema.sql` documents the DDL; `models.py` mirrors it for SQLAlchemy; `books.py`, `cart.py`, `orders.py` show **which HTTP actions cause which writes** to Postgres.
+
+For assessment, **`schema.sql`**, the **`models.py` ↔ table mapping**, and **`docs/devlog.md`** (setup notes) document the relational design and local setup. The Flask routes and blueprints show **how** that PostgreSQL design is exercised in practice (browse, cart, checkout, admin reads).
+
+### HTML, CSS, JavaScript
+
+- **HTML / Jinja2** under `templates/` builds pages and loops (e.g. book grid, review list).
+- **CSS** in `static/css/styles.css` defines layout, dark theme, responsive grids, forms, and admin tables.
+- **JavaScript** in `static/js/main.js` adds progressive enhancements (nav toggle, confirm before destructive POSTs). **Security rules stay on the server** (e.g. “only delete your own review” is enforced in Python, not only in JS).
+
+### Why this approach?
+
+Server-rendered Flask keeps the **data model and SQL story** in the foreground: every important screen is backed by a query or write that maps clearly to **PostgreSQL**. That aligns with Project 3 learning outcomes while still delivering a coherent small product.
+
+---
+
 ## Testing and Bugs
 
 ### Manual testing
@@ -761,7 +767,133 @@ These are **third-party tutorials and playlists** that helped while building boo
 | freeCodeCamp.org — Python OOP Tutorial | [YouTube video](https://www.youtube.com/watch?v=JeznW_7DlB0) |
 | Corey Schafer — Python Decorators & Generators | [YouTube video](https://www.youtube.com/watch?v=FsAPt_9Bf3U) |
 | Real Python — Python Best Practices | [YouTube video](https://www.youtube.com/watch?v=rfscVS0vtbw) |
-| freeCodeCamp.org — Python Data Structures | [YouTube video](https://www.youtube.com/watch?v=R-HLU9Fl5ug) |
+| freeCodeCamp.org — Python Data Structures | [YouTube video](https://www.youtube.com/watch?v=R-HLU9Fl5ug) | 
+
+# Sources for Python
+
+This document compiles helpful references and sources related to Flask, SQLAlchemy, environment management, security, and best practices for Python web development.
+
+---
+
+## Flask Application Structure and Best Practices
+
+- **Application Factory Pattern**  
+  https://flask.palletsprojects.com/en/2.3.x/patterns/appfactories/
+
+- **Flask Configuration Management**  
+  https://flask.palletsprojects.com/en/2.3.x/config/
+
+- **Using python-dotenv for Environment Variables**  
+  https://github.com/theskumar/python-dotenv
+
+- **BluePrints in Flask**  
+  https://flask.palletsprojects.com/en/2.3.x/blueprints/
+
+- **Error Handling in Flask**  
+  https://flask.palletsprojects.com/en/2.3.x/errorhandling/
+
+- **Registering CLI Commands in Flask**  
+  https://flask.palletsprojects.com/en/2.3.x/cli/
+
+- **Deployment Considerations (Gunicorn, Heroku)**  
+  https://devcenter.heroku.com/categories/python
+
+---
+
+## Flask-Login and User Authentication
+
+- **Flask-Login Documentation**  
+  https://flask-login.readthedocs.io/en/latest/
+
+- **Password Hashing with Werkzeug**  
+  https://werkzeug.palletsprojects.com/en/2.3.x/utils/#module-werkzeug.security
+
+- **Security Best Practices in Flask**  
+  - Use HTTPS in production  
+  - Validate email addresses properly  
+  - Protect against CSRF (consider flask-wtf)  
+  https://owasp.org/www-community/controls/Session_Management  
+  https://owasp.org/www-community/Input_Validation
+
+---
+
+## Flask and SQLAlchemy ORM
+
+- **SQLAlchemy ORM Documentation**  
+  https://docs.sqlalchemy.org/en/14/orm/
+
+- **Creating and Dropping Tables**  
+  https://docs.sqlalchemy.org/en/14/orm/session_api.html#sqlalchemy.orm.session.Session
+
+- **Application-wide Database Object Pattern**  
+  https://flask-sqlalchemy.palletsprojects.com/en/3.0.x/contexts/#application-setup
+
+- **Querying and Filtering**  
+  https://docs.sqlalchemy.org/en/14/orm/query.html
+
+---
+
+## Flask Static Files and URL Handling
+
+- **Flask Static Files**  
+  https://flask.palletsprojects.com/en/2.3.x/quickstart/#static-files
+
+- **URL Building with `url_for`**  
+  https://flask.palletsprojects.com/en/2.3.x/templating/#url-for
+
+---
+
+## Database and Environment Configuration
+
+- **Using Environment Variables for Secrets**  
+  https://12factor.net/config
+
+- **Heroku DATABASE_URL Compatibility**  
+  - Heroku Postgres URL: https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-python  
+  - SQLAlchemy URL Schemes: https://docs.sqlalchemy.org/en/14/core/engines.html#database-urls
+
+---
+
+## Flask CLI Command Development
+
+- **Flask CLI Documentation**  
+  https://flask.palletsprojects.com/en/2.3.x/cli/
+
+- **Creating Custom CLI Commands**  
+  https://flask.palletsprojects.com/en/2.3.x/cli/#custom-commands
+
+- **Seeding Data and Migrations**  
+  - https://realpython.com/building-a-flask-and-sqlalchemy-application/  
+  - https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-vii-webforms
+
+---
+
+## Common Security and Best Practices
+
+- **Input Validation and Sanitization**  
+  https://owasp.org/www-community/Input_Validation
+
+- **Cross-site Request Forgery (CSRF) Protection**  
+  https://flask-wtf.readthedocs.io/en/stable/csrf.html
+
+- **Session Security and Management**  
+  https://owasp.org/www-community/controls/Session_Management
+
+---
+
+## Miscellaneous
+
+- **Slug Creation and String Normalization in Python**  
+  https://slugify.readthedocs.io/en/latest/  
+  https://docs.python.org/3/library/re.html  
+  https://docs.python.org/3/library/stdtypes.html#str.casefold
+
+- **Path Handling with pathlib**  
+  https://docs.python.org/3/library/pathlib.html
+
+---
+
+This collection aims to provide authoritative sources to deepen your understanding and guide best practices in Python web development with Flask and SQLAlchemy.
 
 ### Images used in this project
 
