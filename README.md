@@ -160,25 +160,41 @@ Screenshots are shown below so key screens are visible directly in this README.
 
 **First-time / guest user**
 
-- As a guest, I want to browse the catalogue so I can decide if I want to register.
-- As a guest, I want to search by title/author so I can find a book quickly.
-- As a guest, I want to see a book detail page so I can read the description and reviews.
+- As a guest, I want to land on a clear home page so I understand what the site does and what I can do next.
+- As a guest, I want to browse the catalogue so I can explore what books are available before making an account.
+- As a guest, I want to search by title/author so I can find a specific book quickly.
+- As a guest, I want to open a book detail page so I can read the description and existing reviews before deciding whether to register.
+- As a guest, I want to see a clear message when I try to access a protected feature (cart, orders, reviews) so I know I need to log in.
 
 **Registered / returning user**
 
-- As a user, I want to register and log in so I can review and purchase books.
-- As a user, I want to add books to my cart and adjust quantities so I can manage my order before checkout.
-- As a user, I want to check out and then view my past orders so I can confirm the purchase was recorded.
+- As a user, I want to register and log in so I can access features that require an account (reviews, cart, checkout, orders).
+- As a user, I want to add books to my cart and adjust quantities so I can control my order without starting over.
+- As a user, I want the cart total to update correctly when I change quantities so I can trust the checkout amount.
+- As a user, I want to check out so my purchase is saved as an order (with order items) in the database.
+- As a user, I want to view my order history so I can confirm what I bought after checkout.
+- As a user, I want to create reviews with a rating and text so I can share feedback on books I read.
 - As a user, I want to edit/delete **my own** reviews so I can correct mistakes or remove outdated feedback.
+- As a user, I want to be prevented from editing/deleting other people’s reviews so the site feels fair and secure.
 
 **Admin**
 
-- As an admin, I want to view the analytics dashboard so I can track revenue, orders, and top-selling books.
-- As an admin, I want to add a new book to the catalogue (including a category and cover) so I can expand the store inventory.
+- As an admin, I want to view the analytics dashboard so I can monitor revenue, orders, and top-selling books.
+- As an admin, I want to see a category breakdown so I can understand the shape of the catalogue at a glance.
+- As an admin, I want to add a new book to the catalogue (including a category and cover) so I can expand inventory without touching the database directly.
+- As an admin, I want non-admin users to be blocked from admin pages so sensitive business information is protected.
 
 ### Target audience & user stories
 
-The site is aimed at **readers** who want to browse a catalogue, read reviews, and buy books online, and at a **store admin** who needs simple sales visibility. User stories (personas, “As a … I want …”) are included in the **written report** that accompanies this submission where required by the brief.
+The site is aimed at **readers** who want a simple way to browse a small catalogue, check book details, read/write reviews, and place an order using a lightweight checkout flow. It is also aimed at a **store admin** who needs quick visibility of what is happening in the store (revenue, order volume, top sellers, and category distribution) without exporting data or running SQL manually.
+
+In practice, I thought about three “audience groups” while building and testing:
+
+- **Guest visitors**: explore the catalogue and understand the value of the site without being forced to create an account immediately.
+- **Registered customers**: complete the core journey (browse → cart → checkout → orders) and manage their own reviews.
+- **Admin user**: manage the catalogue (add books) and review store performance using the analytics dashboard.
+
+The user stories above are the ones I used to guide feature scope and testing. They map directly to the live routes and the database flows (catalogue read, review write, cart write, order + order items write, and analytics aggregates).
 
 ---
 
@@ -665,22 +681,27 @@ I complemented automated tests with manual runs in the browser, recording **what
 | 4 | Public | Use search `?q=` with a known title | Matching books appear | Pass |  | [04-search](docs/images/manual-testing/04-search.png)<br>[04b-search-no-results](docs/images/manual-testing/04b-search-no-results.png) |
 | 5 | Public | Open a book detail URL | Title, author, price, description | Pass |  | [05-book-detail](docs/images/manual-testing/05-book-detail.png) |
 | 6 | Auth | Register a new user | Redirect to books; flash success | Pass |  | [06a-register-form](docs/images/manual-testing/06a-register-form.png)<br>[06-register-success](docs/images/manual-testing/06-register-success.png) |
-| 7 | Auth | Log out | Session cleared; home or login | Pass | Screenshot pending | `docs/images/manual-testing/07-logout.png` |
-| 8 | Auth | Log in with correct password | Redirect; flash success | Pass |  | [08-login-success](docs/images/manual-testing/08-login-success.png) |
-| 9 | Auth | Log in with wrong password | Stays on login; flash error | Pass | Screenshot pending | `docs/images/manual-testing/09-login-fail.png` |
-| 10 | Auth | Register duplicate email | Error; no duplicate user | Pass |  | [10-register-duplicate](docs/images/manual-testing/10-register-duplicate.png) |
-| 11 | Reviews | While logged out, open book detail | No POST review without login | Pass | Screenshot pending | `docs/images/manual-testing/11-reviews-guest.png` |
-| 12 | Reviews | Post a review (logged in) | Review appears on page | Pass |  | [12-review-created](docs/images/manual-testing/12-review-created.png) |
-| 13 | Reviews | Edit **your** review | Updated text/rating shown | Pass |  | [13-review-edit](docs/images/manual-testing/13-review-edit.png) |
-| 14 | Reviews | Delete **your** review | Review removed | Pass |  | [14-review-delete](docs/images/manual-testing/14-review-delete.png) |
-| 15 | Reviews | Attempt to delete another user’s review (second account) | Blocked with message | Pass |  | [15-review-owner-block](docs/images/manual-testing/15-review-owner-block.png) |
-| 16 | Cart | Add book to cart | Line appears with correct title/qty | Pass |  | [16-cart-add](docs/images/manual-testing/16-cart-add.png) |
-| 17 | Cart | Change quantity / remove line | Totals and rows update | Pass |  | [17-cart-update-remove](docs/images/manual-testing/17-cart-update-remove.png) |
-| 18 | Cart | Checkout with empty cart | Error flash; redirect to cart | Pass | Screenshot pending | `docs/images/manual-testing/18-checkout-empty.png` |
-| 19 | Orders | Checkout with items | Order on Orders page; cart empty | Pass |  | [19-checkout-success](docs/images/manual-testing/19-checkout-success.png)<br>[19b-orders-page](docs/images/manual-testing/19b-orders-page.png) |
-| 20 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page | Pass | Screenshot pending | `docs/images/manual-testing/20-analytics-403.png` |
-| 21 | Admin | Same as admin user | Dashboard metrics load | Pass |  | [21-analytics-admin](docs/images/manual-testing/21-analytics-admin.png) |
-| 22 | Admin | Add a new book via Analytics → Add book | Book created and visible in catalogue | Pass |  | [22-admin-add-book](docs/images/manual-testing/22-admin-add-book.png)<br>[23-admin-book-added](docs/images/manual-testing/23-admin-book-added.png) |
+| 7 | Auth | On Register, enter an invalid email format | Browser validation blocks submit; user is prompted to enter a valid email | Pass |  | [24-register-email-required](docs/images/manual-testing/24-register-email-required.png) |
+| 8 | Auth | On Register, enter a password under 6 characters | Browser validation prompts “Use at least 6 characters” | Pass |  | [25-register-password-min-length](docs/images/manual-testing/25-register-password-min-length.png) |
+| 9 | Auth | Register with mismatched passwords | Error message shown; account not created | Pass |  | [26-register-passwords-dont-match](docs/images/manual-testing/26-register-passwords-dont-match.png) |
+| 10 | Auth | Log out | Session cleared; home or login | Pass | Screenshot pending | `docs/images/manual-testing/07-logout.png` |
+| 11 | Auth | Log in with correct password | Redirect; flash success | Pass |  | [08-login-success](docs/images/manual-testing/08-login-success.png) |
+| 12 | Auth | Log in with wrong password | Stays on login; flash error | Pass | Screenshot pending | `docs/images/manual-testing/09-login-fail.png` |
+| 13 | Auth | Register duplicate email | Error; no duplicate user | Pass |  | [10-register-duplicate](docs/images/manual-testing/10-register-duplicate.png) |
+| 14 | Reviews | While logged out, open book detail | No POST review without login | Pass | Screenshot pending | `docs/images/manual-testing/11-reviews-guest.png` |
+| 15 | Reviews | Post a review (logged in) | Review appears on page | Pass |  | [12-review-created](docs/images/manual-testing/12-review-created.png) |
+| 16 | Reviews | Edit **your** review | Updated text/rating shown | Pass |  | [13-review-edit](docs/images/manual-testing/13-review-edit.png) |
+| 17 | Reviews | Delete **your** review | Review removed | Pass |  | [14-review-delete](docs/images/manual-testing/14-review-delete.png) |
+| 18 | Reviews | Attempt to delete another user’s review (second account) | Blocked with message | Pass |  | [15-review-owner-block](docs/images/manual-testing/15-review-owner-block.png) |
+| 19 | Cart | Add book to cart | Line appears with correct title/qty | Pass |  | [16-cart-add](docs/images/manual-testing/16-cart-add.png) |
+| 20 | Cart | Change quantity / remove line | Totals and rows update | Pass |  | [17-cart-update-remove](docs/images/manual-testing/17-cart-update-remove.png) |
+| 21 | Cart | Checkout with empty cart | Error flash; redirect to cart | Pass | Screenshot pending | `docs/images/manual-testing/18-checkout-empty.png` |
+| 22 | Orders | Checkout with items | Order on Orders page; cart empty | Pass |  | [19-checkout-success](docs/images/manual-testing/19-checkout-success.png)<br>[19b-orders-page](docs/images/manual-testing/19b-orders-page.png) |
+| 23 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page | Pass | Screenshot pending | `docs/images/manual-testing/20-analytics-403.png` |
+| 24 | Admin | Same as admin user | Dashboard metrics load | Pass |  | [21-analytics-admin](docs/images/manual-testing/21-analytics-admin.png) |
+| 25 | Admin | Add a new book via Analytics → Add book | Book created and visible in catalogue | Pass |  | [22-admin-add-book](docs/images/manual-testing/22-admin-add-book.png)<br>[23-admin-book-added](docs/images/manual-testing/23-admin-book-added.png) |
+| 26 | Orders | Large order test (multiple items and quantities) | Cart subtotal matches checkout total; order summary lists all items | Pass |  | [27-large-order-cart](docs/images/manual-testing/27-large-order-cart.png)<br>[28-large-order-checkout](docs/images/manual-testing/28-large-order-checkout.png)<br>[29-large-order-checkout-total](docs/images/manual-testing/29-large-order-checkout-total.png) |
+| 27 | Orders | Log out during checkout, then log back in | Redirects to login and returns to checkout (via `next=`); checkout can continue | Pass |  | [30-checkout-logout-login-continue](docs/images/manual-testing/30-checkout-logout-login-continue.png) |
 
 #### 404 page (assessor note + evidence)
 
@@ -917,11 +938,9 @@ This subsection lists **external reference points** that match key features in b
 
 Sample route from this project (serves the home template):
 
-```python
-@app.get("/")
-def home():
-    return render_template("home.html")
-```
+    @app.get("/")
+    def home():
+        return render_template("home.html")
 
 #### 2) Contact Page (`/contact`)
 
@@ -929,24 +948,20 @@ def home():
 
 In this project, the contact page is intentionally a simple informational page (no POST form submission):
 
-```python
-@app.get("/contact")
-def contact():
-    return render_template("contact.html")
-```
+    @app.get("/contact")
+    def contact():
+        return render_template("contact.html")
 
 Template snippet (`templates/contact.html`):
 
-```html
-<h1>Contact us</h1>
-<section class="card">
-  <h2>Get in touch</h2>
-  <ul class="contact-list">
-    <li><strong>Email:</strong> <a href="mailto:contact@bookly.example">contact@bookly.example</a></li>
-    <li><strong>Phone:</strong> <a href="tel:+10000000000">+1 (000) 000-0000</a></li>
-  </ul>
-</section>
-```
+    <h1>Contact us</h1>
+    <section class="card">
+      <h2>Get in touch</h2>
+      <ul class="contact-list">
+        <li><strong>Email:</strong> <a href="mailto:contact@bookly.example">contact@bookly.example</a></li>
+        <li><strong>Phone:</strong> <a href="tel:+10000000000">+1 (000) 000-0000</a></li>
+      </ul>
+    </section>
 
 #### 3) Browse Books Catalogue (`/books`)
 
@@ -959,13 +974,11 @@ Template snippet (`templates/contact.html`):
 
 Sample search logic from this project (`books.py`):
 
-```python
-q = (request.args.get("q") or "").strip()
-query = Book.query
-if q:
-    like = f"%{q}%"
-    query = query.filter((Book.title.ilike(like)) | (Book.author.ilike(like)))
-```
+    q = (request.args.get("q") or "").strip()
+    query = Book.query
+    if q:
+        like = f"%{q}%"
+        query = query.filter((Book.title.ilike(like)) | (Book.author.ilike(like)))
 
 #### 5) Book Detail Pages (`/books/<id>`)
 
@@ -973,12 +986,10 @@ if q:
 
 Sample route from this project (`books.py`):
 
-```python
-@books_bp.get("/<int:book_id>")
-def book_detail(book_id: int):
-    book = Book.query.get_or_404(book_id)
-    # ... load reviews, render template ...
-```
+    @books_bp.get("/<int:book_id>")
+    def book_detail(book_id: int):
+        book = Book.query.get_or_404(book_id)
+        # ... load reviews, render template ...
 
 #### 6) Custom Error Pages (403, 404)
 
@@ -986,15 +997,13 @@ def book_detail(book_id: int):
 
 Sample error handlers from this project (`app.py`):
 
-```python
-@app.errorhandler(403)
-def forbidden(_err):
-    return render_template("403.html"), 403
+    @app.errorhandler(403)
+    def forbidden(_err):
+        return render_template("403.html"), 403
 
-@app.errorhandler(404)
-def not_found(_err):
-    return render_template("404.html"), 404
-```
+    @app.errorhandler(404)
+    def not_found(_err):
+        return render_template("404.html"), 404
 
 #### 7) Accounts (Authentication) (`/register`, `/login`, `/logout`)
 
@@ -1002,11 +1011,9 @@ def not_found(_err):
 
 Sample login guard used across the project:
 
-```python
-@login_required
-def some_view():
-    ...
-```
+    @login_required
+    def some_view():
+        ...
 
 #### 8) Reviews (Create/Edit/Delete + ownership protection)
 
@@ -1015,11 +1022,9 @@ def some_view():
 
 Sample ownership check from this project (`books.py`):
 
-```python
-if review.user_id != current_user.id:
-    flash("You can only edit your own reviews.", "error")
-    return redirect(url_for("books.book_detail", book_id=book_id))
-```
+    if review.user_id != current_user.id:
+        flash("You can only edit your own reviews.", "error")
+        return redirect(url_for("books.book_detail", book_id=book_id))
 
 #### 9) Cart + Checkout (add/view/update/checkout)
 
@@ -1027,12 +1032,10 @@ if review.user_id != current_user.id:
 
 Sample checkout behaviour from this project (`orders.py`):
 
-```python
-items = CartItem.query.filter_by(user_id=current_user.id).all()
-if not items:
-    flash("Your cart is empty.", "error")
-    return redirect(url_for("cart.view_cart"))
-```
+    items = CartItem.query.filter_by(user_id=current_user.id).all()
+    if not items:
+        flash("Your cart is empty.", "error")
+        return redirect(url_for("cart.view_cart"))
 
 #### 10) Order History (`/orders`)
 
@@ -1040,13 +1043,15 @@ if not items:
 
 Sample route from this project (`orders.py`):
 
-```python
-@orders_bp.get("")
-@login_required
-def list_orders():
-    orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
-    return render_template("orders.html", orders=orders)
-```
+    @orders_bp.get("")
+    @login_required
+    def list_orders():
+        orders = (
+            Order.query.filter_by(user_id=current_user.id)
+            .order_by(Order.created_at.desc())
+            .all()
+        )
+        return render_template("orders.html", orders=orders)
 
 #### 11) Admin Features (`/admin/...`)
 
@@ -1055,10 +1060,8 @@ def list_orders():
 
 Sample admin-only protection from this project (`admin.py`):
 
-```python
-if not getattr(current_user, "is_admin", False):
-    abort(403)
-```
+    if not getattr(current_user, "is_admin", False):
+        abort(403)
 
 #### 12) Add New Book (`/admin/books/new`)
 
@@ -1066,13 +1069,11 @@ if not getattr(current_user, "is_admin", False):
 
 This project uses a custom form and server-side validation rather than Flask-Admin:
 
-```python
-@admin_bp.post("/books/new")
-@admin_required
-def new_book_submit():
-    # validate fields, prevent duplicates, insert Book row
-    ...
-```
+    @admin_bp.post("/books/new")
+    @admin_required
+    def new_book_submit():
+        # validate fields, prevent duplicates, insert Book row
+        ...
 
 #### 13) CLI Commands & Tests
 
@@ -1081,9 +1082,7 @@ def new_book_submit():
 
 Sample CLI registration used in this project (`app.py`):
 
-```python
-register_cli(app)
-```
+    register_cli(app)
 
 ### Flask
 
