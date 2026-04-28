@@ -3,9 +3,11 @@
 ## Table of Contents
 
 - [Overview](#overview)
+  - [Project goals](#project-goals)
 - [Quick links (assessor)](#quick-links-assessor)
 - [Features](#features)
 - [User Experience (UX)](#user-experience-ux)
+  - [User stories](#user-stories)
 - [Wireframes](#wireframes)
 - [Design](#design)
 - [Technologies Used](#technologies-used)
@@ -43,6 +45,13 @@ The site is intended to demonstrate a realistic “small business” workflow:
 - Logged-in users can create and manage **their own** reviews (including **edit** and **delete** with server-side ownership checks).
 - Logged-in users can add items to a **cart**, adjust quantities, remove lines, and **check out** so that an **order** and **order line items** are written to Postgres.
 - An **admin-only** analytics dashboard reads aggregate data from Postgres (counts, sums, joins) to show revenue, orders, top-selling titles, and category distribution.
+
+### Project goals
+
+- Demonstrate a **relational PostgreSQL** design with realistic relationships and constraints (users, books, reviews, cart, orders).
+- Build clear **end-to-end flows** where database reads/writes are visible through the UI (browse → cart → checkout → orders).
+- Implement **authentication and authorisation** properly (hashed passwords, session-based login, owner-only review edit/delete, admin-only analytics).
+- Keep the project approachable for marking by using **server-rendered Flask** and a consistent file structure.
 
 ## Quick links (assessor)
 
@@ -139,6 +148,30 @@ Screenshots are shown below so key screens are visible directly in this README.
 
 - **Best viewed on laptop/desktop:** the catalogue grid, checkout summary, order history, and especially the **admin analytics tables** are easier to read and compare on a wider screen (more items visible at once, less scrolling).
 - **Phone/tablet support:** the site was adjusted to be usable on smaller screens (responsive CSS breakpoints stack multi-column layouts into a single column, the book detail page collapses, the footer becomes one column, and the navigation switches to a hamburger menu).
+
+#### Responsiveness testing evidence
+
+![Responsive testing on mobile, tablet and laptop](docs/images/validation/responsive-test-devices.png)
+
+### User stories
+
+**First-time / guest user**
+
+- As a guest, I want to browse the catalogue so I can decide if I want to register.
+- As a guest, I want to search by title/author so I can find a book quickly.
+- As a guest, I want to see a book detail page so I can read the description and reviews.
+
+**Registered / returning user**
+
+- As a user, I want to register and log in so I can review and purchase books.
+- As a user, I want to add books to my cart and adjust quantities so I can manage my order before checkout.
+- As a user, I want to check out and then view my past orders so I can confirm the purchase was recorded.
+- As a user, I want to edit/delete **my own** reviews so I can correct mistakes or remove outdated feedback.
+
+**Admin**
+
+- As an admin, I want to view the analytics dashboard so I can track revenue, orders, and top-selling books.
+- As an admin, I want to add a new book to the catalogue (including a category and cover) so I can expand the store inventory.
 
 ### Target audience & user stories
 
@@ -620,27 +653,33 @@ I complemented automated tests with manual runs in the browser, recording **what
 
 | # | Area | Step | Expected | Pass/Fail | Notes | Screenshot evidence |
 |---|------|------|----------|-----------|-------|-------------------|
-| 1 | Public | Open `/` | Home loads; branding and hero visible |  |  | [01-home](docs/images/manual-testing/01-home.png) |
-| 2 | Public | Open `/contact` | Contact content loads |  |  | `docs/images/manual-testing/02-contact.png` |
-| 3 | Public | Open `/books` | Catalog or empty state loads |  |  | [03-books-list](docs/images/manual-testing/03-books-list.png) |
-| 4 | Public | Use search `?q=` with a known title | Matching books appear |  |  | [04-search](docs/images/manual-testing/04-search.png)<br>[04b-search-no-results](docs/images/manual-testing/04b-search-no-results.png) |
-| 5 | Public | Open a book detail URL | Title, author, price, description |  |  | [05-book-detail](docs/images/manual-testing/05-book-detail.png) |
-| 6 | Auth | Register a new user | Redirect to books; flash success |  |  | [06a-register-form](docs/images/manual-testing/06a-register-form.png)<br>[06-register-success](docs/images/manual-testing/06-register-success.png) |
-| 7 | Auth | Log out | Session cleared; home or login |  |  | `docs/images/manual-testing/07-logout.png` |
-| 8 | Auth | Log in with correct password | Redirect; flash success |  |  | [08-login-success](docs/images/manual-testing/08-login-success.png) |
-| 9 | Auth | Log in with wrong password | Stays on login; flash error |  |  | `docs/images/manual-testing/09-login-fail.png` |
-| 10 | Auth | Register duplicate email | Error; no duplicate user |  |  | `docs/images/manual-testing/10-register-duplicate.png` |
-| 11 | Reviews | While logged out, open book detail | No POST review without login |  |  | `docs/images/manual-testing/11-reviews-guest.png` |
-| 12 | Reviews | Post a review (logged in) | Review appears on page |  |  | [12-review-created](docs/images/manual-testing/12-review-created.png) |
-| 13 | Reviews | Edit **your** review | Updated text/rating shown |  |  | [13-review-edit](docs/images/manual-testing/13-review-edit.png) |
-| 14 | Reviews | Delete **your** review | Review removed |  |  | [14-review-delete](docs/images/manual-testing/14-review-delete.png) |
-| 15 | Reviews | Attempt to delete another user’s review (second account) | Blocked with message |  |  | [15-review-owner-block](docs/images/manual-testing/15-review-owner-block.png) |
-| 16 | Cart | Add book to cart | Line appears with correct title/qty |  |  | [16-cart-add](docs/images/manual-testing/16-cart-add.png) |
-| 17 | Cart | Change quantity / remove line | Totals and rows update |  |  | [17-cart-update-remove](docs/images/manual-testing/17-cart-update-remove.png) |
-| 18 | Cart | Checkout with empty cart | Error flash; redirect to cart |  |  | `docs/images/manual-testing/18-checkout-empty.png` |
-| 19 | Orders | Checkout with items | Order on Orders page; cart empty |  |  | [19-checkout-success](docs/images/manual-testing/19-checkout-success.png)<br>[19b-orders-page](docs/images/manual-testing/19b-orders-page.png) |
-| 20 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page |  |  | `docs/images/manual-testing/20-analytics-403.png` |
-| 21 | Admin | Same as admin user | Dashboard metrics load |  |  | [21-analytics-admin](docs/images/manual-testing/21-analytics-admin.png) |
+| 1 | Public | Open `/` | Home loads; branding and hero visible | Pass |  | [01-home](docs/images/manual-testing/01-home.png) |
+| 2 | Public | Open `/contact` | Contact content loads | Pass | Screenshot pending | `docs/images/manual-testing/02-contact.png` |
+| 3 | Public | Open `/books` | Catalog or empty state loads | Pass |  | [03-books-list](docs/images/manual-testing/03-books-list.png) |
+| 4 | Public | Use search `?q=` with a known title | Matching books appear | Pass |  | [04-search](docs/images/manual-testing/04-search.png)<br>[04b-search-no-results](docs/images/manual-testing/04b-search-no-results.png) |
+| 5 | Public | Open a book detail URL | Title, author, price, description | Pass |  | [05-book-detail](docs/images/manual-testing/05-book-detail.png) |
+| 6 | Auth | Register a new user | Redirect to books; flash success | Pass |  | [06a-register-form](docs/images/manual-testing/06a-register-form.png)<br>[06-register-success](docs/images/manual-testing/06-register-success.png) |
+| 7 | Auth | Log out | Session cleared; home or login | Pass | Screenshot pending | `docs/images/manual-testing/07-logout.png` |
+| 8 | Auth | Log in with correct password | Redirect; flash success | Pass |  | [08-login-success](docs/images/manual-testing/08-login-success.png) |
+| 9 | Auth | Log in with wrong password | Stays on login; flash error | Pass | Screenshot pending | `docs/images/manual-testing/09-login-fail.png` |
+| 10 | Auth | Register duplicate email | Error; no duplicate user | Pass | Screenshot pending | `docs/images/manual-testing/10-register-duplicate.png` |
+| 11 | Reviews | While logged out, open book detail | No POST review without login | Pass | Screenshot pending | `docs/images/manual-testing/11-reviews-guest.png` |
+| 12 | Reviews | Post a review (logged in) | Review appears on page | Pass |  | [12-review-created](docs/images/manual-testing/12-review-created.png) |
+| 13 | Reviews | Edit **your** review | Updated text/rating shown | Pass |  | [13-review-edit](docs/images/manual-testing/13-review-edit.png) |
+| 14 | Reviews | Delete **your** review | Review removed | Pass |  | [14-review-delete](docs/images/manual-testing/14-review-delete.png) |
+| 15 | Reviews | Attempt to delete another user’s review (second account) | Blocked with message | Pass |  | [15-review-owner-block](docs/images/manual-testing/15-review-owner-block.png) |
+| 16 | Cart | Add book to cart | Line appears with correct title/qty | Pass |  | [16-cart-add](docs/images/manual-testing/16-cart-add.png) |
+| 17 | Cart | Change quantity / remove line | Totals and rows update | Pass |  | [17-cart-update-remove](docs/images/manual-testing/17-cart-update-remove.png) |
+| 18 | Cart | Checkout with empty cart | Error flash; redirect to cart | Pass | Screenshot pending | `docs/images/manual-testing/18-checkout-empty.png` |
+| 19 | Orders | Checkout with items | Order on Orders page; cart empty | Pass |  | [19-checkout-success](docs/images/manual-testing/19-checkout-success.png)<br>[19b-orders-page](docs/images/manual-testing/19b-orders-page.png) |
+| 20 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page | Pass | Screenshot pending | `docs/images/manual-testing/20-analytics-403.png` |
+| 21 | Admin | Same as admin user | Dashboard metrics load | Pass |  | [21-analytics-admin](docs/images/manual-testing/21-analytics-admin.png) |
+
+#### 404 page (assessor note + evidence)
+
+- **Where to find it:** click **Sitemap** in the footer (route: **`/sitemap`**). This route is intentionally not implemented so the custom 404 page is shown.
+
+![Custom 404 page](docs/images/validation/404-page.png)
 
 Where something failed during manual runs, I kept **screenshots** or a short log and noted the fix in the bug table or devlog.
 
@@ -671,30 +710,42 @@ The 20 rows below match the automated tests in `tests/` (reproducible with `pyte
 
 | Test number | Area | What it verifies | Pass/Fail | Notes |
 |---------------|------|------------------|-----------|-------|
-| 1 | Authentication | `GET /register` loads |  | `test_register_get_ok` |
-| 2 | Authentication | `GET /login` loads |  | `test_login_get_ok` |
-| 3 | Authentication | Register → logout → login works end-to-end |  | `test_register_login_flow` |
-| 4 | Authentication | Register rejected when passwords do not match |  | `test_register_password_mismatch` |
-| 5 | Authentication | Login rejected when password is wrong |  | `test_login_bad_password` |
-| 6 | Books & reviews | Search returns matching book |  | `test_books_search_param_ok` |
-| 7 | Books & reviews | Guest cannot POST a review (redirect to login) |  | `test_create_review_requires_login` |
-| 8 | Books & reviews | Logged-in user can create a review |  | `test_create_review_ok` |
-| 9 | Cart & orders | Guest cannot open cart (redirect) |  | `test_cart_requires_login` |
-| 10 | Cart & orders | Logged-in user can add a book to cart |  | `test_add_to_cart_ok` |
-| 11 | Cart & orders | Checkout with empty cart is handled safely |  | `test_checkout_empty_cart_redirects` |
-| 12 | Admin | Guest cannot open analytics (redirect) |  | `test_admin_analytics_requires_login` |
-| 13 | Admin | Non-admin receives **403** on analytics |  | `test_admin_analytics_forbidden_for_normal_user` |
-| 14 | Admin | Admin user receives **200** and dashboard content |  | `test_admin_analytics_ok_for_admin` |
-| 15 | Public pages | Home page loads with expected content |  | `test_home_ok` |
-| 16 | Public pages | Contact page loads |  | `test_contact_ok` |
-| 17 | Public pages | Books list page loads |  | `test_books_list_empty_ok` |
-| 18 | Public pages | Unknown book id returns **404** |  | `test_book_detail_404` |
-| 19 | Public pages | Book detail shows seeded sample book |  | `test_book_detail_ok` |
-| 20 | Public pages | Global stylesheet is served (`/static/css/styles.css`) |  | `test_static_css_served` |
+| 1 | Authentication | `GET /register` loads | Pass | `test_register_get_ok` |
+| 2 | Authentication | `GET /login` loads | Pass | `test_login_get_ok` |
+| 3 | Authentication | Register → logout → login works end-to-end | Pass | `test_register_login_flow` |
+| 4 | Authentication | Register rejected when passwords do not match | Pass | `test_register_password_mismatch` |
+| 5 | Authentication | Login rejected when password is wrong | Pass | `test_login_bad_password` |
+| 6 | Books & reviews | Search returns matching book | Pass | `test_books_search_param_ok` |
+| 7 | Books & reviews | Guest cannot POST a review (redirect to login) | Pass | `test_create_review_requires_login` |
+| 8 | Books & reviews | Logged-in user can create a review | Pass | `test_create_review_ok` |
+| 9 | Cart & orders | Guest cannot open cart (redirect) | Pass | `test_cart_requires_login` |
+| 10 | Cart & orders | Logged-in user can add a book to cart | Pass | `test_add_to_cart_ok` |
+| 11 | Cart & orders | Checkout with empty cart is handled safely | Pass | `test_checkout_empty_cart_redirects` |
+| 12 | Admin | Guest cannot open analytics (redirect) | Pass | `test_admin_analytics_requires_login` |
+| 13 | Admin | Non-admin receives **403** on analytics | Pass | `test_admin_analytics_forbidden_for_normal_user` |
+| 14 | Admin | Admin user receives **200** and dashboard content | Pass | `test_admin_analytics_ok_for_admin` |
+| 15 | Public pages | Home page loads with expected content | Pass | `test_home_ok` |
+| 16 | Public pages | Contact page loads | Pass | `test_contact_ok` |
+| 17 | Public pages | Books list page loads | Pass | `test_books_list_empty_ok` |
+| 18 | Public pages | Unknown book id returns **404** | Pass | `test_book_detail_404` |
+| 19 | Public pages | Book detail shows seeded sample book | Pass | `test_book_detail_ok` |
+| 20 | Public pages | Global stylesheet is served (`/static/css/styles.css`) | Pass | `test_static_css_served` |
 
 ### Bugs encountered during development
 
 The table below is a **bug / issue log** in the style used for coursework: it records problems **encountered while building bookly**, how serious they were, and that they were **resolved**. It is **not** a list of current security defects—the shipped app uses **Werkzeug password hashing** and server-side checks as implemented in `models.py` and the blueprints.
+
+### Use of AI (assistance log)
+
+This table lists where AI-assisted help was used during development and documentation. The final code and write-up were still checked, edited, and tested manually to match how the project actually works.
+
+| Area / section | What AI assistance was used for | Notes / checks I still did |
+|---|---|---|
+| **README + docs** (`README.md`, `docs/*.md`) | Spell-checking, rephrasing for clarity, tightening wording, and structuring sections (TOC, headings). | I verified all steps and claims against the actual repository contents and deployment flow. |
+| **Pytest suite** (`tests/`) | Drafting test structure and suggesting assertions/fixtures for Flask routes. | I ran the tests, fixed failures, and aligned each test to real routes and behaviours. |
+| **Python (Flask / SQLAlchemy)** (`app.py`, blueprints, `cli.py`) | Spot-checking patterns (blueprints, decorators, error handlers) and suggesting safer validation/guard logic. | I implemented the logic, tested flows in-browser, and confirmed DB writes/reads in Postgres. |
+| **HTML/Jinja templates** (`templates/`) | Suggesting layout tweaks and accessibility improvements (labels, alt text, ARIA). | I checked pages visually, verified navigation flows, and ensured server-side checks remained in Python. |
+| **CSS/JS** (`static/css/styles.css`, `static/js/main.js`) | Minor suggestions for responsiveness and small JS helpers (nav toggle, confirm). | I validated behaviour on multiple screen sizes and confirmed no critical console errors. |
 
 | Bug number | Area | Description | Severity | Priority | Solutions | Status |
 |------------|------|-------------|----------|----------|-----------|--------|
@@ -719,9 +770,25 @@ The table below is a **bug / issue log** in the style used for coursework: it re
 
 I ran **Lighthouse** (Chrome DevTools → Lighthouse) against the main pages (home, books list, book detail). Scores and any follow-up tweaks are summarised in the **submitted report** so this README stays in sync with what assessors receive.
 
+#### Lighthouse report screenshot (Home)
+
+![Lighthouse results - Home](docs/images/validation/lighthouse-home.png)
+
 ### HTML, CSS and JS validation
 
-I validated **HTML** with the W3C Markup Validator and **CSS** with the W3C CSS Validator on representative pages. **JavaScript** was checked in the browser and with the editor’s built-in diagnostics on `static/js/main.js`. Validation outputs or screenshots are attached to the **coursework report** where the brief asked for evidence.
+I validated **HTML** with the W3C Markup Validator and **CSS** with the W3C CSS Validator on representative pages. **JavaScript** was checked using JSHint and with the editor’s built-in diagnostics on `static/js/main.js`.
+
+#### W3C CSS validation (no errors)
+
+![W3C CSS validator - no errors](docs/images/validation/w3c-css-valid.png)
+
+#### W3C HTML validation results
+
+![W3C HTML validator results](docs/images/validation/w3c-html-results.png)
+
+#### JSHint results (`static/js/main.js`)
+
+![JSHint results](docs/images/validation/jshint-main-js.png)
 
 ---
 
@@ -952,7 +1019,7 @@ The catalogue uses cover images to make the UI feel closer to a real storefront.
 
 ## Additional Notes
 
-- **Use of AI:** Generative AI was used mainly as an **assistant for spell checking** and small wording tweaks in written materials (for example the README and other docs). The same kind of tooling also **helped write and iterate on automated tests** (pytest); those tests were still aligned by hand with how the app actually behaves. Application and database work were implemented and checked by the author; AI did not replace that process.
+- **Use of AI:** Generative AI was used as an **assistant** during development (mainly spell-checking and improving the clarity of documentation). It also helped with **drafting and iterating on automated tests** and discussing approaches for parts of the Python/Flask code (validation, structure, and edge cases). The final implementation was still **written/edited, verified, and tested by me**, and any AI suggestions were only kept when they matched the project’s real behaviour. A concise log of AI-assisted areas is included in **Testing and Bugs → Use of AI (assistance log)**.
 - **`docs/devlog.md`** — local setup, CLI commands, checkout assumptions, cover pipeline.
 - **`docs/testing.md`** — expanded automated testing description.
 - During development, when the schema changed, I used **`flask reset-db`** (destructive) and re-seeded as needed.
