@@ -638,9 +638,9 @@ SQLAlchemy maps Python classes in `models.py` to these tables. **`flask init-db`
 
 ### Project 3 scope vs what this submission demonstrates
 
-For **Project 3**, the emphasis was typically on **PostgreSQL**—designing tables, relationships, and queries—often with a **lighter** presentation layer than a full production-style web stack.
+For **Project 3**, the emphasis is on **PostgreSQL**—designing tables, relationships, and queries—and demonstrating that data in a working project.
 
-This project **goes beyond** that minimal presentation bar and is implemented as a **small full-stack, server-rendered application**:
+While building bookly, I watched a range of tutorials and walkthroughs (Flask + database projects). As a result, I included a few extra “real app” steps that were not strictly required by the brief, because they helped me complete the overall logic of the site and make the database work easier to demonstrate end-to-end.
 
 | Typical Project 3 focus | What bookly adds (and why) |
 |-------------------------|----------------------------|
