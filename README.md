@@ -28,6 +28,7 @@
   - [Lighthouse Testing](#lighthouse-testing)
   - [HTML, CSS and JS Validation](#html-css-and-js-validation)
 - [Sources and references](#sources-and-references)
+  - [Feature resources (inspiration & references)](#feature-resources-inspiration--references)
 - [Attributions](#attributions)
 - [Additional Notes](#additional-notes)
 - [Author](#author)
@@ -904,6 +905,185 @@ I validated **HTML** with the W3C Markup Validator and **CSS** with the W3C CSS 
 ## Sources and references
 
 These are **third-party tutorials and playlists** that helped while building bookly (Flask, PostgreSQL, and Python). They are **learning resources**, not code copied into this repository.
+
+### Feature resources (inspiration & references)
+
+This subsection lists **external reference points** that match key features in bookly. I used these to understand typical patterns and UI expectations, then implemented my own version for this project.
+
+#### 1) Home Page (`/`)
+
+- **Bootstrap bookstore-style homepage UI**: [`startbootstrap.com/template-overviews/shop-home`](https://startbootstrap.com/template-overviews/shop-home)
+- **Flask basics (routes + templates)**: [`blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-1-hello-world`](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-1-hello-world)
+
+Sample route from this project (serves the home template):
+
+```python
+@app.get("/")
+def home():
+    return render_template("home.html")
+```
+
+#### 2) Contact Page (`/contact`)
+
+- **Flask-WTF forms tutorial (reference)**: [`blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ii-web-forms`](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ii-web-forms)
+
+In this project, the contact page is intentionally a simple informational page (no POST form submission):
+
+```python
+@app.get("/contact")
+def contact():
+    return render_template("contact.html")
+```
+
+Template snippet (`templates/contact.html`):
+
+```html
+<h1>Contact us</h1>
+<section class="card">
+  <h2>Get in touch</h2>
+  <ul class="contact-list">
+    <li><strong>Email:</strong> <a href="mailto:contact@bookly.example">contact@bookly.example</a></li>
+    <li><strong>Phone:</strong> <a href="tel:+10000000000">+1 (000) 000-0000</a></li>
+  </ul>
+</section>
+```
+
+#### 3) Browse Books Catalogue (`/books`)
+
+- **ReadMeBookshop (Flask bookstore reference)**: [`github.com/hoangdat07/ReadMeBookshop`](https://github.com/hoangdat07/ReadMeBookshop)
+- **Django Oscar (full e-commerce reference)**: [`github.com/django-oscar/django-oscar`](https://github.com/django-oscar/django-oscar)
+
+#### 4) Search Books by Title/Author (`/books?q=...`)
+
+- **Flask blog tutorial code (search + query patterns reference)**: [`github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog`](https://github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog)
+
+Sample search logic from this project (`books.py`):
+
+```python
+q = (request.args.get("q") or "").strip()
+query = Book.query
+if q:
+    like = f"%{q}%"
+    query = query.filter((Book.title.ilike(like)) | (Book.author.ilike(like)))
+```
+
+#### 5) Book Detail Pages (`/books/<id>`)
+
+- **Open Library example book detail page**: [`openlibrary.org/works/OL45883W/The_Adventures_of_Tom_Sawyer`](https://openlibrary.org/works/OL45883W/The_Adventures_of_Tom_Sawyer)
+
+Sample route from this project (`books.py`):
+
+```python
+@books_bp.get("/<int:book_id>")
+def book_detail(book_id: int):
+    book = Book.query.get_or_404(book_id)
+    # ... load reviews, render template ...
+```
+
+#### 6) Custom Error Pages (403, 404)
+
+- **Flask error handling docs**: [`flask.palletsprojects.com/en/2.2.x/errorhandling/`](https://flask.palletsprojects.com/en/2.2.x/errorhandling/)
+
+Sample error handlers from this project (`app.py`):
+
+```python
+@app.errorhandler(403)
+def forbidden(_err):
+    return render_template("403.html"), 403
+
+@app.errorhandler(404)
+def not_found(_err):
+    return render_template("404.html"), 404
+```
+
+#### 7) Accounts (Authentication) (`/register`, `/login`, `/logout`)
+
+- **Flask Mega-Tutorial (login)**: [`blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ii-user-log-in`](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ii-user-log-in)
+
+Sample login guard used across the project:
+
+```python
+@login_required
+def some_view():
+    ...
+```
+
+#### 8) Reviews (Create/Edit/Delete + ownership protection)
+
+- **Django review app reference**: [`github.com/justdjango/django-review-app`](https://github.com/justdjango/django-review-app)
+- **Corey Schafer Flask blog tutorial code (CRUD patterns reference)**: [`github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog`](https://github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog)
+
+Sample ownership check from this project (`books.py`):
+
+```python
+if review.user_id != current_user.id:
+    flash("You can only edit your own reviews.", "error")
+    return redirect(url_for("books.book_detail", book_id=book_id))
+```
+
+#### 9) Cart + Checkout (add/view/update/checkout)
+
+- **E-commerce project reference (cart/checkout concepts)**: [`github.com/django-oscar/django-oscar`](https://github.com/django-oscar/django-oscar)
+
+Sample checkout behaviour from this project (`orders.py`):
+
+```python
+items = CartItem.query.filter_by(user_id=current_user.id).all()
+if not items:
+    flash("Your cart is empty.", "error")
+    return redirect(url_for("cart.view_cart"))
+```
+
+#### 10) Order History (`/orders`)
+
+- **E-commerce reference (orders list patterns)**: [`github.com/django-oscar/django-oscar`](https://github.com/django-oscar/django-oscar)
+
+Sample route from this project (`orders.py`):
+
+```python
+@orders_bp.get("")
+@login_required
+def list_orders():
+    orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
+    return render_template("orders.html", orders=orders)
+```
+
+#### 11) Admin Features (`/admin/...`)
+
+- **Flask-Admin docs (admin UI reference)**: [`flask-admin.readthedocs.io/en/latest/`](https://flask-admin.readthedocs.io/en/latest/)
+- **Django admin docs (admin UI reference)**: [`docs.djangoproject.com/en/stable/ref/contrib/admin/`](https://docs.djangoproject.com/en/stable/ref/contrib/admin/)
+
+Sample admin-only protection from this project (`admin.py`):
+
+```python
+if not getattr(current_user, "is_admin", False):
+    abort(403)
+```
+
+#### 12) Add New Book (`/admin/books/new`)
+
+- **Flask-Admin model views (reference)**: [`flask-admin.readthedocs.io/en/latest/advanced/#creating-model-views`](https://flask-admin.readthedocs.io/en/latest/advanced/#creating-model-views)
+
+This project uses a custom form and server-side validation rather than Flask-Admin:
+
+```python
+@admin_bp.post("/books/new")
+@admin_required
+def new_book_submit():
+    # validate fields, prevent duplicates, insert Book row
+    ...
+```
+
+#### 13) CLI Commands & Tests
+
+- **Flask CLI docs**: [`flask.palletsprojects.com/en/2.2.x/cli/`](https://flask.palletsprojects.com/en/2.2.x/cli/)
+- **Flask testing docs (pytest-style patterns)**: [`flask.palletsprojects.com/en/2.2.x/testing/`](https://flask.palletsprojects.com/en/2.2.x/testing/)
+
+Sample CLI registration used in this project (`app.py`):
+
+```python
+register_cli(app)
+```
 
 ### Flask
 
