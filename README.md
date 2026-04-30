@@ -4,6 +4,7 @@
 
 - [Overview](#overview)
   - [Project goals](#project-goals)
+  - [Planning notes (written at project start)](#planning-notes-written-at-project-start)
 - [Quick links (assessor)](#quick-links-assessor)
 - [Features](#features)
 - [User Experience (UX)](#user-experience-ux)
@@ -53,6 +54,51 @@ The site shows a realistic “small business” workflow:
 - Show clear **end-to-end flows** where DB reads/writes show up in the UI (browse → cart → checkout → orders).
 - Implement **auth and permissions** properly (hashed passwords, session login, owner-only review edit/delete, admin-only analytics).
 - Keep the project easy to mark by using **server-rendered Flask** and a consistent file structure.
+
+### Planning notes (written at project start)
+
+This is the simple logic and screen plan I would write at the start of building bookly (before coding), to keep the scope clear.
+
+#### Logic flow (simple)
+
+- **Guest visitor**
+  - I will let guests browse the catalogue (`/books`) and open book detail pages (`/books/<id>`).
+  - When a guest tries to do an account-only action (add to cart, checkout, write a review), I will redirect them to **Login**.
+
+- **Register / login**
+  - I will create routes for **Register** (`/register`) and **Login** (`/login`).
+  - After login, I will store the session so the site knows who the user is on future requests.
+
+- **Cart**
+  - I will store cart items per user in the database so the cart persists (not just in the browser session).
+  - Users will be able to add to cart, update quantities, and remove items (`/cart`).
+
+- **Checkout → Orders**
+  - I will create a checkout page (`/orders/checkout`) that validates the form, then writes an **Order** and **Order Items** to the database.
+  - After checkout, I will clear the user’s cart and show the order in **Orders** (`/orders`).
+
+- **Reviews**
+  - Logged-in users will be able to post reviews on a book.
+  - Only the owner of a review will be able to edit/delete it (server-side check).
+
+- **Admin analytics**
+  - I will add an admin-only dashboard (`/admin/analytics`) to read summary information from the database (counts, totals, top sellers).
+  - Non-admin users will see a **403** page when trying to access admin routes.
+
+#### Wireframe plan (what I planned to build)
+
+Based on the routes above, my wireframe plan is:
+
+- **Home (`/`)**: hero + clear calls-to-action (browse books, create account).
+- **Books (`/books`)**: searchable grid/list of books (title/author/category/price).
+- **Book detail (`/books/<id>`)**: cover + description + add-to-cart + reviews section.
+- **Register (`/register`)** and **Login (`/login`)**: card forms with validation messages.
+- **Cart (`/cart`)**: list of cart items with update/remove controls and subtotal.
+- **Checkout (`/orders/checkout`)**: shipping form + order summary + place order.
+- **Orders (`/orders`)**: list of previous orders with totals and line items.
+- **Admin analytics (`/admin/analytics`)**: KPIs + tables (recent orders, top books, categories).
+- **Admin add book (`/admin/books/new`)**: form to add a new book to the catalogue.
+- **Error pages (403/404)**: friendly messages with navigation back to safe pages.
 
 ## Quick links (assessor)
 
@@ -309,12 +355,12 @@ This section summarises **how bookly was built**, in the order features were imp
 I started by building the foundation so every later feature had a stable base:
 
 - **Project setup**: virtual environment, dependencies, and a clean Flask project structure.
-- **Configuration**: environment-based settings (`SECRET_KEY`, `DATABASE_URL`) so the same code could run locally and in a hosted environment.
+- **Configuration**: environment-based settings (`SECRET_KEY`, `DATABASE_URL`) so the same code could run locally and in a hosted environment. (AI)
 - **Database first**: a PostgreSQL schema that reflects the core entities and relationships (`users`, `books`, `reviews`, `cart_items`, `orders`, `order_items`) with sensible constraints (foreign keys and uniqueness where needed).
-- **Bootstrap commands and seed data**: a repeatable way to initialise the schema and seed a starter catalogue so pages were never “empty by default”.
+- **Bootstrap commands and seed data**: a repeatable way to initialise the schema and seed a starter catalogue so pages were never “empty by default”. (AI)
 - **Shared UI shell**: `base.html` with navigation, flash messages, and consistent layout, plus a first pass of CSS variables and reusable components.
 
-The practical reason for doing this first was personal experience: once the database and layout are stable, every new page becomes “connect the route to the template to the query”, instead of reinventing structure on every screen.
+The practical reason for doing this first was personal experience: once the database and layout are stable, every new page becomes “connect the route to the template to the query”, instead of reinventing structure on every screen.(AI)
 
 ### Milestone 1 — **31/03** (public pages + shared layout)
 
@@ -416,7 +462,7 @@ This project reinforced that the biggest risk under time pressure is not writing
 
 Late in development, I planned a small admin improvement: a **“Complete order”** button on the admin side (so an admin could mark an order as completed after checkout). The idea came from watching extra e-commerce tutorials and thinking about how a real store would track order status, but I did not have enough time to implement it properly before submission.
 
-In a future iteration, I would add an `order_status` field (for example: Pending → Completed), show it on the admin dashboard, and only allow status changes for admin users with server-side validation.
+In a future iteration, I would add an `order_status` field (for example: Pending → Completed), show it on the admin dashboard, and only allow status changes for admin users with server-side validation. (AI)
 
 ---
 
@@ -526,7 +572,9 @@ These choices are implemented as CSS variables at the top of `static/css/styles.
 | `docs/testing.md` | Feature ↔ automated test mapping |
 | `docs/legacy-code.md` | Small “before → after” code snapshots for assessor review |
 | `docs/wireframe-bookly.pdf` | Wireframes (PDF) for main screens and flows |
+| `docs/images/manual-testing/` | Manual testing evidence screenshots used in the testing table |
 | `docs/images/validation/` | Evidence screenshots (Lighthouse, W3C validators, JSHint, responsiveness, 404) |
+| `tools/` | One-off helper scripts used during development (not part of the running app) |
 
 ---
 
@@ -538,7 +586,6 @@ These choices are implemented as CSS variables at the top of `static/css/styles.
 - **PostgreSQL** installed and running locally (e.g. Homebrew Postgres on macOS).
 
 ### Environment setup
-
 ```bash
 cd /path/to/bookly-final
 python3 -m venv .venv
@@ -803,28 +850,29 @@ I complemented automated tests with manual runs in the browser, recording **what
 | 7 | Auth | On Register, enter an invalid email format | Browser validation blocks submit; user is prompted to enter a valid email | Pass |  | [24-register-email-required](docs/images/manual-testing/24-register-email-required.png) |
 | 8 | Auth | On Register, enter a password under 6 characters | Browser validation prompts “Use at least 6 characters” | Pass |  | [25-register-password-min-length](docs/images/manual-testing/25-register-password-min-length.png) |
 | 9 | Auth | Register with mismatched passwords | Error message shown; account not created | Pass |  | [26-register-passwords-dont-match](docs/images/manual-testing/26-register-passwords-dont-match.png) |
-| 10 | Auth | Log out | Session cleared; home or login | Pass | Screenshot pending | `docs/images/manual-testing/07-logout.png` |
+| 10 | Auth | Log out | Session cleared; home or login | Pass |  | [07-logout](docs/images/manual-testing/07-logout.png) |
 | 11 | Auth | Log in with correct password | Redirect; flash success | Pass |  | [08-login-success](docs/images/manual-testing/08-login-success.png) |
-| 12 | Auth | Log in with wrong password | Stays on login; flash error | Pass | Screenshot pending | `docs/images/manual-testing/09-login-fail.png` |
+| 12 | Auth | Log in with wrong password | Stays on login; flash error | Pass |  | [09-login-fail](docs/images/manual-testing/09-login-fail.png) |
 | 13 | Auth | Register duplicate email | Error; no duplicate user | Pass |  | [10-register-duplicate](docs/images/manual-testing/10-register-duplicate.png) |
-| 14 | Reviews | While logged out, open book detail | No POST review without login | Pass | Screenshot pending | `docs/images/manual-testing/11-reviews-guest.png` |
+| 14 | Reviews | While logged out, open book detail | No POST review without login | Pass |  | [11-reviews-guest](docs/images/manual-testing/11-reviews-guest.png) |
 | 15 | Reviews | Post a review (logged in) | Review appears on page | Pass |  | [12-review-created](docs/images/manual-testing/12-review-created.png) |
 | 16 | Reviews | Edit **your** review | Updated text/rating shown | Pass |  | [13-review-edit](docs/images/manual-testing/13-review-edit.png) |
 | 17 | Reviews | Delete **your** review | Review removed | Pass |  | [14-review-delete](docs/images/manual-testing/14-review-delete.png) |
 | 18 | Reviews | Attempt to delete another user’s review (second account) | Blocked with message | Pass |  | [15-review-owner-block](docs/images/manual-testing/15-review-owner-block.png) |
 | 19 | Cart | Add book to cart | Line appears with correct title/qty | Pass |  | [16-cart-add](docs/images/manual-testing/16-cart-add.png) |
-| 20 | Cart | Change quantity / remove line | Totals and rows update | Pass |  | [17-cart-update-remove](docs/images/manual-testing/17-cart-update-remove.png) |
-| 21 | Cart | Checkout with empty cart | Error flash; redirect to cart | Pass | Screenshot pending | `docs/images/manual-testing/18-checkout-empty.png` |
+| 20 | Cart | Change quantity / remove line | Totals and rows update | Pass |  | [17-cart-update-remove](docs/images/manual-testing/17-cart-update-remove.png)<br>[17b-cart-remove-confirm](docs/images/manual-testing/17b-cart-remove-confirm.png)<br>[17c-cart-updated](docs/images/manual-testing/17c-cart-updated.png) |
+| 21 | Cart | Checkout with empty cart | Error flash; redirect to cart | Pass |  | [18-checkout-empty](docs/images/manual-testing/18-checkout-empty.png) |
 | 22 | Orders | Checkout with items | Order on Orders page; cart empty | Pass |  | [19-checkout-success](docs/images/manual-testing/19-checkout-success.png)<br>[19b-orders-page](docs/images/manual-testing/19b-orders-page.png) |
-| 23 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page | Pass | Screenshot pending | `docs/images/manual-testing/20-analytics-403.png` |
+| 23 | Admin | Open `/admin/analytics` as normal user | 403 Forbidden page | Pass |  |  |
 | 24 | Admin | Same as admin user | Dashboard metrics load | Pass |  | [21-analytics-admin](docs/images/manual-testing/21-analytics-admin.png) |
 | 25 | Admin | Add a new book via Analytics → Add book | Book created and visible in catalogue | Pass |  | [22-admin-add-book](docs/images/manual-testing/22-admin-add-book.png)<br>[23-admin-book-added](docs/images/manual-testing/23-admin-book-added.png) |
 | 26 | Orders | Large order test (multiple items and quantities) | Cart subtotal matches checkout total; order summary lists all items | Pass |  | [27-large-order-cart](docs/images/manual-testing/27-large-order-cart.png)<br>[28-large-order-checkout](docs/images/manual-testing/28-large-order-checkout.png)<br>[29-large-order-checkout-total](docs/images/manual-testing/29-large-order-checkout-total.png) |
 | 27 | Orders | Log out during checkout, then log back in | Redirects to login and returns to checkout (via `next=`); checkout can continue | Pass |  | [30-checkout-logout-login-continue](docs/images/manual-testing/30-checkout-logout-login-continue.png) |
 | 28 | Auth | When logged in, check the navigation bar | Login/Register are hidden; authenticated links are shown instead (Cart/Orders/Logout) | Pass |  | [31-nav-logged-in-hides-login-register](docs/images/manual-testing/31-nav-logged-in-hides-login-register.png) |
-| 29 | Reviews | Attempt to post a review while logged out | Redirects to login; after login the user can return and submit the review | Pass |  | Screenshot pending (`docs/images/manual-testing/32-review-login-required.png`) |
-| 30 | Cart | Attempt “Add to cart” while logged out | Redirects to login; after login the user can add the book to cart | Pass |  | Screenshot pending (`docs/images/manual-testing/33-cart-login-required.png`) |
-| 31 | Admin | Add book: enter an invalid price (non-numeric or 0/negative) | Blocked with validation errors (“Price must be a number (e.g. 12.99).” / “Price must be greater than 0.”) | Pass |  | Screenshot pending (`docs/images/manual-testing/34-admin-add-book-invalid-price.png`) |
+| 29 | Reviews | Attempt to post a review while logged out | Redirects to login; after login the user can return and submit the review | Pass |  |  |
+| 30 | Cart | Attempt “Add to cart” while logged out | Redirects to login; after login the user can add the book to cart | Pass |  |  |
+| 31 | Admin | Add book: enter an invalid price (non-numeric or 0/negative) | Blocked with validation errors (“Price must be a number (e.g. 12.99).” / “Price must be greater than 0.”) | Pass |  |  |
+| 32 | Cart | Update cart quantity using letters | Browser blocks non-numeric input (“Enter a number”) so quantity validation happens before submit | Pass |  | [35-cart-quantity-non-numeric](docs/images/manual-testing/35-cart-quantity-non-numeric.png) |
 
 #### 404 page (assessor note + evidence)
 
@@ -993,7 +1041,15 @@ To track issues during development, I also used a GitHub **Project board** as a 
 
 ### Use of AI (assistance log)
 
-This table lists where AI-assisted help was used during development and documentation. The final code and write-up were still checked, edited, and tested manually to match how the project actually works.
+This table lists where AI-assisted help was used during development and documentation. In places, I also marked content with **“(AI)”** to make it clear where AI assistance was involved.
+
+My process was:
+
+- I used credited examples/tutorials as a starting point for patterns (routing, forms, validation, and testing structure).
+- When an implementation did not work or needed changing to match bookly, I tried to adjust the code myself first (aligning routes, templates, and database models to this project).
+- When I got stuck, AI helped by suggesting likely causes, pointing me to relevant documentation, and recommending specific videos/tutorial topics that matched the problem. I then applied the fix manually and verified it worked in my project.
+
+The final code and write-up were still checked, edited, and tested manually to match how the project actually works.
 
 | Area / section | What AI assistance was used for | Notes / checks I still did |
 |---|---|---|
@@ -1005,20 +1061,20 @@ This table lists where AI-assisted help was used during development and document
 
 | Bug number | Area | Description | Severity | Priority | Solutions | Status |
 |------------|------|-------------|----------|----------|-----------|--------|
-| 1 | Environment | App crashed on startup when `DATABASE_URL` was missing from `.env` | High | High | Add `.env` using `.env.example`, set `DATABASE_URL` and `SECRET_KEY`, then restart the server. | Resolved |
-| 2 | Database | First run: empty tables until `flask init-db` was documented and run | Medium | High | Run `python -m flask --app app.py init-db` to create tables and seed the catalogue. | Resolved |
-| 3 | Database | Iterating on SQLAlchemy models required `flask reset-db` to rebuild schema during dev | Medium | Medium | Run `python -m flask --app app.py reset-db` after model/schema changes to drop/recreate tables and reseed. | Resolved |
-| 4 | Auth | Login redirect / `next` URL behaviour needed checking after form changes | Medium | Medium | Preserve `next` in the login form/action and redirect to `next` after successful login; verify with manual tests. | Resolved |
-| 5 | Reviews | Ensuring only the **owner** can delete or edit a review (server-side guard) | High | High | Add server-side ownership checks (`review.user_id == current_user.id`) in edit/delete routes; hide buttons in templates as a secondary UX measure. | Resolved |
-| 6 | Search | Verifying search matched **title and author** case-insensitively (`ILIKE`) | Medium | Medium | Use SQLAlchemy `ilike` filters on `Book.title` and `Book.author` and test with mixed-case queries. | Resolved |
-| 7 | Cart | Cart line **merge** behaviour when adding the same book twice (unique constraint) | Medium | Medium | Enforce one row per `(user_id, book_id)` and merge quantities in `add_to_cart`; verify with repeated adds. | Resolved |
-| 8 | Cart | Quantity **0** or remove: line removed and totals consistent | Medium | Medium | Treat quantity < 1 as delete; recalculate subtotal from remaining lines and confirm via manual tests. | Resolved |
-| 9 | Checkout | Empty-cart checkout must not create an order; flash + redirect | High | High | Block checkout when cart is empty; flash an error and redirect back to the cart page. | Resolved |
-| 10 | Admin | Non-admin access to `/admin/analytics` must return **403**, not expose data | High | Critical | Add an admin-only decorator that checks `current_user.is_admin`; abort with 403 for non-admins. | Resolved |
-| 11 | Testing | Pytest uses **SQLite in-memory**; behaviour must still be validated on **Postgres** manually | Low | Medium | Run pytest on SQLite for speed, and separately verify key flows manually against Postgres (checkout, admin, ownership checks). | Resolved |
-| 12 | Static | Cover URLs and `/static/img/covers/` paths had to stay consistent with `book_covers.py` | Low | Low | Standardise `cover_url` values to `/static/img/covers/<slug>.svg` and keep slugs generated by `book_covers.py`. | Resolved |
-| 13 | Database / Setup | Local run failed with `password authentication failed` because `.env` still contained placeholder `DATABASE_URL` values (`USER:PASSWORD@.../DBNAME`). Resolved by creating/updating the Postgres role/database and ensuring commands like `python -m flask ...` were run in the terminal (not inside `psql`). | Medium | High | Update `.env` with a real `DATABASE_URL`; set/reset the Postgres password with `ALTER USER ... WITH PASSWORD ...`; exit `psql` with `\\q` before running Flask commands. | Resolved |
-| 14 | Static / Seed data | Book cover images did not appear on cards because the `books` table already contained older seeded rows with empty `cover_url` values, and `flask init-db` only seeds when the catalogue is empty. Resolved by resetting and re-seeding (`flask reset-db`) so seeded books include correct `/static/img/covers/*.svg` paths. | Low | Medium | Run `python -m flask --app app.py reset-db` to reseed with covers (or update existing `books.cover_url` values if data must be kept). | Resolved |
+| 1 | Environment | (AI assisted) App crashed on startup when `DATABASE_URL` was missing from `.env` | High | High | Add `.env` using `.env.example`, set `DATABASE_URL` and `SECRET_KEY`, then restart the server. | Resolved |
+| 2 | Database | (AI assisted) First run: empty tables until `flask init-db` was documented and run | Medium | High | Run `python -m flask --app app.py init-db` to create tables and seed the catalogue. | Resolved |
+| 3 | Database | (AI assisted) Iterating on SQLAlchemy models required `flask reset-db` to rebuild schema during dev | Medium | Medium | Run `python -m flask --app app.py reset-db` after model/schema changes to drop/recreate tables and reseed. | Resolved |
+| 4 | Auth | (AI assisted) Login redirect / `next` URL behaviour needed checking after form changes | Medium | Medium | Preserve `next` in the login form/action and redirect to `next` after successful login; verify with manual tests. | Resolved |
+| 5 | Reviews | (AI assisted) Ensuring only the **owner** can delete or edit a review (server-side guard) | High | High | Add server-side ownership checks (`review.user_id == current_user.id`) in edit/delete routes; hide buttons in templates as a secondary UX measure. | Resolved |
+| 6 | Search | (AI assisted) Verifying search matched **title and author** case-insensitively (`ILIKE`) | Medium | Medium | Use SQLAlchemy `ilike` filters on `Book.title` and `Book.author` and test with mixed-case queries. | Resolved |
+| 7 | Cart | (AI assisted) Cart line **merge** behaviour when adding the same book twice (unique constraint) | Medium | Medium | Enforce one row per `(user_id, book_id)` and merge quantities in `add_to_cart`; verify with repeated adds. | Resolved |
+| 8 | Cart | (AI assisted) Quantity **0** or remove: line removed and totals consistent | Medium | Medium | Treat quantity < 1 as delete; recalculate subtotal from remaining lines and confirm via manual tests. | Resolved |
+| 9 | Checkout | (AI assisted) Empty-cart checkout must not create an order; flash + redirect | High | High | Block checkout when cart is empty; flash an error and redirect back to the cart page. | Resolved |
+| 10 | Admin | (AI assisted) Non-admin access to `/admin/analytics` must return **403**, not expose data | High | Critical | Add an admin-only decorator that checks `current_user.is_admin`; abort with 403 for non-admins. | Resolved |
+| 11 | Testing | (AI assisted) Pytest uses **SQLite in-memory**; behaviour must still be validated on **Postgres** manually | Low | Medium | Run pytest on SQLite for speed, and separately verify key flows manually against Postgres (checkout, admin, ownership checks). | Resolved |
+| 12 | Static | (AI assisted) Cover URLs and `/static/img/covers/` paths had to stay consistent with `book_covers.py` | Low | Low | Standardise `cover_url` values to `/static/img/covers/<slug>.svg` and keep slugs generated by `book_covers.py`. | Resolved |
+| 13 | Database / Setup | (AI assisted) Local run failed with `password authentication failed` because `.env` still contained placeholder `DATABASE_URL` values (`USER:PASSWORD@.../DBNAME`). Resolved by creating/updating the Postgres role/database and ensuring commands like `python -m flask ...` were run in the terminal (not inside `psql`). | Medium | High | Update `.env` with a real `DATABASE_URL`; set/reset the Postgres password with `ALTER USER ... WITH PASSWORD ...`; exit `psql` with `\\q` before running Flask commands. | Resolved |
+| 14 | Static / Seed data | (AI assisted) Book cover images did not appear on cards because the `books` table already contained older seeded rows with empty `cover_url` values, and `flask init-db` only seeds when the catalogue is empty. Resolved by resetting and re-seeding (`flask reset-db`) so seeded books include correct `/static/img/covers/*.svg` paths. | Low | Medium | Run `python -m flask --app app.py reset-db` to reseed with covers (or update existing `books.cover_url` values if data must be kept). | Resolved |
 
 
 
@@ -1061,7 +1117,7 @@ This subsection lists **external reference points** that match key features in b
 - **Bootstrap bookstore-style homepage UI**: [`startbootstrap.com/template-overviews/shop-home`](https://startbootstrap.com/template-overviews/shop-home)
 - **Flask basics (routes + templates)**: [`blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-1-hello-world`](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-1-hello-world)
 
-Sample route from this project (serves the home template):
+Route used in bookly (serves the home template):
 
     @app.get("/")
     def home():
@@ -1097,7 +1153,7 @@ Template snippet (`templates/contact.html`):
 
 - **Flask blog tutorial code (search + query patterns reference)**: [`github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog`](https://github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog)
 
-Sample search logic from this project (`books.py`):
+Search logic used in bookly (`books.py`):
 
     q = (request.args.get("q") or "").strip()
     query = Book.query
@@ -1109,18 +1165,23 @@ Sample search logic from this project (`books.py`):
 
 - **Open Library example book detail page**: [`openlibrary.org/works/OL45883W/The_Adventures_of_Tom_Sawyer`](https://openlibrary.org/works/OL45883W/The_Adventures_of_Tom_Sawyer)
 
-Sample route from this project (`books.py`):
+Route used in bookly (`books.py`):
 
     @books_bp.get("/<int:book_id>")
     def book_detail(book_id: int):
         book = Book.query.get_or_404(book_id)
-        # ... load reviews, render template ...
+        reviews = (
+            Review.query.filter_by(book_id=book_id)
+            .order_by(Review.created_at.desc())
+            .all()
+        )
+        return render_template("book_detail.html", book=book, reviews=reviews)
 
 #### 6) Custom Error Pages (403, 404)
 
 - **Flask error handling docs**: [`flask.palletsprojects.com/en/2.2.x/errorhandling/`](https://flask.palletsprojects.com/en/2.2.x/errorhandling/)
 
-Sample error handlers from this project (`app.py`):
+Error handlers used in bookly (`app.py`):
 
     @app.errorhandler(403)
     def forbidden(_err):
@@ -1134,18 +1195,14 @@ Sample error handlers from this project (`app.py`):
 
 - **Flask Mega-Tutorial (login)**: [`blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ii-user-log-in`](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-ii-user-log-in)
 
-Sample login guard used across the project:
-
-    @login_required
-    def some_view():
-        ...
+Login protection is handled with Flask-Login’s `@login_required` decorator on routes like cart, checkout, orders, and admin pages.
 
 #### 8) Reviews (Create/Edit/Delete + ownership protection)
 
 - **Django review app reference**: [`github.com/justdjango/django-review-app`](https://github.com/justdjango/django-review-app)
 - **Corey Schafer Flask blog tutorial code (CRUD patterns reference)**: [`github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog`](https://github.com/CoreyMSchafer/code_snippets/tree/master/Python/Flask_Blog)
 
-Sample ownership check from this project (`books.py`):
+Ownership check used in bookly (`books.py`):
 
     if review.user_id != current_user.id:
         flash("You can only edit your own reviews.", "error")
@@ -1155,7 +1212,7 @@ Sample ownership check from this project (`books.py`):
 
 - **E-commerce project reference (cart/checkout concepts)**: [`github.com/django-oscar/django-oscar`](https://github.com/django-oscar/django-oscar)
 
-Sample checkout behaviour from this project (`orders.py`):
+Checkout guard used in bookly (`orders.py`):
 
     items = CartItem.query.filter_by(user_id=current_user.id).all()
     if not items:
@@ -1166,7 +1223,7 @@ Sample checkout behaviour from this project (`orders.py`):
 
 - **E-commerce reference (orders list patterns)**: [`github.com/django-oscar/django-oscar`](https://github.com/django-oscar/django-oscar)
 
-Sample route from this project (`orders.py`):
+Route used in bookly (`orders.py`):
 
     @orders_bp.get("")
     @login_required
@@ -1183,7 +1240,7 @@ Sample route from this project (`orders.py`):
 - **Flask-Admin docs (admin UI reference)**: [`flask-admin.readthedocs.io/en/latest/`](https://flask-admin.readthedocs.io/en/latest/)
 - **Django admin docs (admin UI reference)**: [`docs.djangoproject.com/en/stable/ref/contrib/admin/`](https://docs.djangoproject.com/en/stable/ref/contrib/admin/)
 
-Sample admin-only protection from this project (`admin.py`):
+Admin-only protection used in bookly (`admin.py`):
 
     if not getattr(current_user, "is_admin", False):
         abort(403)
@@ -1198,14 +1255,14 @@ This project uses a custom form and server-side validation rather than Flask-Adm
     @admin_required
     def new_book_submit():
         # validate fields, prevent duplicates, insert Book row
-        ...
+        # (full implementation is in admin.py)
 
 #### 13) CLI Commands & Tests
 
 - **Flask CLI docs**: [`flask.palletsprojects.com/en/2.2.x/cli/`](https://flask.palletsprojects.com/en/2.2.x/cli/)
 - **Flask testing docs (pytest-style patterns)**: [`flask.palletsprojects.com/en/2.2.x/testing/`](https://flask.palletsprojects.com/en/2.2.x/testing/)
 
-Sample CLI registration used in this project (`app.py`):
+CLI registration used in bookly (`app.py`):
 
     register_cli(app)
 
