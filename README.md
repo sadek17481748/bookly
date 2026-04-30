@@ -568,8 +568,8 @@ These choices are implemented as CSS variables at the top of `static/css/styles.
 | `Procfile` / `runtime.txt` | Heroku process + Python version |
 | `.env.example` | Documents required env vars (no secrets) |
 | `.gitignore` | Ignores `.env`, `.venv`, `__pycache__`, etc. |
-| `docs/devlog.md` | Setup / integration notes |
-| `docs/testing.md` | Feature ↔ automated test mapping |
+| `docs/devlog.md` | (Removed) dev notes were merged into `README.md` |
+| `docs/testing.md` | (Removed) testing notes were merged into `README.md` |
 | `docs/legacy-code.md` | Small “before → after” code snapshots for assessor review |
 | `docs/wireframe-bookly.pdf` | Wireframes (PDF) for main screens and flows |
 | `docs/images/manual-testing/` | Manual testing evidence screenshots used in the testing table |
@@ -672,7 +672,7 @@ source .venv/bin/activate
 pytest -v
 ```
 
-Tests use **SQLite in-memory** via `tests/conftest.py` so they run quickly; I still demonstrated PostgreSQL using the steps above. Full mapping: **`docs/testing.md`**.
+Tests use **SQLite in-memory** via `tests/conftest.py` so they run quickly; I still demonstrated PostgreSQL using the steps above. A feature → test mapping is included in the Automated testing section below.
 
 ---
 
@@ -819,7 +819,7 @@ While building bookly, I watched a range of tutorials and walkthroughs (Flask + 
 2. **A thin static page** can show a `SELECT` result, but it does not demonstrate **transactions across steps** (cart updates, checkout clearing the cart while inserting orders) or **authorization** (only the review owner can delete). Those behaviours need **application logic** tied to the database.
 3. **Separation of concerns is still clear:** `schema.sql` documents the DDL; `models.py` mirrors it for SQLAlchemy; `books.py`, `cart.py`, `orders.py` show **which HTTP actions cause which writes** to Postgres.
 
-For assessment, **`schema.sql`**, the **`models.py` ↔ table mapping**, and **`docs/devlog.md`** (setup notes) document the relational design and local setup. The Flask routes and blueprints show **how** that PostgreSQL design is exercised in practice (browse, cart, checkout, admin reads).
+For assessment, **`schema.sql`** and the **`models.py` ↔ table mapping** document the relational design and local setup. The Flask routes and blueprints show **how** that PostgreSQL design is exercised in practice (browse, cart, checkout, admin reads).
 
 ### HTML, CSS, JavaScript
 
@@ -938,7 +938,38 @@ I was able to create these tests by following online tutorials and resources abo
 
 These resources helped me understand how to set up test environments, use an **in-memory database** for fast automated runs, and write **assertions** on HTTP status codes and HTML responses for different parts of the Flask app.
 
-A compact **function name → feature** map is in **`docs/testing.md`**.
+Below is a compact **feature → test** map showing what each automated test covers.
+
+#### Feature → test mapping (simple)
+
+| Feature | Test file | Test name | What it checks |
+|--------|-----------|-----------|----------------|
+| Home page loads | `test_public_pages.py` | `test_home_ok` | `GET /` returns 200 and expected text |
+| Contact page loads | `test_public_pages.py` | `test_contact_ok` | `GET /contact` returns 200 |
+| Books list loads | `test_public_pages.py` | `test_books_list_empty_ok` | `GET /books` returns 200 |
+| Search works | `test_books_reviews.py` | `test_books_search_param_ok` | `?q=` returns matching book |
+| Book detail loads | `test_public_pages.py` | `test_book_detail_ok` | `GET /books/<id>` shows title/author |
+| Missing book returns 404 | `test_public_pages.py` | `test_book_detail_404` | Unknown id returns 404 |
+| CSS is served | `test_public_pages.py` | `test_static_css_served` | `GET /static/css/styles.css` returns 200 |
+| Register page loads | `test_auth.py` | `test_register_get_ok` | `GET /register` returns 200 |
+| Login page loads | `test_auth.py` | `test_login_get_ok` | `GET /login` returns 200 |
+| Register → logout → login | `test_auth.py` | `test_register_login_flow` | Full auth flow works |
+| Register mismatch blocked | `test_auth.py` | `test_register_password_mismatch` | Mismatch redirects (validation path) |
+| Wrong password blocked | `test_auth.py` | `test_login_bad_password` | Wrong password redirects to login |
+| Review requires login | `test_books_reviews.py` | `test_create_review_requires_login` | Guest POST review redirects to login |
+| Review can be created | `test_books_reviews.py` | `test_create_review_ok` | Logged-in user can post a review |
+| Cart requires login | `test_cart_orders_admin.py` | `test_cart_requires_login` | Guest `GET /cart` redirects |
+| Add to cart works | `test_cart_orders_admin.py` | `test_add_to_cart_ok` | Logged-in user can add a book |
+| Empty cart checkout blocked | `test_cart_orders_admin.py` | `test_checkout_empty_cart_redirects` | Empty checkout handled safely |
+| Admin analytics requires login | `test_cart_orders_admin.py` | `test_admin_analytics_requires_login` | Guest redirects to login |
+| Admin analytics forbidden | `test_cart_orders_admin.py` | `test_admin_analytics_forbidden_for_normal_user` | Non-admin gets 403 |
+| Admin analytics works | `test_cart_orders_admin.py` | `test_admin_analytics_ok_for_admin` | Admin gets 200 |
+
+#### Limits (what automated tests do not cover)
+
+- Payments are not integrated (checkout is “store the order”, not card processing).
+- There is no email sending to test.
+- UI layout changes are only checked where tests assert on key HTML text.
 
 #### Running pytest locally (terminal evidence)
 
@@ -1491,8 +1522,8 @@ The catalogue uses cover images to make the UI feel closer to a real storefront.
 
 - **Use of AI:** Generative AI was used as an **assistant** during development (mainly spell-checking and improving the clarity of documentation). It also helped with **drafting and iterating on automated tests** and discussing approaches for parts of the Python/Flask code (validation, structure, and edge cases). The final implementation was still **written/edited, verified, and tested by me**, and any AI suggestions were only kept when they matched the project’s real behaviour. A concise log of AI-assisted areas is included in **Testing and Bugs → Use of AI (assistance log)**.
 - **`docs/legacy-code.md` (development snapshots):** Earlier in development, my GitHub/Heroku setup ended up in a broken state (the repo would not accept new commits reliably and the Heroku connection stopped working). I restarted the project setup and moved the work into a fresh repository on a new GitHub account, linked to a new Heroku app/account. To make the development progression easy to review, I kept small “before → after” code snapshots in `docs/legacy-code.md`.
-- **`docs/devlog.md`** — local setup, CLI commands, checkout assumptions, cover pipeline.
-- **`docs/testing.md`** — expanded automated testing description.
+- **`docs/devlog.md`** — removed (notes merged into `README.md`).
+- **`docs/testing.md`** — removed (moved into `README.md`).
 - During development, when the schema changed, I used **`flask reset-db`** (destructive) and re-seeded as needed.
 
 ---
