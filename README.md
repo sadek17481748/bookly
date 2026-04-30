@@ -62,6 +62,7 @@ The site shows a realistic “small business” workflow:
 - **Live app login page**: [Login](https://bookly-final-98e88d5d388e.herokuapp.com/login)
 - **Analytics dashboard (admin-only)**: [`/admin/analytics`](https://bookly-final-98e88d5d388e.herokuapp.com/admin/analytics) — shows revenue, orders, top sellers, and catalogue breakdown (requires the assessor admin login).
 - **Assessor analytics login**: `analytics@testemail.com` / `test123` — admin account for accessing the analytics dashboard on the live site.
+- **Bug tracker (GitHub Project board)**: [`github.com/users/sadek17481748/projects/6`](https://github.com/users/sadek17481748/projects/6)
 - **GitHub Pages (documentation site)**: [`sadek17481748.github.io/bookly`](https://sadek17481748.github.io/bookly/)
 - **Closed issues (progress log)**: [GitHub Issues (closed)](https://github.com/sadek17481748/bookly/issues?q=is%3Aissue%20state%3Aclosed)
 
@@ -206,6 +207,97 @@ Low-fidelity wireframes for bookly are in this repository as a single PDF:
 
 Any extra Figma links or annotated screenshots I used only in the written report stay in the **coursework appendix**; this PDF is the main wireframe file in the repo.
 
+### Wireframe description (screen-by-screen)
+
+The PDF wireframe is intentionally low fidelity (boxes, labels, and simple components), but it still captures the **layout decisions** and the main **user actions** for each route.
+
+#### Global layout used across screens
+
+- **Header navigation**: logo on the left and the main links on the right (**Home**, **Books**, **Contact**).
+- **Auth-aware nav**:
+  - When logged out: **Login**, **Register**
+  - When logged in: **Cart**, **Orders**, **Logout** (and **Analytics** for admin users)
+- **Footer**: quick links (**Contact us**, **Browse books**, **Sitemap**) plus social icons.
+
+#### Home (`/`)
+
+- A hero panel with the primary message (“Discover your next favourite book / Find your next great read”) and two clear calls to action:
+  - **Browse books**
+  - **Create account**
+- Supporting feature cards to preview core functionality (reviews + checkout).
+
+#### Books catalogue (`/books`)
+
+- Page heading (“Our books / Books list”) and a **search bar** (“Search by title or author”).
+- A **grid of book cards**, each showing:
+  - title, author, category, price
+  - an action to **view details** and/or **add to cart** (depending on auth state in the live app).
+
+#### Book detail (`/books/<id>`)
+
+- A split layout with:
+  - **Cover image** panel
+  - **Book metadata** (title, author, category, price) and a longer description
+- A quantity selector and **Add to cart** action (shown for logged-in users in the real UI).
+- Reviews section:
+  - List of reviews (reviewer email, timestamp, rating, body)
+  - Owner controls for edit/delete (represented in the wireframe as buttons alongside reviews).
+
+#### Login (`/login`)
+
+- A compact “card” form with:
+  - Email input
+  - Password input
+  - Login button
+  - Link to Register
+
+#### Register (`/register`)
+
+- A matching “card” form with:
+  - Email input
+  - Password input
+  - Confirm password input
+  - Register button
+  - Link to Login
+
+#### Cart (`/cart`)
+
+- A list/table of cart items with:
+  - title, unit price, quantity input
+  - **Update** and **Remove** actions per line
+- An order summary area showing a subtotal and a clear **Checkout** button.
+
+#### Checkout (`/orders/checkout`)
+
+- A two-column layout:
+  - Left: shipping information inputs and a **Place order** button
+  - Right: an **order summary** (items, quantities, totals)
+
+#### Orders (`/orders`)
+
+- A list of previous orders (order IDs / timestamps), with the intention that an order can be expanded to show line items and totals.
+
+#### Admin analytics (`/admin/analytics`)
+
+- An admin-only dashboard screen with:
+  - KPI summary cards (sales, books, users, new orders)
+  - Category breakdown and top sellers
+  - Recent orders table
+  - A clear admin call-to-action: **Add new book**
+
+#### Admin add book (`/admin/books/new`)
+
+- A form layout for adding to the catalogue, including:
+  - title, author, category, price
+  - cover image selector
+  - description
+  - submit button
+
+#### Error pages (403 / 404)
+
+- **404**: a friendly “Page not found” message with buttons to return home or browse books.
+- **403**: a clear “Forbidden” message with a back-home action.
+
 ---
 
 ## Website build process and planning (milestones)
@@ -319,6 +411,12 @@ In future projects, to manage my time and communication better, I would take the
 #### What I learned
 
 This project reinforced that the biggest risk under time pressure is not writing code—it is losing structure: forgetting what changed, delaying testing, and trying to complete too many features at once. A clearer schedule, earlier communication, and smaller planned deliverables would make future projects more controlled and less stressful, even if delays happen.
+
+#### Planned but not completed (time constraint)
+
+Late in development, I planned a small admin improvement: a **“Complete order”** button on the admin side (so an admin could mark an order as completed after checkout). The idea came from watching extra e-commerce tutorials and thinking about how a real store would track order status, but I did not have enough time to implement it properly before submission.
+
+In a future iteration, I would add an `order_status` field (for example: Pending → Completed), show it on the admin dashboard, and only allow status changes for admin users with server-side validation.
 
 ---
 
@@ -587,6 +685,27 @@ heroku open -a bookly-final
 - I created the GitHub repository and added the project documentation (`README.md`).
 - To publish the documentation on GitHub Pages, I opened **Settings → Pages**, selected **Deploy from a branch**, chose **`main`** as the source, and saved to generate the Pages site.
 - I also used GitHub **Issues** to log issues and user stories, and to track progress throughout development.
+
+### How I committed changes to GitHub (workflow used)
+
+During development I used a simple Git workflow so changes were traceable and easy to review:
+
+- I checked what changed with `git status` and `git diff`.
+- I staged the files I wanted in the commit with `git add ...`.
+- I created a commit with a short message describing what changed and why.
+- I pushed commits to GitHub so the repository stayed up to date.
+
+Typical commands I used:
+
+```bash
+git status
+git diff
+git add README.md
+git commit -m "docs(readme): update testing evidence"
+git push origin main
+```
+
+Where changes affected both documentation and the app itself, I kept commits separate so it was obvious what was “README/docs” and what was “code changes”.
 
 ---
 
@@ -869,6 +988,8 @@ The rows below match the automated tests in `tests/` (reproducible with `pytest 
 ### Bugs encountered during development
 
 The table below is a **bug / issue log** in the style used for coursework: it records problems **encountered while building bookly**, how serious they were, and that they were **resolved**. It is **not** a list of current security defects—the shipped app uses **Werkzeug password hashing** and server-side checks as implemented in `models.py` and the blueprints.
+
+To track issues during development, I also used a GitHub **Project board** as a simple bug tracker ([`projects/6`](https://github.com/users/sadek17481748/projects/6)). I used **Low / Medium / High** priority labels to decide what to fix first (for example, authentication, ownership checks, and checkout logic were treated as higher priority than UI tweaks), and the board helped me keep a clear record of what was open, what was in progress, and what was resolved.
 
 ### Use of AI (assistance log)
 
