@@ -551,18 +551,9 @@ The implementation lives in `models.py` and `schema.sql` (DDL reference). Money 
 
 **ERD (Entity Relationship Diagram)**
 
-The diagram below is a logical view of the same schema PostgreSQL applies via foreign keys and constraints. **GitHub’s Mermaid renderer truncates text inside ER attribute lists**, so this diagram shows **entities and relationships only**; column names, types, and keys are listed in the **cardinality table above** and in `models.py` / `schema.sql`.
+The diagram below is a **full logical ERD** (attributes, types, keys, and relationship labels with cascade/restrict notes). It matches `models.py`, `schema.sql`, and the cardinality summary above. File: [`docs/images/bookly-erd.png`](docs/images/bookly-erd.png).
 
-```mermaid
-erDiagram
-    users ||--o{ reviews : "writes"
-    users ||--o{ cart_items : "owns"
-    users ||--o{ orders : "places"
-    books ||--o{ reviews : "receives"
-    books ||--o{ cart_items : "in_cart"
-    books ||--o{ order_items : "sold_as"
-    orders ||--|{ order_items : "contains"
-```
+![bookly entity–relationship diagram](docs/images/bookly-erd.png)
 
 ### Visual language
 
@@ -673,6 +664,7 @@ These choices are implemented as CSS variables at the top of `static/css/styles.
 | `docs/wireframe-bookly.pdf` | Wireframes (PDF) for main screens and flows |
 | `docs/images/manual-testing/` | Manual testing evidence screenshots used in the testing table |
 | `docs/images/validation/` | Evidence screenshots (Lighthouse, W3C validators, JSHint, responsiveness, 404) |
+| `docs/images/bookly-erd.png` | Full ERD image used in [Data model and ERD](#data-model-and-erd-entity-relationships) |
 | `static website/` | Early static HTML/CSS prototype only (pages wrapped in comments; not served by Flask). See `index.html`, other `.html` files, and `css/site.css` |
 | `README.md` | Project documentation, testing evidence, and assessor-facing structure (this file) |
 | `.jshintrc` | JSHint config for `static/js/main.js` (modern browser JS; see [HTML, CSS and JS Validation](#html-css-and-js-validation)) |
