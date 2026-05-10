@@ -551,68 +551,17 @@ The implementation lives in `models.py` and `schema.sql` (DDL reference). Money 
 
 **ERD (Entity Relationship Diagram)**
 
-The diagram below is a logical view of the same schema PostgreSQL applies via foreign keys and constraints.
+The diagram below is a logical view of the same schema PostgreSQL applies via foreign keys and constraints. **GitHub’s Mermaid renderer truncates text inside ER attribute lists**, so this diagram shows **entities and relationships only**; column names, types, and keys are listed in the **cardinality table above** and in `models.py` / `schema.sql`.
 
 ```mermaid
 erDiagram
-    users ||--o{ reviews : "user_id"
-    users ||--o{ cart_items : "user_id"
-    users ||--o{ orders : "user_id"
-    books ||--o{ reviews : "book_id"
-    books ||--o{ cart_items : "book_id"
-    books ||--o{ order_items : "book_id"
-    orders ||--|{ order_items : "order_id"
-
-    users {
-        int id PK
-        string email UK
-        string password_hash
-        boolean is_admin
-        datetime created_at
-    }
-
-    books {
-        int id PK
-        string title
-        string author
-        string category
-        int price_cents
-        text description
-        string cover_url
-        datetime created_at
-    }
-
-    reviews {
-        int id PK
-        int user_id FK
-        int book_id FK
-        int rating
-        text body
-        datetime created_at
-    }
-
-    cart_items {
-        int id PK
-        int user_id FK
-        int book_id FK
-        int quantity
-        datetime created_at
-    }
-
-    orders {
-        int id PK
-        int user_id FK
-        int total_cents
-        datetime created_at
-    }
-
-    order_items {
-        int id PK
-        int order_id FK
-        int book_id FK
-        int quantity
-        int unit_price_cents
-    }
+    users ||--o{ reviews : "writes"
+    users ||--o{ cart_items : "owns"
+    users ||--o{ orders : "places"
+    books ||--o{ reviews : "receives"
+    books ||--o{ cart_items : "in_cart"
+    books ||--o{ order_items : "sold_as"
+    orders ||--|{ order_items : "contains"
 ```
 
 ### Visual language
