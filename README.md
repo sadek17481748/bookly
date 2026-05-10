@@ -70,7 +70,7 @@ Assessor-facing links and evidence paths (also useful when marking without searc
 | **Closed issues (progress log)** | GitHub **Issues** (closed) on the repository |
 | **Bug / fix narratives** | [`docs/fix-log.md`](docs/fix-log.md) — short notes per fix next to the manual checklist |
 | **Manual test evidence (screenshots)** | [`docs/images/manual-testing/`](docs/images/manual-testing/) — filenames match the [Manual testing](#manual-testing) table |
-| **Validation tooling evidence** | [`docs/images/validation/`](docs/images/validation/) — Lighthouse, W3C validators, JSHint, 404, responsiveness composite |
+| **Validation tooling evidence** | [`docs/images/validation/`](docs/images/validation/) — Lighthouse, W3C validators, JSHint, 404, responsiveness (e.g. responsivetesttool samples) |
 | **Rubric 4 & 2.1 — ERD / data model** | [Data model and ERD (entity relationships)](#data-model-and-erd-entity-relationships) — Mermaid diagram + cardinality + `models.py` / `schema.sql` |
 | **Rubric 1.5 — test procedures (four areas)** | [Assessment test matrix](#assessment-test-matrix-functionality-usability-responsiveness-data-management) — functionality, usability, responsiveness, data management |
 
@@ -249,7 +249,19 @@ I treated **responsiveness as a manual test pass** (layout and navigation, not s
 
 #### Responsiveness testing evidence
 
-![Responsive testing on mobile, tablet and laptop](docs/images/validation/responsive-test-devices.png)
+Sample screenshots from [responsivetesttool.com](https://responsivetesttool.com/?url=https://bookly-final-98e88d5d388e.herokuapp.com) while loading the live Heroku deployment and switching device presets (home page shown).
+
+**Mobile — Apple iPhone XS Max (414 × 896)**
+
+![Responsive testing — iPhone XS Max](docs/images/validation/responsive-responsivetest-mobile-iphone-xs-max.png)
+
+**Tablet / medium-width viewport**
+
+![Responsive testing — tablet / medium width](docs/images/validation/responsive-responsivetest-tablet-medium.png)
+
+**Desktop / laptop — 1024 × 600**
+
+![Responsive testing — desktop 1024×600](docs/images/validation/responsive-responsivetest-desktop-1024x600.png)
 
 ### User stories
 
@@ -982,7 +994,7 @@ The procedures below show how testing covers the **full-stack** application acro
 |------|-------------------|----------------------------------------|-------------------------|
 | **Functionality** | End-to-end behaviour: browse, auth, reviews, cart, checkout, orders, admin guards | **Automated:** `pytest` (route status, redirects, cart, admin 403/200, search, reviews). **Manual:** checklist tests **#1–#32** (public pages, auth, reviews, cart, checkout, orders, admin). | [Manual testing](#manual-testing) table; [Automated testing](#automated-testing) and [Testing summary table](#testing-summary-table); terminal log under [Running pytest locally](#running-pytest-locally-terminal-evidence) |
 | **Usability** | Navigation, forms, validation feedback, destructive confirmations, access to help/error states | **Manual:** registration/login validation (**#7–#9**), cart/checkout flows, review CRUD, **404** via sitemap link, flash messages. **Tools:** Lighthouse (performance/accessibility/best-practice signals). | Manual rows **#7–#9**, **#14–#18**, **#21–#22**, **#28–#30**; [404 page note](#404-page-note-and-evidence); [Lighthouse testing](#lighthouse-testing); [User Experience (UX)](#user-experience-ux) |
-| **Responsiveness** | Layout and navigation from **phone → tablet → laptop → desktop**; readable catalogue, forms, and admin views | **Manual:** dedicated pass using Chrome **Device Toolbar** at typical widths for each class (see [How responsiveness was tested](#how-responsiveness-was-tested)); repeated browse/cart/checkout flows per viewport; **Tools:** Lighthouse. **Evidence:** composite screenshot in `docs/images/validation/`. | [Responsive behaviour](#responsive-behaviour) and [How responsiveness was tested](#how-responsiveness-was-tested); [Lighthouse testing](#lighthouse-testing); [File Structure](#file-structure) |
+| **Responsiveness** | Layout and navigation from **phone → tablet → laptop → desktop**; readable catalogue, forms, and admin views | **Manual:** dedicated pass using Chrome **Device Toolbar** at typical widths for each class (see [How responsiveness was tested](#how-responsiveness-was-tested)); repeated browse/cart/checkout flows per viewport; **Tools:** Lighthouse. **Evidence:** screenshots in `docs/images/validation/` (see [Responsiveness testing evidence](#responsiveness-testing-evidence)). | [Responsive behaviour](#responsive-behaviour) and [How responsiveness was tested](#how-responsiveness-was-tested); [Lighthouse testing](#lighthouse-testing); [File Structure](#file-structure) |
 | **Data management** | Correct persistence, FK relationships, ownership rules, cart merge, checkout multi-table write, price snapshot | **Automated:** cart requires login, add-to-cart, empty-checkout guard, admin routes. **Manual:** duplicate email (**#13**), review ownership (**#18**), cart merge/update (**#19–#20**), checkout creates order and clears cart (**#22**), large order totals (**#26**), admin add book (**#25**, **#31**). **Design ref:** ERD and `schema.sql`. | [Data model and ERD](#data-model-and-erd-entity-relationships); manual rows **#13**, **#18–#22**, **#25–#26**, **#31**; [Database (PostgreSQL)](#database-postgresql); [Why PostgreSQL is the technical centre of this work](#why-postgresql-is-the-technical-centre-of-this-work) |
 
 ### Manual testing
