@@ -702,6 +702,8 @@ These choices are implemented as CSS variables at the top of `static/css/styles.
 | `admin.py` | Admin analytics blueprint + `admin_required` decorator |
 | `cli.py` | `flask init-db`, `reset-db`, `make-admin`; seeds books and back-fills `cover_url` values |
 | `templates/` | Jinja2 HTML (includes admin pages) |
+| `templates/base.html` | Global layout: head, skip link, nav, footer, flash region |
+| `templates/403.html` / `templates/404.html` | Custom forbidden and not-found pages |
 | `templates/admin_add_book.html` | Admin-only “Add book” form (category + cover selection) |
 | `static/css/styles.css` | Site styles |
 | `static/js/main.js` | Nav toggle + confirm helper |
@@ -721,6 +723,9 @@ These choices are implemented as CSS variables at the top of `static/css/styles.
 | `docs/wireframe-bookly.pdf` | Wireframes (PDF) for main screens and flows |
 | `docs/images/manual-testing/` | Manual testing evidence screenshots used in the testing table |
 | `docs/images/validation/` | Evidence screenshots (Lighthouse, W3C validators, JSHint, responsiveness, 404) |
+| `static website/` | Early static HTML/CSS prototype only (pages wrapped in comments; not served by Flask). See `index.html`, other `.html` files, and `css/site.css` |
+| `README.md` | Project documentation, testing evidence, and assessor-facing structure (this file) |
+| `.jshintrc` | JSHint config for `static/js/main.js` (modern browser JS; see [HTML, CSS and JS Validation](#html-css-and-js-validation)) |
 | `tools/` | One-off helper scripts used during development (not part of the running app) |
 
 ---
@@ -993,13 +998,13 @@ The procedures below show how testing covers the **full-stack** application acro
 | Area | What was assessed | Procedures (automated / manual / tools) | Evidence in this README |
 |------|-------------------|----------------------------------------|-------------------------|
 | **Functionality** | End-to-end behaviour: browse, auth, reviews, cart, checkout, orders, admin guards | **Automated:** `pytest` (route status, redirects, cart, admin 403/200, search, reviews). **Manual:** checklist tests **#1–#32** (public pages, auth, reviews, cart, checkout, orders, admin). | [Manual testing](#manual-testing) table; [Automated testing](#automated-testing) and [Testing summary table](#testing-summary-table); terminal log under [Running pytest locally](#running-pytest-locally-terminal-evidence) |
-| **Usability** | Navigation, forms, validation feedback, destructive confirmations, access to help/error states | **Manual:** registration/login validation (**#7–#9**), cart/checkout flows, review CRUD, **404** via sitemap link, flash messages. **Tools:** Lighthouse (performance/accessibility/best-practice signals). | Manual rows **#7–#9**, **#14–#18**, **#21–#22**, **#28–#30**; [404 page note](#404-page-note-and-evidence); [Lighthouse testing](#lighthouse-testing); [User Experience (UX)](#user-experience-ux) |
-| **Responsiveness** | Layout and navigation from **phone → tablet → laptop → desktop**; readable catalogue, forms, and admin views | **Manual:** dedicated pass using Chrome **Device Toolbar** at typical widths for each class (see [How responsiveness was tested](#how-responsiveness-was-tested)); repeated browse/cart/checkout flows per viewport; **Tools:** Lighthouse. **Evidence:** screenshots in `docs/images/validation/` (see [Responsiveness testing evidence](#responsiveness-testing-evidence)). | [Responsive behaviour](#responsive-behaviour) and [How responsiveness was tested](#how-responsiveness-was-tested); [Lighthouse testing](#lighthouse-testing); [File Structure](#file-structure) |
+| **Usability** | Navigation, forms, validation feedback, destructive confirmations, access to help/error states | **Manual:** registration/login validation (**#7–#9**), cart/checkout flows, review CRUD, **404** via sitemap link, flash messages, plus dedicated rows **#33–#38** (keyboard/skip link, confirmations, error pages, Lighthouse). **Tools:** Lighthouse (performance/accessibility/best-practice signals). | Manual rows **#7–#9**, **#14–#18**, **#21–#22**, **#28–#30**, **#33–#38**; [404 page note](#404-page-note-and-evidence); [Lighthouse testing](#lighthouse-testing); [User Experience (UX)](#user-experience-ux) |
+| **Responsiveness** | Layout and navigation from **phone → tablet → laptop → desktop**; readable catalogue, forms, and admin views | **Manual:** dedicated pass using Chrome **Device Toolbar** at typical widths for each class (see [How responsiveness was tested](#how-responsiveness-was-tested)); checklist rows **#39–#43** (viewport classes, landscape, cross-device tool); **Tools:** Lighthouse. **Evidence:** screenshots in `docs/images/validation/` (see [Responsiveness testing evidence](#responsiveness-testing-evidence)). | [Responsive behaviour](#responsive-behaviour) and [How responsiveness was tested](#how-responsiveness-was-tested); manual rows **#39–#43**; [Lighthouse testing](#lighthouse-testing); [File Structure](#file-structure) |
 | **Data management** | Correct persistence, FK relationships, ownership rules, cart merge, checkout multi-table write, price snapshot | **Automated:** cart requires login, add-to-cart, empty-checkout guard, admin routes. **Manual:** duplicate email (**#13**), review ownership (**#18**), cart merge/update (**#19–#20**), checkout creates order and clears cart (**#22**), large order totals (**#26**), admin add book (**#25**, **#31**). **Design ref:** ERD and `schema.sql`. | [Data model and ERD](#data-model-and-erd-entity-relationships); manual rows **#13**, **#18–#22**, **#25–#26**, **#31**; [Database (PostgreSQL)](#database-postgresql); [Why PostgreSQL is the technical centre of this work](#why-postgresql-is-the-technical-centre-of-this-work) |
 
 ### Manual testing
 
-I complemented automated tests with manual runs in the browser, recording **what I did**, **what I expected**, and **what happened**. The table below is the checklist I used; I filled **Pass/Fail**, **Notes**, and captured screenshots in `docs/images/manual-testing/`.
+I complemented automated tests with manual runs in the browser, recording **what I did**, **what I expected**, and **what happened**. The table below is the checklist I used; I filled **Pass/Fail**, **Notes**, and captured screenshots in `docs/images/manual-testing/` (and linked **`docs/images/validation/`** where the evidence is tooling or cross-device screenshots). Rows **#1–#32** focus on **functionality**; **#33–#38** add explicit **usability** checks; **#39–#43** add explicit **responsiveness** checks aligned with the assessment matrix.
 
 | # | Area | Step | Expected | Pass/Fail | Notes | Screenshot evidence |
 |---|------|------|----------|-----------|-------|-------------------|
@@ -1035,6 +1040,17 @@ I complemented automated tests with manual runs in the browser, recording **what
 | 30 | Cart | Attempt “Add to cart” while logged out | Redirects to login; after login the user can add the book to cart | Pass |  |  |
 | 31 | Admin | Add book: enter an invalid price (non-numeric or 0/negative) | Blocked with validation errors (“Price must be a number (e.g. 12.99).” / “Price must be greater than 0.”) | Pass |  |  |
 | 32 | Cart | Update cart quantity using letters | Browser blocks non-numeric input (“Enter a number”) so quantity validation happens before submit | Pass |  | [35-cart-quantity-non-numeric](docs/images/manual-testing/35-cart-quantity-non-numeric.png) |
+| 33 | Usability | Use **keyboard only**: `Tab` through Home, Books, and Login; activate **Skip to content** | Focus order is logical; skip link jumps to `#main`; all interactive elements reachable | Pass |  |  |
+| 34 | Usability | After login, cart update, and checkout, read **flash messages** | Success and error flashes appear, readable, and match the action (green/red styling) | Pass |  |  |
+| 35 | Usability | **Delete review** and **remove cart line**: try Cancel vs OK in the browser confirm | Cancel leaves data; OK completes the action (no accidental loss without confirmation) | Pass |  | [14-review-delete](docs/images/manual-testing/14-review-delete.png)<br>[17b-cart-remove-confirm](docs/images/manual-testing/17b-cart-remove-confirm.png) |
+| 36 | Usability | **Register** and **checkout** forms: required fields, inline/browser hints | Empty or invalid input is blocked with clear messages; required fields obvious | Pass |  | [06a-register-form](docs/images/manual-testing/06a-register-form.png)<br>[28-large-order-checkout](docs/images/manual-testing/28-large-order-checkout.png) |
+| 37 | Usability | **Custom 404** (footer → Sitemap) and **403** (normal user → `/admin/analytics`) | Pages explain the problem and offer navigation back to safe routes | Pass |  | [404 validation](docs/images/validation/404-page.png) |
+| 38 | Usability | **Lighthouse** (Chrome DevTools) on **Home**: Accessibility and Best practices | Audit completes; scores recorded for submission (see validation screenshot) | Pass |  | [Lighthouse home](docs/images/validation/lighthouse-home.png) |
+| 39 | Responsive | **Phone** width (~375px): Home, Books, Book detail, Cart, Checkout | Hamburger works; single-column layouts; text and buttons readable; **no horizontal scroll** on core flows | Pass | Same pass as [How responsiveness was tested](#how-responsiveness-was-tested) | [Mobile preset](docs/images/validation/responsive-responsivetest-mobile-iphone-xs-max.png) |
+| 40 | Responsive | **Tablet** width (~768–900px): Books grid, Checkout, Orders | Grids and forms balance; navigation/footer not cramped | Pass |  | [Tablet / medium](docs/images/validation/responsive-responsivetest-tablet-medium.png) |
+| 41 | Responsive | **Laptop / desktop** (~1024px+): Catalogue, Cart, **Admin analytics** | Multi-column catalogue; tables and KPI tiles usable with the max-width container | Pass |  | [Desktop 1024×600](docs/images/validation/responsive-responsivetest-desktop-1024x600.png) |
+| 42 | Responsive | **Landscape** on phone/tablet Device Toolbar presets | Hero, forms, and nav remain usable (spot-check; height is limited) | Pass |  |  |
+| 43 | Responsive | **Responsivetesttool.com**: load live Heroku URL; switch device presets | Home (and spot-check other routes) render consistently across presets | Pass | Tool: [responsivetesttool.com](https://responsivetesttool.com/?url=https://bookly-final-98e88d5d388e.herokuapp.com) | [Mobile](docs/images/validation/responsive-responsivetest-mobile-iphone-xs-max.png)<br>[Tablet](docs/images/validation/responsive-responsivetest-tablet-medium.png)<br>[Desktop](docs/images/validation/responsive-responsivetest-desktop-1024x600.png) |
 
 #### 404 page (note and evidence)
 
