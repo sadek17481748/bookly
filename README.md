@@ -71,18 +71,20 @@ Assessor-facing links and evidence paths (also useful when marking without searc
 | **Bug / fix narratives** | [`docs/fix-log.md`](docs/fix-log.md) — short notes per fix next to the manual checklist |
 | **Manual test evidence (screenshots)** | [`docs/images/manual-testing/`](docs/images/manual-testing/) — filenames match the [Manual testing](#manual-testing) table |
 | **Validation tooling evidence** | [`docs/images/validation/`](docs/images/validation/) — Lighthouse, W3C validators, JSHint, 404, responsiveness composite |
+| **Rubric 4 & 2.1 — ERD / data model** | [Data model and ERD (entity relationships)](#data-model-and-erd-entity-relationships) — Mermaid diagram + cardinality + `models.py` / `schema.sql` |
+| **Rubric 1.5 — test procedures (four areas)** | [Assessment test matrix](#assessment-test-matrix-functionality-usability-responsiveness-data-management) — functionality, usability, responsiveness, data management |
 
 Key screens are also embedded under [Key UI screenshots](#key-ui-screenshots) below.
 
 ### Marking criteria → README (assessor map)
 
-These rows tie **this `README.md` only** (no extra marker document) to the parts of the brief that ask for **database design**, **testing across the full stack**, and **a project data model**. The evidence named here is what you should scroll to in the sections linked.
+These rows tie **this `README.md` only** (no extra marker document) to the assessment items below. The evidence named here is what you should scroll to in the sections linked.
 
-| Criterion (brief wording) | What you should see in this README | Anchor |
-|---------------------------|-------------------------------------|--------|
-| **Domain database design** — structure relevant to the domain **and relationships between entities** | Relational entities (users, books, reviews, cart, orders), **cardinality table**, and a **Mermaid ERD** showing keys and links between tables. Same design is reflected in `models.py` and `schema.sql`. | [Data model and ERD (entity relationships)](#data-model-and-erd-entity-relationships) |
-| **1.5** — test procedures for **functionality**, **usability**, **responsiveness**, and **data management** in the full-stack app | The **four-row assessment matrix** (what was tested, how, where to read it), then the **numbered manual checklist** with Pass/Fail and screenshot paths, plus **automated testing** and the **testing summary** table. | [Assessment test matrix](#assessment-test-matrix-functionality-usability-responsiveness-data-management); [Manual testing](#manual-testing); [Automated testing](#automated-testing); [Testing summary table](#testing-summary-table) |
-| **2.1** — **data model** that fits the project purpose | Same subsection as the first row: the ERD and narrative explain how the schema supports browsing, reviews, cart, checkout, and admin reporting. | [Data model and ERD (entity relationships)](#data-model-and-erd-entity-relationships) |
+| Rubric | Criterion (assessment brief wording) | What you should see in this README | Anchor |
+|--------|----------------------------------------|-------------------------------------|--------|
+| **4** | Design a **database structure** that is relevant to the domain, **including relationships between records of different entities**. | Relational entities (users, books, reviews, cart, orders), **cardinality table**, and a **Mermaid ERD** (entity–relationship diagram) with keys and links. The same structure is implemented in `models.py` and `schema.sql`. | [Data model and ERD (entity relationships)](#data-model-and-erd-entity-relationships) |
+| **1.5** | Design and implement **test procedures** (automated or manual) to assess **functionality**, **usability**, **responsiveness**, and **data management** within the **full-stack** web application. | The **four-row assessment matrix** (one row per area above), then the **numbered manual checklist** with Pass/Fail and screenshot paths, plus **automated testing** (`pytest`) and the **testing summary** table. | [Assessment test matrix](#assessment-test-matrix-functionality-usability-responsiveness-data-management); [Manual testing](#manual-testing); [Automated testing](#automated-testing); [Testing summary table](#testing-summary-table) |
+| **2.1** | Design a **data model** that fits the **purpose** of the project. | Same place as rubric **4**: the ERD plus narrative explain how tables support browsing, reviews, cart, checkout, and admin reporting for a bookstore domain. | [Data model and ERD (entity relationships)](#data-model-and-erd-entity-relationships) |
 
 ---
 
@@ -525,6 +527,8 @@ In a future iteration, I would add an `order_status` field (for example: Pending
 ## Design
 
 ### Data model and ERD (entity relationships)
+
+**Rubric 4 and 2.1:** This subsection is the evidence for **(4) domain database design with relationships between entities** and **(2.1) a data model that fits the project purpose**. It includes an **ERD** (entity–relationship diagram) and cardinality summary; the same design is enforced in PostgreSQL via foreign keys in `schema.sql` and SQLAlchemy models in `models.py`.
 
 This subsection documents the **relational data model** for bookly: entities, attributes, and how records link across tables. It covers **database structure for the domain** (users, catalogue, social reviews, cart, orders) and **relationships between entities**.
 
@@ -979,6 +983,8 @@ Server-rendered Flask keeps the database work clear: every important screen is b
 ## Testing and Bugs
 
 ### Assessment test matrix (functionality, usability, responsiveness, data management)
+
+**Rubric 1.5:** The matrix below is the explicit mapping for **(1.5) test procedures** across **functionality**, **usability**, **responsiveness**, and **data management** in the **full-stack** application (browser, Flask, PostgreSQL). Each row states what was assessed, how (automated / manual / tools), and where to read the evidence in this README.
 
 The procedures below show how testing covers the **full-stack** application across four areas: whether features work (**functionality**), whether the interface is clear and forgiving (**usability**), whether layouts behave on different screens (**responsiveness**), and whether data is created, constrained, and persisted correctly (**data management**). Methods mix **automated** tests (`pytest` in `tests/`), **manual** browser runs (checklist and screenshots under `docs/images/manual-testing/` and `docs/images/validation/`), and **tooling** (Lighthouse, W3C validators, JSHint—see sections further down).
 
