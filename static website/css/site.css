@@ -1,5 +1,14 @@
-/* Bookly — early layout stylesheet */
+/* =============================================================================
+   Bookly — static prototype stylesheet (css/site.css)
+   Shared by the HTML files under static website/. Not used by the Flask app
+   (the live site uses static/css/styles.css instead).
+   ============================================================================= */
 
+/* -----------------------------------------------------------------------------
+   Design tokens (:root)
+   Colours, radii, and max content width as CSS variables so the rest of the
+   file can stay consistent and easy to tweak in one place.
+   ----------------------------------------------------------------------------- */
 :root {
   --bg: #0c1018;
   --card: #151b2a;
@@ -12,12 +21,21 @@
   --max: 960px;
 }
 
+/* -----------------------------------------------------------------------------
+   Global box model
+   Makes width calculations include padding and border (easier layouts).
+   ----------------------------------------------------------------------------- */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
+/* -----------------------------------------------------------------------------
+   Page base
+   Removes default body margin; sets font stack, background, text colour, and
+   comfortable line height for reading.
+   ----------------------------------------------------------------------------- */
 body {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
@@ -26,6 +44,10 @@ body {
   line-height: 1.5;
 }
 
+/* -----------------------------------------------------------------------------
+   Links
+   Accent colour and no underline by default; underline on hover for feedback.
+   ----------------------------------------------------------------------------- */
 a {
   color: var(--accent-soft);
   text-decoration: none;
@@ -35,12 +57,20 @@ a:hover {
   text-decoration: underline;
 }
 
+/* -----------------------------------------------------------------------------
+   Main content column (.wrap)
+   Centres content and caps width using --max; vertical padding for breathing room.
+   ----------------------------------------------------------------------------- */
 .wrap {
   width: min(var(--max), calc(100% - 2rem));
   margin: 0 auto;
   padding: 1.5rem 0 3rem;
 }
 
+/* -----------------------------------------------------------------------------
+   Site header (.top, .top-inner)
+   Full-width header strip with bottom border; inner flex row spaces brand and nav.
+   ----------------------------------------------------------------------------- */
 .top {
   border-bottom: 1px solid var(--line);
   padding-bottom: 1rem;
@@ -57,6 +87,10 @@ a:hover {
   gap: 1rem;
 }
 
+/* -----------------------------------------------------------------------------
+   Logo wordmark (.brand)
+   Strong weight and slight letter-spacing so “Bookly” reads as the site title.
+   ----------------------------------------------------------------------------- */
 .brand {
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -64,6 +98,10 @@ a:hover {
   color: var(--text);
 }
 
+/* -----------------------------------------------------------------------------
+   Primary navigation (nav)
+   Horizontal link row with sans-serif for UI chrome (contrasts with body serif).
+   ----------------------------------------------------------------------------- */
 nav {
   display: flex;
   flex-wrap: wrap;
@@ -72,6 +110,10 @@ nav {
   font-size: 0.95rem;
 }
 
+/* -----------------------------------------------------------------------------
+   Home hero (.hero)
+   Large gradient panel on index.html: headline, supporting text, CTA row.
+   ----------------------------------------------------------------------------- */
 .hero {
   padding: 2.5rem 1.5rem;
   border-radius: var(--radius);
@@ -92,12 +134,21 @@ nav {
   font-family: system-ui, sans-serif;
 }
 
+/* -----------------------------------------------------------------------------
+   Button group row (.row)
+   Flex wrap so multiple .btn links sit side by side and wrap on small screens.
+   ----------------------------------------------------------------------------- */
 .row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
 }
 
+/* -----------------------------------------------------------------------------
+   Buttons (.btn, .outline, disabled)
+   Pill-shaped primary button; outline variant for secondary actions; disabled state
+   for mock forms where inputs are not wired up.
+   ----------------------------------------------------------------------------- */
 .btn {
   display: inline-block;
   padding: 0.55rem 1.1rem;
@@ -124,6 +175,10 @@ button.btn {
   color: var(--text);
 }
 
+/* -----------------------------------------------------------------------------
+   Book grid (.grid, .tile)
+   Responsive auto-fill grid for catalogue cards; each tile is a small panel.
+   ----------------------------------------------------------------------------- */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -138,6 +193,10 @@ button.btn {
   font-family: system-ui, sans-serif;
 }
 
+/* -----------------------------------------------------------------------------
+   Placeholder “cover” inside a tile (.tile .cover-block)
+   Striped gradient block standing in for a real cover image in the prototype.
+   ----------------------------------------------------------------------------- */
 .tile .cover-block {
   height: 120px;
   border-radius: 8px;
@@ -162,6 +221,10 @@ button.btn {
   color: var(--muted);
 }
 
+/* -----------------------------------------------------------------------------
+   Form card (.panel)
+   Bordered panel for login, register, and contact mock layouts.
+   ----------------------------------------------------------------------------- */
 .panel {
   background: var(--card);
   border: 1px solid var(--line);
@@ -175,6 +238,10 @@ button.btn {
   margin-top: 0;
 }
 
+/* -----------------------------------------------------------------------------
+   Form controls (label, input, textarea)
+   Stacked labels; full-width fields with dark fill to match the theme.
+   ----------------------------------------------------------------------------- */
 label {
   display: block;
   margin: 0.75rem 0 0.2rem;
@@ -192,6 +259,10 @@ textarea {
   color: var(--text);
 }
 
+/* -----------------------------------------------------------------------------
+   Cart table (table, th, td)
+   Simple full-width table with row dividers for the static basket page.
+   ----------------------------------------------------------------------------- */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -206,6 +277,10 @@ td {
   text-align: left;
 }
 
+/* -----------------------------------------------------------------------------
+   Muted helper text (.muted)
+   Smaller sans-serif lines for breadcrumbs, by-lines, and secondary copy.
+   ----------------------------------------------------------------------------- */
 .muted {
   color: var(--muted);
   font-family: system-ui, sans-serif;

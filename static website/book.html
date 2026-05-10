@@ -1,12 +1,22 @@
 <!DOCTYPE html>
+<!--
+  Static HTML prototype only (not used by the Flask app). Entire document commented out
+  so opening this file in a browser does not render the old mock-up. Remove this comment
+  wrapper to preview locally.
+
+  [HTML] Root of the page; lang sets English.
+
 <html lang="en">
+  [HEAD] Metadata and shared stylesheet for this prototype.
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bookly — The Quiet Shelf</title>
   <link rel="stylesheet" href="css/site.css">
 </head>
+  [BODY] Book detail layout mock.
 <body>
+  [HEADER] Compact nav: back to list, link to cart (no full site nav on this mock).
   <header class="top">
     <div class="top-inner">
       <a class="brand" href="index.html">Bookly</a>
@@ -17,13 +27,16 @@
     </div>
   </header>
 
+  [MAIN] Single book view: breadcrumb, title, meta line, cover + description + quantity + CTA.
   <main class="wrap">
+    [BREADCRUMB] Simple text path back to books list and current title (static text).
     <p class="muted"><a href="books.html">Books</a> / The Quiet Shelf</p>
     <h1>The Quiet Shelf</h1>
     <p class="muted">by A. North · fiction · £12.99</p>
 
+    [DETAIL ROW] Flex row: placeholder cover box and text column with blurb, fake qty field, cart link.
     <div style="display:flex;flex-wrap:wrap;gap:2rem;margin-top:2rem;align-items:flex-start">
-      <div class="cover-block" style="width:180px;height:260px;border-radius:var(--radius)" aria-hidden="true"></div>
+      <div class="cover-block" style="width:180px;height:260px;border-radius:12px" aria-hidden="true"></div>
       <div style="flex:1;min-width:220px;font-family:system-ui,sans-serif">
         <p>
           A small-town librarian pieces together a family secret after a box of unclaimed letters
@@ -39,3 +52,4 @@
   </main>
 </body>
 </html>
+-->

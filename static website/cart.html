@@ -1,12 +1,22 @@
 <!DOCTYPE html>
+<!--
+  Static HTML prototype only (not used by the Flask app). Entire document commented out
+  so opening this file in a browser does not render the old mock-up. Remove this comment
+  wrapper to preview locally.
+
+  [HTML] Root of the page; lang sets English.
+
 <html lang="en">
+  [HEAD] Metadata and shared stylesheet.
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bookly — Cart</title>
   <link rel="stylesheet" href="css/site.css">
 </head>
+  [BODY] Shopping basket mock (no server, numbers are hard coded).
 <body>
+  [HEADER] Minimal nav: jump to books or home.
   <header class="top">
     <div class="top-inner">
       <a class="brand" href="index.html">Bookly</a>
@@ -17,9 +27,11 @@
     </div>
   </header>
 
+  [MAIN] Cart content: heading, line-item table, total, continue shopping button.
   <main class="wrap">
     <h1>Shopping basket</h1>
 
+    [TABLE] Fake cart rows: title, quantity per line, line subtotal in GBP (static).
     <table style="margin-top:1.5rem">
       <thead>
         <tr>
@@ -42,6 +54,7 @@
       </tbody>
     </table>
 
+    [TOTAL + ACTIONS] Order total summary and link styled as button back to catalogue.
     <p style="margin-top:1.5rem;font-family:system-ui,sans-serif">
       <strong>Total:</strong> £31.99
     </p>
@@ -49,3 +62,4 @@
   </main>
 </body>
 </html>
+-->
