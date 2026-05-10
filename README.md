@@ -1573,13 +1573,37 @@ Wireframes live in-repo as `docs/wireframe-bookly.pdf`. Other coursework artefac
 
 ### Image credits
 
-The catalogue uses cover images to make the UI feel closer to a real storefront. Where a real-world cover thumbnail was used, the source is credited below. (If a row shows “Wikipedia page”, use the book’s Wikipedia article image file page as the attribution source.)
+The catalogue uses cover images to make the UI feel closer to a real storefront. Where a real-world cover thumbnail was used, the source is credited below.
 
 | Asset | Source / link | Credit / licence note |
 |-------|----------------|------------------------|
-| Book cover images (`static/img/covers/*.{png,jpg,svg}`) | (add per-title links as needed) | Local cover assets served from `static/img/covers/`. |
-| Wireframes PDF (`docs/wireframe-bookly.pdf`) | N/A | Created during the planning phase. |
-| Footer icons (inline `<svg>`) | (add if applicable) | Vector icons embedded directly in templates. |
+| Book cover images (`static/img/covers/*.{png,jpg,svg}`) | Files under [`static/img/covers/`](static/img/covers/) in this repository | Local cover assets served from `static/img/covers/`. Individual external sources are credited in the rows below. |
+| Cover source (*Where the Crawdads Sing*) | [Wikipedia — *Where the Crawdads Sing*](https://en.wikipedia.org/wiki/Where_the_Crawdads_Sing) | Source link for the cover image used. |
+| Cover source (*The Help*) | [Wikipedia — *The Help* (novel)](https://en.wikipedia.org/wiki/The_Help_(novel)) | Source link for the cover image used. |
+| Cover source (*Me Before You*) | [Wikipedia — *Me Before You*](https://en.wikipedia.org/wiki/Me_Before_You) | Source link for the cover image used. |
+| Cover source (*The Road*) | [Wikipedia — *The Road* (novel)](https://en.wikipedia.org/wiki/The_Road_(novel)) | Source link for the cover image used. |
+| Cover source (*Life of Pi*) | [Wikipedia — *Life of Pi* (novel)](https://en.wikipedia.org/wiki/Life_of_Pi_(novel)) | Source link for the cover image used. |
+| Cover source (*The Kite Runner*) | [Wikipedia — *The Kite Runner*](https://en.wikipedia.org/wiki/The_Kite_Runner) | Source link for the cover image used. |
+| Cover source (*A Thousand Splendid Suns*) | [Wikipedia — *A Thousand Splendid Suns*](https://en.wikipedia.org/wiki/A_Thousand_Splendid_Suns) | Source link for the cover image used. |
+| Cover source (*The Alchemist*) | [Wikipedia — *The Alchemist* (novel)](https://en.wikipedia.org/wiki/The_Alchemist_(novel)) | Source link for the cover image used. |
+| Cover source (*The Woman in the Window*) | [Wikipedia — *The Woman in the Window* (novel)](https://en.wikipedia.org/wiki/The_Woman_in_the_Window_(novel)) | Source link for the cover image used. |
+| Cover source (*The Reversal*) | [Wikipedia — *The Reversal*](https://en.wikipedia.org/wiki/The_Reversal) | Source link for the cover image used. |
+| Cover source (*And Then There Were None*) | [Wikipedia — *And Then There Were None*](https://en.wikipedia.org/wiki/And_Then_There_Were_None) | Source link for the cover image used. |
+| Cover source (*Big Little Lies*) | [Wikipedia — *Big Little Lies* (novel)](https://en.wikipedia.org/wiki/Big_Little_Lies_(novel)) | Source link for the cover image used. |
+| Cover source (*The Silent Patient*) | [Wikipedia — *The Silent Patient*](https://en.wikipedia.org/wiki/The_Silent_Patient) | Source link for the cover image used. |
+| Cover source (*In the Woods*) | [Wikipedia — *In the Woods*](https://en.wikipedia.org/wiki/In_the_Woods) | Source link for the cover image used. |
+| Cover source (*Gone Girl*) | [Wikipedia — *Gone Girl* (novel)](https://en.wikipedia.org/wiki/Gone_Girl_(novel)) | Source link for the cover image used. |
+| Cover source (*The Girl with the Dragon Tattoo*) | [Wikipedia — *The Girl with the Dragon Tattoo*](https://en.wikipedia.org/wiki/The_Girl_with_the_Dragon_Tattoo) | Source link for the cover image used. |
+| Cover source (*The Da Vinci Code*) | [Wikipedia — *The Da Vinci Code*](https://en.wikipedia.org/wiki/The_Da_Vinci_Code) | Source link for the cover image used. |
+| Cover source (*Ready Player One*) | [Wikipedia — *Ready Player One*](https://en.wikipedia.org/wiki/Ready_Player_One) | Source link for the cover image used. |
+| Cover source (*Frankenstein*) | [Wikipedia — *Frankenstein*](https://en.wikipedia.org/wiki/Frankenstein) | Source link for the cover image used. |
+| Cover source (*The Martian*) | [Wikipedia — *The Martian* (novel)](https://en.wikipedia.org/wiki/The_Martian_(Weir_novel)) | Source link for the cover image used. |
+| Cover source (*Ender’s Game*) | [Wikipedia — *Ender’s Game*](https://en.wikipedia.org/wiki/Ender%27s_Game) | Source link for the cover image used. |
+| Cover source (*Dune*) | [Wikipedia — *Dune* (novel)](https://en.wikipedia.org/wiki/Dune_(novel)) | Source link for the cover image used. |
+| Cover source (*The Hobbit*) | [Wikipedia — *The Hobbit*](https://en.wikipedia.org/wiki/The_Hobbit) | Source link for the cover image used. |
+| Cover source (*The Great Gatsby*) | [Wikipedia — *The Great Gatsby*](https://en.wikipedia.org/wiki/The_Great_Gatsby) | Source link for the cover image used. |
+| Wireframes PDF (`docs/wireframe-bookly.pdf`) | N/A | Created by me during the planning phase. |
+| Footer icons (inline `<svg>`) | Embedded in [`templates/base.html`](templates/base.html) | Vector icons embedded directly in templates. |
 
 ---
 
