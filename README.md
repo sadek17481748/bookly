@@ -35,6 +35,7 @@
   - [Testing summary table](#testing-summary-table)
   - [Bugs encountered during development](#bugs-encountered-during-development)
   - [Use of AI (assistance log)](#use-of-ai-assistance-log)
+  - [Security features](#security-features)
   - [Lighthouse Testing](#lighthouse-testing)
   - [HTML, CSS and JS Validation](#html-css-and-js-validation)
 - [Sources and references](#sources-and-references)
@@ -1269,6 +1270,21 @@ My process was:
 | HTML/Jinja templates (`templates/`) | Suggesting layout tweaks and accessibility improvements (labels, alt text, ARIA). | I checked pages visually, verified navigation flows, and ensured server-side checks remained in Python. |
 | CSS/JS (`static/css/styles.css`, `static/js/main.js`) | Minor suggestions for responsiveness and small JS helpers (nav toggle, confirm). | I validated behaviour on multiple screen sizes and confirmed no critical console errors. |
 | Git / GitHub / pushes | **Cursor:** diagnosing failed pushes and remote misconfiguration when VS Code’s GitHub integration would not connect as usual. | I confirmed the correct repository URL, updated `origin`, and verified pushes reached GitHub. |
+
+### Security features
+
+This is a small coursework app, not a bank or a high-risk production system. Still, a few **simple protections** are in place so everyday misuse is harder:
+
+- **HTTPS on the live site:** Heroku serves the deployed app over **HTTPS**, so traffic between the visitor and the server is encrypted in transit. (Local development may use plain HTTP; that is normal for a laptop-only setup.)
+- **Passwords are not stored in plain text:** When someone registers, the password is turned into a **hash** with Werkzeug and only the hash is saved in PostgreSQL. Login checks the typed password against that hash, so a database leak does not expose readable passwords.
+- **Logged-in state is server-backed:** Flask-Login ties actions to the current user using a **session** cookie. Sensitive settings like `SECRET_KEY` (used to sign the session) come from environment configuration, not from hard-coded secrets in the repo.
+- **Permission checks on the server:** Rules like “only edit or delete **your own** review” and “only **admins** see analytics / add books” are enforced in **Python on the server**. The browser cannot be trusted by itself, so the UI is only a convenience layer.
+- **Database access through the ORM:** SQLAlchemy is used for queries and writes, which avoids hand-built SQL strings and reduces the risk of classic **SQL injection** mistakes compared to concatenating user input into raw SQL.
+- **Safer HTML output by default:** Pages are rendered with **Jinja2**, which **escapes** content by default when you print variables into HTML, which lowers the risk of simple **cross-site scripting (XSS)** from user-written text like reviews.
+- **Small UX guardrails in JavaScript:** `static/js/main.js` can ask for a **confirm** before a destructive click (for example deleting a review). That is only to prevent accidents; the real protection is still the **server-side** ownership check.
+- **External links opened carefully:** Social links in the footer use `target="_blank"` together with `rel="noopener noreferrer"`, which is a small hardening step for opening third-party sites in a new tab.
+
+What this project **does not** try to be: it does not include a real payment gateway, full **CSRF** token hardening on every form, rate limiting, CAPTCHA, or a professional penetration test. Those would be the next step if the site ever handled real money or very sensitive data.
 
 ### Lighthouse testing
 
